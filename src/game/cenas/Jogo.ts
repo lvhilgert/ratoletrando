@@ -6,8 +6,10 @@ import { Rato } from '../entidades/Rato';
 import { SistemaPalavra } from '../sistemas/SistemaPalavra';
 import { SistemaPontuacao } from '../sistemas/SistemaPontuacao';
 import { PontuacaoAcumulada } from '../sistemas/PontuacaoAcumulada';
+import { PreferenciaModoPalavras } from '../sistemas/PreferenciaModoPalavras';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { ConfiguracaoFase, PosicaoGrade } from '../tipos/jogo';
+import { ModoPalavras } from '../dados/palavras';
 
 const TILE=48, TOPO=136;
 interface LetraMapa extends Phaser.GameObjects.Image { letra?:string; coletada?:boolean }
@@ -21,7 +23,16 @@ const TEMAS:TemaVisual[]=[
 ];
 
 export class Jogo extends Phaser.Scene {
-    private indiceFase=0; private fase!:ConfiguracaoFase; private rato!:Rato; private gatos:Gato[]=[];
+    private static readonly CORES_AZULEJO=['amarelo','azul','vermelho','roxo','verde'];
+    private static readonly FUNDOS_AZULEJO:Record<string,number>={
+        amarelo:0xf3dda0,
+        azul:0xc5dce8,
+        vermelho:0xf1c6bd,
+        roxo:0xdccde8,
+        verde:0xc9dfc0
+    };
+    private static readonly DESLOCAMENTO_AZULEJO=Phaser.Math.Between(0,Jogo.CORES_AZULEJO.length-1);
+    private indiceFase=0; private modo:ModoPalavras='ate4'; private fase!:ConfiguracaoFase; private rato!:Rato; private gatos:Gato[]=[];
     private paredes!:Phaser.Physics.Arcade.StaticGroup; private itens!:Phaser.Physics.Arcade.Group;
     private sistemaPalavra!:SistemaPalavra; private pontos=new SistemaPontuacao(); private textoPontos!:Phaser.GameObjects.Text; private pontosAcumulados=0;
     private caixasLetras:Phaser.GameObjects.Container[]=[]; private mensagem!:Phaser.GameObjects.Text; private invulneravel=false; private terminou=false;
@@ -30,14 +41,15 @@ export class Jogo extends Phaser.Scene {
     private tema!:TemaVisual;
     private pausado=false;private overlayPausa?:Phaser.GameObjects.Container;
     constructor(){super('Jogo');}
-    init(dados:{fase?:number}):void { this.indiceFase=Math.max(0,dados.fase??0); this.pontos=new SistemaPontuacao(); this.pontosAcumulados=PontuacaoAcumulada.obter(); this.gatos=[]; this.caixasLetras=[];this.indicadoresProgresso=[]; this.invulneravel=false; this.terminou=false;this.tema=TEMAS[this.indiceFase%TEMAS.length]; }
+    init(dados:{fase?:number;modo?:ModoPalavras}):void { this.indiceFase=Math.max(0,dados.fase??0); this.modo=dados.modo??PreferenciaModoPalavras.obter(); this.pontos=new SistemaPontuacao(); this.pontosAcumulados=PontuacaoAcumulada.obter(); this.gatos=[]; this.caixasLetras=[];this.indicadoresProgresso=[]; this.invulneravel=false; this.terminou=false;this.tema=TEMAS[this.indiceFase%TEMAS.length]; }
     create():void {
+        audioJogo.iniciarMusica();
         this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{
             this.timerInvencibilidade?.remove(false);
             this.timerInvencibilidade=undefined;
             audioJogo.pararEstrela();
         });
-        this.fase=criarFase(this.indiceFase); this.sistemaPalavra=new SistemaPalavra(this.fase.palavra); this.cameras.main.fadeIn(420,255,255,255);
+        this.fase=criarFase(this.indiceFase,this.modo); this.sistemaPalavra=new SistemaPalavra(this.fase.palavra); this.cameras.main.fadeIn(420,255,255,255);
         this.criarMapa(); this.criarHud(); const inicio=this.mundo(this.fase.posicaoInicialRato);
         this.rato=new Rato(this,inicio.x,inicio.y,this.fase.velocidadeRato,this.fase.mapa,TILE,TOPO,120,this.fase.posicaoInicialRato);
         for(let i=0;i<this.fase.quantidadeGatos;i++){const pos=this.fase.posicoesIniciaisGatos[i]??this.fase.posicoesIniciaisGatos[0]; const p=this.mundo(pos); const gato=new Gato(this,p.x,p.y,this.fase.velocidadeGato,this.fase.mapa,TILE,TOPO,120); this.physics.add.collider(gato,this.paredes); this.physics.add.overlap(this.rato,gato,()=>this.gatoPegou(gato)); this.gatos.push(gato);}
@@ -45,10 +57,17 @@ export class Jogo extends Phaser.Scene {
     }
     update(tempo:number):void { if(this.terminou||this.pausado)return; this.rato.atualizar(); this.gatos.forEach(g=>g.atualizar(tempo,this.rato)); }
     private criarBotaoPausa():void {
-        const botao=this.add.container(902,111).setDepth(40).setSize(88,34).setInteractive({useHandCursor:true});
-        const fundo=this.add.rectangle(0,0,88,34,0x253e53,.9).setStrokeStyle(2,0xffffff,.8);
-        const texto=this.add.text(0,0,'Ⅱ  PAUSA',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#ffffff'}).setOrigin(.5);
-        botao.add([fundo,texto]);botao.on('pointerdown',()=>this.alternarPausa());
+        const botao=this.add.container(893,103).setDepth(40).setSize(88,28).setInteractive({useHandCursor:true});
+        const sombra=this.add.graphics().fillStyle(0x173b46,.25).fillRoundedRect(-44,-11,88,28,14);
+        const fundo=this.add.graphics().fillStyle(this.tema.borda,1).fillRoundedRect(-44,-14,88,28,14).lineStyle(2,0xffffff,.9).strokeRoundedRect(-44,-14,88,28,14);
+        const brilho=this.add.graphics().fillStyle(0xffffff,.16).fillRoundedRect(-38,-10,76,9,7);
+        const selo=this.add.circle(-27,0,9,0xffffff,.2);
+        const icone=this.add.graphics().fillStyle(0xffffff,1).fillRoundedRect(-30,-5,3,10,1).fillRoundedRect(-25,-5,3,10,1);
+        const texto=this.add.text(8,0,'PAUSA',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'11px',color:'#ffffff',letterSpacing:.5}).setOrigin(.5);
+        botao.add([sombra,fundo,brilho,selo,icone,texto]);
+        botao.on('pointerover',()=>this.tweens.add({targets:botao,scale:1.06,duration:110,ease:'Sine.Out'}));
+        botao.on('pointerout',()=>this.tweens.add({targets:botao,scale:1,duration:110,ease:'Sine.Out'}));
+        botao.on('pointerdown',()=>{botao.setScale(.96);this.alternarPausa();});
         this.input.keyboard?.on('keydown-ESC',()=>this.alternarPausa());
     }
     private alternarPausa():void {
@@ -68,28 +87,32 @@ export class Jogo extends Phaser.Scene {
         this.add.rectangle(484,70,930,112,0x18374a,.2).setDepth(8);
         this.add.rectangle(480,64,930,112,0xfffbdf,.98).setStrokeStyle(5,this.tema.borda).setDepth(9);
         this.add.circle(82,57,39,this.tema.primaria).setStrokeStyle(5,0xffffff).setDepth(10);this.add.text(82,48,`${this.fase.numero}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'32px',color:'#fff'}).setOrigin(.5).setDepth(11);this.add.text(82,78,this.tema.nome,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'9px',color:'#ffffff'}).setOrigin(.5).setDepth(11);
-        this.textoPontos=this.add.text(185,57,`TOTAL  ⭐  ${this.pontosAcumulados.toLocaleString('pt-BR')}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'19px',color:'#5b3b8c'}).setOrigin(.5).setDepth(11);
+        this.textoPontos=this.add.text(215,57,`TOTAL  ⭐  ${this.pontosAcumulados.toLocaleString('pt-BR')}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'19px',color:'#5b3b8c'}).setOrigin(.5).setDepth(11);
         const largura=Math.min(62,440/this.fase.palavra.length), total=largura*this.fase.palavra.length;
         this.add.text(480,17,'FORME A PALAVRA',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'11px',color:'#806292',letterSpacing:2}).setOrigin(.5).setDepth(11);
         [...this.fase.palavra].forEach((_,i)=>{const c=this.add.container(480-total/2+largura*i+largura/2,58).setDepth(11); const sombra=this.add.rectangle(2,4,largura-8,54,0x6c477c,.22);const fundo=this.add.rectangle(0,0,largura-8,54,0xffffff).setStrokeStyle(3,this.tema.secundaria); const t=this.add.text(0,-1,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'32px',color:'#593d78',stroke:'#ffffff',strokeThickness:2}).setOrigin(.5); c.add([sombra,fundo,t]); this.caixasLetras.push(c);});
         this.add.ellipse(805,57,225,66,0xdff3d5).setStrokeStyle(3,0x78b96c);this.mensagem=this.add.text(805,57,'Pegue as letras em qualquer ordem!',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'16px',color:'#356653',align:'center',wordWrap:{width:190}}).setOrigin(.5);
         const progresso=this.add.container(480,104);
-        [...this.fase.palavra].forEach((_,i)=>{const bolha=this.add.circle((i-1.5)*27,0,7,0xffffff,.9).setStrokeStyle(2,0x8d55c7);this.indicadoresProgresso.push(bolha);progresso.add(bolha);});
+        const totalLetras=this.fase.palavra.length, espacoProgresso=totalLetras>1?Math.min(27,110/(totalLetras-1)):0;
+        [...this.fase.palavra].forEach((_,i)=>{const bolha=this.add.circle((i-(totalLetras-1)/2)*espacoProgresso,0,7,0xffffff,.9).setStrokeStyle(2,0x8d55c7);this.indicadoresProgresso.push(bolha);progresso.add(bolha);});
         this.textoRestantes=this.add.text(555,104,`${this.fase.palavra.length} restantes`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#68458c'}).setOrigin(0,.5);
     }
     private criarMapa():void {
         const tema=this.tema;this.cameras.main.setBackgroundColor(tema.ceu);
+        const cores=Jogo.CORES_AZULEJO;
+        const corAzulejo=cores[(this.indiceFase+Jogo.DESLOCAMENTO_AZULEJO)%cores.length];
+        const azulejo=`azulejo-${corAzulejo}`,fundoBlocos=Jogo.FUNDOS_AZULEJO[corAzulejo];
         for(let i=0;i<5;i++){const nuvem=this.add.ellipse(80+i*205,130+(i%2)*18,95,25,0xffffff,.3).setDepth(-2);this.tweens.add({targets:nuvem,x:nuvem.x+35,yoyo:true,repeat:-1,duration:5000+i*600,ease:'Sine.InOut'});}
         this.paredes=this.physics.add.staticGroup();
         this.add.rectangle(486,394,744,494,0x173b46,.22);
-        this.add.rectangle(480,388,744,494,tema.chao).setStrokeStyle(8,tema.borda);
+        this.add.rectangle(480,388,744,494,fundoBlocos).setStrokeStyle(8,tema.borda);
         this.fase.mapa.forEach((linha,l)=>linha.forEach((celula,c)=>{
             const p=this.mundo({linha:l,coluna:c});
             if(celula===1){
                 const parede=this.add.image(p.x,p.y,'natureza',(l*7+c)%4).setDisplaySize(TILE+8,TILE+8).setTint(tema.tintaNatureza).setDepth(2);
                 this.physics.add.existing(parede,true); this.paredes.add(parede);
             } else {
-                this.add.image(p.x,p.y,'azulejo-amarelo').setDisplaySize(TILE-1,TILE-1).setTint(tema.tintaPiso);
+                this.add.image(p.x,p.y,azulejo).setDisplaySize(TILE-1,TILE-1);
             }
         }));
         this.criarAmbiente();
@@ -153,7 +176,7 @@ export class Jogo extends Phaser.Scene {
     private gatoPegou(gato:Gato):void { if(this.invulneravel||this.terminou)return; audioJogo.tocarMiado();this.cameras.main.shake(320,.014);this.cameras.main.flash(120,255,90,90);this.particulas(this.rato.x,this.rato.y,0xff6a62,12); this.invulneravel=true; this.rato.definirBloqueado(true); gato.setVelocity(0); this.mensagem.setText('Ops! O gato te encontrou!'); this.tweens.add({targets:this.rato,alpha:.25,yoyo:true,repeat:6,duration:160}); this.time.delayedCall(1200,()=>{gato.afastar(this.fase.posicoesIniciaisGatos[0]);this.rato.definirBloqueado(false);this.mensagem.setText('Vamos continuar! Pegue qualquer letra.');}); this.time.delayedCall(3200,()=>{this.invulneravel=false;this.rato.setAlpha(1);}); }
     private atualizarPontos(valor:number):void {const pontosDaPartida=this.pontos.adicionar(valor);this.textoPontos.setText(`TOTAL  ⭐  ${(this.pontosAcumulados+pontosDaPartida).toLocaleString('pt-BR')}`);}
     private feedbackPontos(x:number,y:number,v:number):void {const t=this.add.text(x,y,`+${v}`,{fontFamily:'Arial',fontSize:'20px',color:'#3b7d62',stroke:'#fff',strokeThickness:3}).setOrigin(.5).setDepth(10);this.tweens.add({targets:t,y:y-35,alpha:0,duration:550,onComplete:()=>t.destroy()});}
-    private finalizar():void {this.timerInvencibilidade?.remove(false);this.timerInvencibilidade=undefined;audioJogo.pararEstrela();this.invulneravel=false;audioJogo.efeito('vitoria');this.terminou=true;const totalAcumulado=PontuacaoAcumulada.adicionar(this.pontos.total);this.rato.definirBloqueado(true);this.gatos.forEach(g=>g.setVelocity(0));this.mensagem.setText('Palavra completa!');this.particulas(480,58,0xffd83d,28);this.cameras.main.flash(350,255,245,160);this.time.delayedCall(700,()=>this.cameras.main.fadeOut(380,255,255,255,(_c:Phaser.Cameras.Scene2D.Camera,p:number)=>{if(p===1)this.scene.start('FimDaFase',{fase:this.indiceFase,palavra:this.fase.palavra,pontuacao:this.pontos.total,totalAcumulado});}));}
+    private finalizar():void {this.timerInvencibilidade?.remove(false);this.timerInvencibilidade=undefined;audioJogo.tocarVitoria();this.invulneravel=false;this.terminou=true;const totalAcumulado=PontuacaoAcumulada.adicionar(this.pontos.total);this.rato.definirBloqueado(true);this.gatos.forEach(g=>g.setVelocity(0));this.mensagem.setText('Palavra completa!');this.particulas(480,58,0xffd83d,28);this.cameras.main.flash(350,255,245,160);this.time.delayedCall(700,()=>this.cameras.main.fadeOut(380,255,255,255,(_c:Phaser.Cameras.Scene2D.Camera,p:number)=>{if(p===1)this.scene.start('FimDaFase',{fase:this.indiceFase,palavra:this.fase.palavra,pontuacao:this.pontos.total,totalAcumulado,modo:this.modo});}));}
     private particulas(x:number,y:number,cor:number,quantidade:number):void {for(let i=0;i<quantidade;i++){const p=this.add.circle(x,y,Phaser.Math.Between(2,5),cor).setDepth(20);const angulo=Phaser.Math.FloatBetween(0,Math.PI*2),distancia=Phaser.Math.Between(22,70);this.tweens.add({targets:p,x:x+Math.cos(angulo)*distancia,y:y+Math.sin(angulo)*distancia,scale:0,alpha:0,duration:Phaser.Math.Between(300,600),ease:'Cubic.Out',onComplete:()=>p.destroy()});}}
     private mundo(p:PosicaoGrade):{x:number;y:number}{return{x:p.coluna*TILE+TILE/2+120,y:TOPO+p.linha*TILE+TILE/2};}
 }

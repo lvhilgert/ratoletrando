@@ -6,7 +6,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-canvas { border-radius: 18px; box-shadow: 0 16px 45px rgba(42, 70, 53, .28); }
+canvas { border-radius: 18px; box-shadow: 0 16px 45px rgba(42, 70, 53, .28); touch-action: none; }
 
 #app {
     width: 100%;

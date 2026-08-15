@@ -3,6 +3,12 @@ import { Carregamento } from './cenas/Carregamento';
 import { Menu } from './cenas/Menu';
 import { Jogo } from './cenas/Jogo';
 import { FimDaFase } from './cenas/FimDaFase';
+import { EducApp } from './cenas/EducApp';
+import { OuviEscrevi } from './cenas/OuviEscrevi';
+import { MontaPalavra } from './cenas/MontaPalavra';
+import { ContaComigo } from './cenas/ContaComigo';
+import { SomaTrilha } from './cenas/SomaTrilha';
+import { MemoLetras } from './cenas/MemoLetras';
 
 const configuracao: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -12,7 +18,7 @@ const configuracao: Phaser.Types.Core.GameConfig = {
     backgroundColor: '#f7efd8',
     physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 0 }, debug: false } },
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-    scene: [Carregamento, Menu, Jogo, FimDaFase]
+    scene: [Carregamento, EducApp, Menu, Jogo, FimDaFase, OuviEscrevi, MontaPalavra, ContaComigo, SomaTrilha, MemoLetras]
 };
 
 export default (parent: string): Phaser.Game => new Phaser.Game({ ...configuracao, parent });

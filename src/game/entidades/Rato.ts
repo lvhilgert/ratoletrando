@@ -3,13 +3,19 @@ import { PosicaoGrade } from '../tipos/jogo';
 
 export class Rato extends Phaser.Physics.Arcade.Sprite {
     private bloqueado=false;
+    private pausado=false;
     private movendo=false;
     private posicao:PosicaoGrade;
     private aoPressionar:(evento:KeyboardEvent)=>void;
     private aoSoltar:(evento:KeyboardEvent)=>void;
+    private aoTocar:(ponteiro:Phaser.Input.Pointer)=>void;
+    private aoArrastar:(ponteiro:Phaser.Input.Pointer)=>void;
+    private aoSoltarToque:()=>void;
     private teclasPressionadas:string[]=[];
     private alvo?:{x:number;y:number;linha:number;coluna:number;dl:number;dc:number};
     private direcaoPendente?:[number,number];
+    private caminhoToque:[number,number][]=[];
+    private ultimaCelulaApontada?:string;
 
     constructor(
         cena:Phaser.Scene,x:number,y:number,private velocidade:number,
@@ -43,12 +49,34 @@ export class Rato extends Phaser.Physics.Arcade.Sprite {
             this.direcaoPendente=direcao;
             if(direcao)this.solicitarMovimento(direcao[0],direcao[1]);
         };
+        this.aoTocar=(ponteiro)=>this.atualizarDestinoDoPonteiro(ponteiro);
+        this.aoArrastar=(ponteiro)=>{
+            if(ponteiro.isDown)this.atualizarDestinoDoPonteiro(ponteiro);
+        };
+        this.aoSoltarToque=()=>{this.ultimaCelulaApontada=undefined;};
         window.addEventListener('keydown',this.aoPressionar,{passive:false,capture:true});
         window.addEventListener('keyup',this.aoSoltar,{passive:false,capture:true});
+        cena.input.on('pointerdown',this.aoTocar);
+        cena.input.on('pointermove',this.aoArrastar);
+        cena.input.on('pointerup',this.aoSoltarToque);
         cena.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{
             window.removeEventListener('keydown',this.aoPressionar,{capture:true});
             window.removeEventListener('keyup',this.aoSoltar,{capture:true});
+            cena.input.off('pointerdown',this.aoTocar);
+            cena.input.off('pointermove',this.aoArrastar);
+            cena.input.off('pointerup',this.aoSoltarToque);
         });
+    }
+
+    private atualizarDestinoDoPonteiro(ponteiro:Phaser.Input.Pointer):void {
+        if(this.bloqueado||this.pausado)return;
+        const coluna=Math.floor((ponteiro.worldX-this.esquerda)/this.tamanho);
+        const linha=Math.floor((ponteiro.worldY-this.topo)/this.tamanho);
+        if(this.mapa[linha]?.[coluna]!==0)return;
+        const celula=`${linha},${coluna}`;
+        if(celula===this.ultimaCelulaApontada)return;
+        this.ultimaCelulaApontada=celula;
+        this.definirDestino({linha,coluna});
     }
 
     atualizar():void {
@@ -63,8 +91,9 @@ export class Rato extends Phaser.Physics.Arcade.Sprite {
                 this.alvo=undefined;this.movendo=false;
                 const pendente=this.direcaoPendente;this.direcaoPendente=undefined;
                 const segurando=this.direcaoPressionada();
-                const proxima=pendente??segurando;
+                const proxima=pendente??segurando??this.caminhoToque.shift();
                 if(proxima&&this.mover(proxima[0],proxima[1]))return;
+                this.caminhoToque=[];
                 this.setVelocity(0);
                 this.anims.stop();
             }
@@ -76,12 +105,56 @@ export class Rato extends Phaser.Physics.Arcade.Sprite {
 
     private solicitarMovimento(dl:number,dc:number):void {
         if(this.bloqueado)return;
+        this.caminhoToque=[];
         if(this.movendo&&this.alvo){
             if(dl===this.alvo.dl&&dc===this.alvo.dc)return;
             if(this.virarImediatamente(dl,dc))return;
             this.direcaoPendente=[dl,dc];return;
         }
         this.mover(dl,dc);
+    }
+
+    private definirDestino(destino:PosicaoGrade):void {
+        // Se já está entre células, termina o passo atual antes de iniciar a rota tocada.
+        const inicio=this.movendo&&this.alvo
+            ? {linha:this.alvo.linha,coluna:this.alvo.coluna}
+            : {...this.posicao};
+        const caminho=this.encontrarCaminho(inicio,destino);
+        if(!caminho)return;
+        this.direcaoPendente=undefined;
+        this.caminhoToque=caminho;
+        if(!this.movendo){
+            const primeira=this.caminhoToque.shift();
+            if(primeira)this.mover(primeira[0],primeira[1]);
+        }
+    }
+
+    private encontrarCaminho(inicio:PosicaoGrade,destino:PosicaoGrade):[number,number][]|undefined {
+        if(inicio.linha===destino.linha&&inicio.coluna===destino.coluna)return [];
+        const direcoes:[number,number][]=[[-1,0],[1,0],[0,-1],[0,1]];
+        const chave=(p:PosicaoGrade)=>`${p.linha},${p.coluna}`;
+        const fila:PosicaoGrade[]=[inicio],anteriores=new Map<string,{posicao:PosicaoGrade;direcao:[number,number]}>();
+        const visitados=new Set<string>([chave(inicio)]);
+        while(fila.length){
+            const atual=fila.shift()!;
+            for(const direcao of direcoes){
+                const proxima={linha:atual.linha+direcao[0],coluna:atual.coluna+direcao[1]};
+                const id=chave(proxima);
+                if(this.mapa[proxima.linha]?.[proxima.coluna]!==0||visitados.has(id))continue;
+                visitados.add(id);anteriores.set(id,{posicao:atual,direcao});
+                if(proxima.linha===destino.linha&&proxima.coluna===destino.coluna){
+                    const caminho:[number,number][]=[];
+                    let cursor=proxima;
+                    while(chave(cursor)!==chave(inicio)){
+                        const passo=anteriores.get(chave(cursor))!;
+                        caminho.unshift(passo.direcao);cursor=passo.posicao;
+                    }
+                    return caminho;
+                }
+                fila.push(proxima);
+            }
+        }
+        return undefined;
     }
 
     private virarImediatamente(dl:number,dc:number):boolean {
@@ -137,10 +210,11 @@ export class Rato extends Phaser.Physics.Arcade.Sprite {
             this.setVelocity(0);
             const x=this.esquerda+this.posicao.coluna*this.tamanho+this.tamanho/2;
             const y=this.topo+this.posicao.linha*this.tamanho+this.tamanho/2;
-            this.body!.reset(x,y);this.alvo=undefined;this.direcaoPendente=undefined;this.teclasPressionadas=[];this.movendo=false;this.anims.stop();
+            this.body!.reset(x,y);this.alvo=undefined;this.direcaoPendente=undefined;this.caminhoToque=[];this.teclasPressionadas=[];this.movendo=false;this.anims.stop();
         }
     }
     definirPausado(valor:boolean):void {
+        this.pausado=valor;
         if(valor)this.setVelocity(0);
         else if(this.alvo)this.setVelocity(this.alvo.dc*this.velocidade,this.alvo.dl*this.velocidade);
     }

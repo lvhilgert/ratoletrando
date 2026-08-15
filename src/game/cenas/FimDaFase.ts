@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { DadosFimFase } from '../tipos/jogo';
+import { servicoVoz } from '../../services/ServicoVoz';
 
 export class FimDaFase extends Phaser.Scene {
     constructor(){super('FimDaFase');}
@@ -26,15 +27,15 @@ export class FimDaFase extends Phaser.Scene {
         painel.add(desenhar(0,-158,572,74,22,0xff8b69));
 
         // Medalhão e estrelas dão um foco visual claro ao resultado.
-        painel.add(this.add.circle(0,-210,61,0xfff4a6).setStrokeStyle(8,0xffc83d));
-        painel.add(this.add.circle(0,-210,47,0x7a45bd));
-        const estrelaCentral=this.add.star(0,-214,5,18,38,0xffdf4f).setStrokeStyle(4,0xffffff);
+        painel.add(this.add.circle(0,-229,61,0xfff4a6).setStrokeStyle(8,0xffc83d));
+        painel.add(this.add.circle(0,-229,47,0x7a45bd));
+        const estrelaCentral=this.add.star(0,-233,5,18,38,0xffdf4f).setStrokeStyle(4,0xffffff);
         painel.add(estrelaCentral);
         painel.add(this.add.star(-83,-199,5,8,18,0xffd94b).setAngle(-18));
         painel.add(this.add.star(83,-199,5,8,18,0xffd94b).setAngle(18));
 
-        painel.add(this.add.text(0,-153,'MUITO BEM!',{
-            fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'42px',color:'#ffffff',
+        painel.add(this.add.text(0,-145,'MUITO BEM!',{
+            fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'39px',color:'#ffffff',
             stroke:'#b83d55',strokeThickness:5,shadow:{offsetY:4,color:'#8e3048',blur:1,fill:true}
         }).setOrigin(.5));
         painel.add(this.add.text(0,-93,'VOCÊ COMPLETOU A PALAVRA',{
@@ -75,12 +76,14 @@ export class FimDaFase extends Phaser.Scene {
         botao.on('pointerout',()=>this.tweens.add({targets:botao,scale:1,duration:100}));
         botao.on('pointerdown',()=>{
             botao.setScale(.96);
-            this.time.delayedCall(90,()=>this.scene.start('Jogo',{fase:dados.fase+1}));
+            this.time.delayedCall(90,()=>this.scene.start('Jogo',{fase:dados.fase+1,modo:dados.modo}));
         });
 
         this.tweens.add({targets:painel,scale:1,alpha:1,duration:520,ease:'Back.Out'});
         this.tweens.add({targets:estrelaCentral,angle:360,scale:{from:.35,to:1},duration:700,ease:'Back.Out'});
-        this.input.keyboard?.once('keydown-ENTER',()=>this.scene.start('Jogo',{fase:dados.fase+1}));
+        this.time.delayedCall(650,()=>servicoVoz.falar(dados.palavra));
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>servicoVoz.parar());
+        this.input.keyboard?.once('keydown-ENTER',()=>this.scene.start('Jogo',{fase:dados.fase+1,modo:dados.modo}));
     }
 
     private criarConfetes():void {

@@ -1,3 +1,5 @@
+import { ModoPalavras } from '../dados/palavras';
+
 export interface PosicaoGrade { linha: number; coluna: number }
 
 export type TipoGato = 'normal';
@@ -21,4 +23,4 @@ export interface ConfiguracaoFase {
     tipoGato: TipoGato;
 }
 
-export interface DadosFimFase { fase: number; palavra: string; pontuacao: number; totalAcumulado: number }
+export interface DadosFimFase { fase: number; palavra: string; pontuacao: number; totalAcumulado: number; modo: ModoPalavras }

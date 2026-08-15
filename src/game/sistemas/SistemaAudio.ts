@@ -1,5 +1,4 @@
-const ZELDA=new URL('../sounds/trilha-sonora-zelda-piano.mp3',import.meta.url).href;
-const ESTRELA=new URL('../sounds/estrela-mario-bros.mp3',import.meta.url).href;
+const ESTRELA=new URL('../sounds/estrela.mp3',import.meta.url).href;
 const MIADO=new URL('../sounds/miado-gato.mp3',import.meta.url).href;
 
 export class SistemaAudio {
@@ -13,15 +12,14 @@ export class SistemaAudio {
     private musicaPausadaPelaEstrela=false;
     private pausado=false;
     private sinteticaTocavaAntesDaPausa=false;
+    private aguardandoNovaFase=false;
     private modo:'sintetica'|'zelda'='sintetica';
 
     iniciarMusica():void {
-        if(this.timer||this.externa)return;
-        this.modo='zelda';
-        if(this.modo==='zelda'){
-            this.externa=new Audio(ZELDA);this.externa.loop=true;this.externa.volume=.22;
-            void this.externa.play().catch(()=>this.iniciarSintetica());
-        }else this.iniciarSintetica();
+        if(this.aguardandoNovaFase)this.aguardandoNovaFase=false;
+        if(this.timer)return;
+        this.modo='sintetica';
+        this.iniciarSintetica();
     }
     tocarEstrela():void {
         this.pararEstrela();
@@ -29,15 +27,23 @@ export class SistemaAudio {
         this.externa?.pause();
         const sinteticaTocava=Boolean(this.timer);this.pararSintetica();
         this.musicaPausadaPelaEstrela=externaTocava||sinteticaTocava;
-        this.estrela=new Audio(ESTRELA);this.estrela.volume=.42;this.estrela.loop=true;
+        this.estrela=new Audio(ESTRELA);this.estrela.volume=.4;this.estrela.loop=true;this.estrela.playbackRate=1.3;
         void this.estrela.play().catch(()=>this.pararEstrela());
     }
     pararEstrela():void {
         if(this.estrela){this.estrela.pause();this.estrela.currentTime=0;this.estrela.src='';this.estrela=undefined;}
         if(!this.musicaPausadaPelaEstrela)return;
         this.musicaPausadaPelaEstrela=false;
+        if(this.aguardandoNovaFase)return;
         if(this.modo==='zelda'&&this.externa)void this.externa.play();
         else this.iniciarSintetica();
+    }
+    tocarVitoria():void {
+        this.aguardandoNovaFase=true;
+        if(this.estrela){this.estrela.pause();this.estrela.currentTime=0;this.estrela.src='';this.estrela=undefined;}
+        this.musicaPausadaPelaEstrela=false;
+        this.externa?.pause();this.pararSintetica();
+        this.comemorarVitoria();
     }
     tocarMiado():void {
         this.miado?.pause();
@@ -73,6 +79,19 @@ export class SistemaAudio {
         tocar();this.timer=window.setInterval(tocar,430);
     }
     private pararSintetica():void {if(this.timer){clearInterval(this.timer);this.timer=undefined;}this.ganhoMusica?.disconnect();this.ganhoMusica=undefined;}
-    private nota(f:number,atraso:number,forma:OscillatorType,volume:number):void {if(!this.contexto)return;const agora=this.contexto.currentTime+atraso,osc=this.contexto.createOscillator(),ganho=this.contexto.createGain();osc.type=forma;osc.frequency.setValueAtTime(f,agora);ganho.gain.setValueAtTime(volume,agora);ganho.gain.exponentialRampToValueAtTime(.001,agora+.3);osc.connect(ganho).connect(this.contexto.destination);osc.start(agora);osc.stop(agora+.32);}
+    private comemorarVitoria():void {
+        this.contexto??=new AudioContext();
+        void this.contexto.resume().then(()=>{
+            // Subida alegre seguida de um acorde final amplo, sem ficar estridente.
+            const melodia:[number,number,number][]=[
+                [523.25,0,.34],[659.25,.16,.34],[783.99,.32,.38],[1046.5,.5,.62],
+                [659.25,.82,.72],[783.99,.82,.72],[1046.5,.82,.82]
+            ];
+            melodia.forEach(([frequencia,atraso,duracao],indice)=>
+                this.nota(frequencia,atraso,indice<4?'sine':'triangle',indice<4?.13:.075,duracao)
+            );
+        });
+    }
+    private nota(f:number,atraso:number,forma:OscillatorType,volume:number,duracao=.3):void {if(!this.contexto)return;const agora=this.contexto.currentTime+atraso,osc=this.contexto.createOscillator(),ganho=this.contexto.createGain();osc.type=forma;osc.frequency.setValueAtTime(f,agora);ganho.gain.setValueAtTime(volume,agora);ganho.gain.exponentialRampToValueAtTime(.001,agora+duracao);osc.connect(ganho).connect(this.contexto.destination);osc.start(agora);osc.stop(agora+duracao+.02);}
 }
 export const audioJogo=new SistemaAudio();
