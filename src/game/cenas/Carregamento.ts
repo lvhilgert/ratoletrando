@@ -28,6 +28,11 @@ export class Carregamento extends Phaser.Scene {
         for(let i=0;i<6;i++) this.load.image(`estrela-${i}`,`assets/ratoletrando/jogo/estrela/estrela-${i}.png`);
         this.load.spritesheet('reino-cavaleiro','assets/reino-portas/cavaleiro-sprites-espacado.png',{frameWidth:257,frameHeight:748,endFrame:9});
         this.load.spritesheet('reino-slime','assets/reino-portas/slime-sprites-espacado.png',{frameWidth:402,frameHeight:748,endFrame:5});
+        this.load.spritesheet('reino-morcego','assets/reino-portas/morcego-sprites.png',{frameWidth:362,frameHeight:724,endFrame:5});
+        this.load.spritesheet('reino-cogumelo','assets/reino-portas/cogumelo-saltador-sprites.png',{frameWidth:520,frameHeight:755,endFrame:3});
+        this.load.spritesheet('reino-furacao','assets/reino-portas/furacao-folhas-sprites.png',{frameWidth:682,frameHeight:768,endFrame:2});
+        this.load.spritesheet('reino-gnomo-noz','assets/reino-portas/gnomo-noz-sprites.png',{frameWidth:498,frameHeight:788,endFrame:3});
+        this.load.spritesheet('reino-espantalho','assets/reino-portas/cavaleiro-espantalho-sprites.png',{frameWidth:543,frameHeight:724,endFrame:3});
         this.load.spritesheet('reino-objetos','assets/reino-portas/objetos.png',{frameWidth:354,frameHeight:443,endFrame:9});
         this.load.image('reino-bosque','assets/reino-portas/bosque-castelo.png');
         this.load.image('reino-panorama','assets/reino-portas/panorama-reinos.png');

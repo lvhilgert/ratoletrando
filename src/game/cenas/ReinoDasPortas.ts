@@ -5,12 +5,13 @@ import { CavaleiroReino } from '../entidades/CavaleiroReino';
 import { InimigoReino } from '../entidades/InimigoReino';
 import { SlimeReino } from '../entidades/SlimeReino';
 import { MorcegoReino } from '../entidades/MorcegoReino';
-import { GoblinReino } from '../entidades/GoblinReino';
 import { ArqueiroReino } from '../entidades/ArqueiroReino';
-import { PlantaReino } from '../entidades/PlantaReino';
+import { CogumeloSaltadorReino } from '../entidades/CogumeloSaltadorReino';
+import { FuracaoFolhasReino } from '../entidades/FuracaoFolhasReino';
+import { CavaleiroEspantalhoReino } from '../entidades/CavaleiroEspantalhoReino';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
-import { EQUIPAMENTOS_REINO, MISSOES_REINO, POSICOES_INIMIGOS, REGIOES_REINO } from '../dados/mundoReinoPortas';
+import { EQUIPAMENTOS_REINO, MISSOES_REINO, REGIOES_REINO } from '../dados/mundoReinoPortas';
 import { progressoReino } from '../sistemas/ProgressoReino';
 
 interface PortaReino {x:number;categoria:CategoriaDesafio;sprite:Phaser.Physics.Arcade.Sprite;aberta:boolean}
@@ -39,7 +40,7 @@ export class ReinoDasPortas extends Phaser.Scene {
         this.physics.world.gravity.y=920;this.physics.world.setBounds(0,0,this.larguraMundo,640);
         this.criarCenario();this.criarAnimacoes();this.criarPlataformas();this.filtroEntardecer=this.add.rectangle(480,320,960,640,0x764873,0).setScrollFactor(0).setDepth(20);
         this.cavaleiro=new CavaleiroReino(this,120,450);this.physics.add.collider(this.cavaleiro,this.plataformas);
-        this.criarMoedas();this.criarSlimes();this.criarPortas();this.criarSegredos();this.criarComposicoesCenario();this.criarAmbiente();this.criarPortal();this.criarHUD();this.criarControlesTouch();
+        this.criarMoedas();this.criarInimigos();this.criarPortas();this.criarSegredos();this.criarComposicoesCenario();this.criarAmbiente();this.criarPortal();this.criarHUD();this.criarControlesTouch();
         this.cameras.main.setBounds(0,0,this.larguraMundo,640).startFollow(this.cavaleiro,true,.09,.09,0,45);
         const salvo=progressoReino.carregar(),checkpointValido=salvo.faseAtual===this.faseAtual&&salvo.checkpointX<this.larguraMundo-300;this.checkpoint=checkpointValido?salvo.checkpointX:120;this.cavaleiro.x=this.checkpoint;this.cavaleiro.aplicarRoupa(salvo.skin);this.portas.forEach((p,i)=>{if(checkpointValido&&i<salvo.portasAbertas){p.aberta=true;p.sprite.setFrame(1);p.sprite.disableBody();}});this.vidas=salvo.dificuldade==='tranquilo'?4:salvo.dificuldade==='aventura'?2:3;this.atualizarVidas();
         this.cursores=this.input.keyboard!.createCursorKeys();this.teclas=this.input.keyboard!.addKeys('A,D,S,Z,X,J,P,SHIFT,SPACE') as Record<string,Phaser.Input.Keyboard.Key>;
@@ -70,6 +71,7 @@ export class ReinoDasPortas extends Phaser.Scene {
         if(!this.anims.exists('reino-correr'))this.anims.create({key:'reino-correr',frames:this.anims.generateFrameNumbers('reino-cavaleiro',{frames:[2,3,4]}),frameRate:9,repeat:-1});
         if(!this.anims.exists('reino-atacar'))this.anims.create({key:'reino-atacar',frames:this.anims.generateFrameNumbers('reino-cavaleiro',{frames:[7,8,7]}),frameRate:14,repeat:0});
         if(!this.anims.exists('reino-slime-mover'))this.anims.create({key:'reino-slime-mover',frames:this.anims.generateFrameNumbers('reino-slime',{frames:[0,1,2]}),frameRate:5,repeat:-1});
+        if(!this.anims.exists('reino-morcego-voar'))this.anims.create({key:'reino-morcego-voar',frames:this.anims.generateFrameNumbers('reino-morcego',{frames:[0,1,2]}),frameRate:9,repeat:-1});
     }
     private criarPlataformas():void {
         this.plataformas=this.physics.add.staticGroup();
@@ -83,8 +85,17 @@ export class ReinoDasPortas extends Phaser.Scene {
         const pontos=[[350,500],[650,420],[1050,350],[1450,420],[1800,500],[2050,340],[2550,410],[2850,500],[3100,325],[3650,405],[3950,500],[4200,335],[4750,415],[5050,500],[5250,325],[5700,405]];
         pontos.forEach(([x,y])=>{const moeda=this.physics.add.sprite(x,y,'reino-objetos',2).setDisplaySize(46,46).setDepth(6);const body=moeda.body as Phaser.Physics.Arcade.Body;body.setAllowGravity(false).setCircle(120,55,100);this.tweens.add({targets:moeda,y:y-10,angle:360,yoyo:true,repeat:-1,duration:650+Phaser.Math.Between(0,250)});const brilho=this.add.circle(x,y,28,0xffed91,.12).setDepth(5);this.tweens.add({targets:brilho,scale:1.45,alpha:0,yoyo:true,repeat:-1,duration:700});this.physics.add.overlap(this.cavaleiro,moeda,()=>{if(!moeda.active)return;brilho.destroy();moeda.disableBody(true,true);this.moedas++;this.textoMoedas?.setText(`${this.moedas}`);audioJogo.efeito('moeda');this.criarParticulas(moeda.x,moeda.y,0xffd85a,12);});});
     }
-    private criarSlimes():void {
-        const tipos=POSICOES_INIMIGOS.slice(this.faseAtual*4,this.faseAtual*4+6);[900,1800,2700,3800,4700,5500].forEach((x,i)=>{const tipo=tipos[i]?.tipo??'slime',y=tipo==='morcego'?350:i===2?390:500;let inimigo:InimigoReino;if(tipo==='morcego')inimigo=new MorcegoReino(this,x,y,this.cavaleiro);else if(tipo==='goblin')inimigo=new GoblinReino(this,x,y,this.cavaleiro);else if(tipo==='arqueiro')inimigo=new ArqueiroReino(this,x,y,this.cavaleiro,()=>this.dano(inimigo));else if(tipo==='planta')inimigo=new PlantaReino(this,x,y);else inimigo=new SlimeReino(this,x,y,tipo);this.inimigos.push(inimigo);if(inimigo.colideComPlataformas)this.physics.add.collider(inimigo.corpoColisao,this.plataformas);this.physics.add.overlap(this.cavaleiro,inimigo.corpoColisao,()=>this.dano(inimigo));});
+    private criarInimigos():void {
+        const tipos=Phaser.Utils.Array.Shuffle(['slime','morcego','cogumelo','furacao','arqueiro','espantalho']);
+        [900,1800,2700,3800,4700,5500].forEach((x,i)=>{const tipo=tipos[i],y=tipo==='morcego'?350:tipo==='furacao'?430:i===2?390:500;let inimigo:InimigoReino;
+            if(tipo==='morcego')inimigo=new MorcegoReino(this,x,y,this.cavaleiro);
+            else if(tipo==='cogumelo')inimigo=new CogumeloSaltadorReino(this,x,y,this.cavaleiro);
+            else if(tipo==='furacao')inimigo=new FuracaoFolhasReino(this,x,y);
+            else if(tipo==='arqueiro')inimigo=new ArqueiroReino(this,x,y,this.cavaleiro,()=>this.dano(inimigo));
+            else if(tipo==='espantalho')inimigo=new CavaleiroEspantalhoReino(this,x,y,this.cavaleiro);
+            else inimigo=new SlimeReino(this,x,y);
+            this.inimigos.push(inimigo);if(inimigo.colideComPlataformas)this.physics.add.collider(inimigo.corpoColisao,this.plataformas);this.physics.add.overlap(this.cavaleiro,inimigo.corpoColisao,()=>this.dano(inimigo));
+        });
     }
     private criarPortas():void {
         const categorias:CategoriaDesafio[]=['matematica','letras','silabas'];
