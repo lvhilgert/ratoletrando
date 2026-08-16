@@ -1,10 +1,11 @@
 import * as Phaser from 'phaser';
 
-export type CategoriaDesafio='matematica'|'letras'|'silabas';
+export type CategoriaDesafio='matematica'|'letras'|'silabas'|'quantidade';
+export type DificuldadeReino='tranquilo'|'normal'|'aventura';
 
 export interface PalavraReino {palavra:string;silabas:string[]}
 export interface ConfiguracaoReinoPortas {
-    dificuldade:'tranquilo'|'normal'|'aventura';
+    dificuldade:DificuldadeReino;
     matematica:{minimo:number;maximo:number;permitirSoma:boolean;permitirSubtracao:boolean};
     linguagem:{palavras:PalavraReino[]};
 }
@@ -24,6 +25,7 @@ export const CONFIGURACAO_REINO_PORTAS:ConfiguracaoReinoPortas={
 };
 
 export interface DesafioPorta {categoria:CategoriaDesafio;pergunta:string;palavra?:string;resposta:number;alternativas:number[];explicacao:string}
+export interface FaixasDesafio {soma?:{minimo:number;maximo:number};quantidade?:{minimo:number;maximo:number}}
 
 const alternativas=(resposta:number,minimo=0):number[]=>{
     const valores=new Set<number>([resposta]);
@@ -31,12 +33,17 @@ const alternativas=(resposta:number,minimo=0):number[]=>{
     return Phaser.Utils.Array.Shuffle([...valores]);
 };
 
-export function criarDesafio(categoria:CategoriaDesafio):DesafioPorta {
+export function criarDesafio(categoria:CategoriaDesafio,dificuldade:DificuldadeReino='normal',faixas:FaixasDesafio={}):DesafioPorta {
     const config=CONFIGURACAO_REINO_PORTAS;
     if(categoria==='matematica'){
+        const minimo=faixas.soma?.minimo??config.matematica.minimo,maximo=faixas.soma?.maximo??(dificuldade==='tranquilo'?20:dificuldade==='aventura'?90:config.matematica.maximo);
         const soma=config.matematica.permitirSoma&&(!config.matematica.permitirSubtracao||Math.random()>.5);
-        if(soma){const resultado=Phaser.Math.Between(15,config.matematica.maximo),a=Phaser.Math.Between(5,resultado-3),b=resultado-a;return {categoria,pergunta:`${a} + ${b} = ?`,resposta:resultado,alternativas:alternativas(resultado),explicacao:`Junte ${a} com ${b}: o resultado é ${resultado}.`};}
-        const a=Phaser.Math.Between(12,config.matematica.maximo),b=Phaser.Math.Between(2,a),resultado=a-b;return {categoria,pergunta:`${a} − ${b} = ?`,resposta:resultado,alternativas:alternativas(resultado),explicacao:`Tire ${b} de ${a}: restam ${resultado}.`};
+        if(soma){const resultado=Phaser.Math.Between(Math.min(maximo,Math.max(minimo,15)),maximo),a=resultado>=8?Phaser.Math.Between(5,resultado-3):Phaser.Math.Between(0,resultado),b=resultado-a;return {categoria,pergunta:`${a} + ${b} = ?`,resposta:resultado,alternativas:alternativas(resultado,minimo),explicacao:`Junte ${a} com ${b}: o resultado é ${resultado}.`};}
+        const a=Phaser.Math.Between(Math.min(maximo,Math.max(minimo,12)),maximo),limiteB=a-minimo,b=limiteB>=2?Phaser.Math.Between(2,limiteB):Phaser.Math.Between(0,limiteB),resultado=a-b;return {categoria,pergunta:`${a} − ${b} = ?`,resposta:resultado,alternativas:alternativas(resultado,minimo),explicacao:`Tire ${b} de ${a}: restam ${resultado}.`};
+    }
+    if(categoria==='quantidade'){
+        const minimo=faixas.quantidade?.minimo??3,maximo=faixas.quantidade?.maximo??9,resposta=Phaser.Math.Between(minimo,maximo);
+        return {categoria,pergunta:'Quantas estrelas você vê?',resposta,alternativas:alternativas(resposta,1),explicacao:`Contando uma por uma: são ${resposta}.`};
     }
     const item=Phaser.Utils.Array.GetRandom(config.linguagem.palavras);
     const resposta=categoria==='letras'?Array.from(item.palavra).length:item.silabas.length;

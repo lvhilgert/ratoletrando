@@ -1,17 +1,17 @@
 export type TemaReino='bosque'|'vila'|'caverna'|'montanha'|'pantano'|'biblioteca'|'castelo';
-export type TipoInimigo='slime'|'saltador'|'guardiao'|'veloz'|'gelo';
+export type TipoInimigo='slime'|'saltador'|'guardiao'|'veloz'|'gelo'|'morcego'|'goblin'|'arqueiro'|'planta';
 
 export interface RegiaoReino {id:TemaReino;nome:string;inicio:number;fim:number;cor:number;corDestaque:number}
 export interface EquipamentoReino {id:string;nome:string;tipo:'arma'|'roupa'|'companheiro';descricao:string;preco:number}
 
 export const REGIOES_REINO:RegiaoReino[]=[
-    {id:'bosque',nome:'Bosque dos Números',inicio:0,fim:900,cor:0x6e9b52,corDestaque:0xb6df72},
-    {id:'vila',nome:'Vila das Palavras',inicio:900,fim:1600,cor:0xb88758,corDestaque:0xf0c477},
-    {id:'caverna',nome:'Caverna dos Ecos',inicio:1600,fim:2350,cor:0x447f91,corDestaque:0x65d9df},
-    {id:'montanha',nome:'Montanha das Formas',inicio:2350,fim:3100,cor:0x7189a8,corDestaque:0xc8e4f4},
-    {id:'pantano',nome:'Pântano das Poções',inicio:3100,fim:3750,cor:0x658752,corDestaque:0xb4cf6c},
-    {id:'biblioteca',nome:'Biblioteca Encantada',inicio:3750,fim:4350,cor:0x765b96,corDestaque:0xd2adf0},
-    {id:'castelo',nome:'Castelo do Rei Confuso',inicio:4350,fim:4900,cor:0xb98a45,corDestaque:0xffdc75}
+    {id:'bosque',nome:'Bosque dos Números',inicio:0,fim:3200,cor:0x6e9b52,corDestaque:0xb6df72},
+    {id:'vila',nome:'Vila das Palavras',inicio:3200,fim:7000,cor:0xb88758,corDestaque:0xf0c477},
+    {id:'caverna',nome:'Caverna dos Ecos',inicio:7000,fim:11000,cor:0x447f91,corDestaque:0x65d9df},
+    {id:'montanha',nome:'Montanha das Formas',inicio:11000,fim:15200,cor:0x7189a8,corDestaque:0xc8e4f4},
+    {id:'pantano',nome:'Pântano das Poções',inicio:15200,fim:19400,cor:0x658752,corDestaque:0xb4cf6c},
+    {id:'biblioteca',nome:'Biblioteca Encantada',inicio:19400,fim:23800,cor:0x765b96,corDestaque:0xd2adf0},
+    {id:'castelo',nome:'Castelo do Rei Confuso',inicio:23800,fim:28000,cor:0xb98a45,corDestaque:0xffdc75}
 ];
 
 export const EQUIPAMENTOS_REINO:EquipamentoReino[]=[
@@ -30,8 +30,13 @@ export const EQUIPAMENTOS_REINO:EquipamentoReino[]=[
 ];
 
 export const POSICOES_INIMIGOS:Array<{x:number;tipo:TipoInimigo}>=[
-    {x:880,tipo:'slime'},{x:1510,tipo:'veloz'},{x:1880,tipo:'saltador'},{x:2520,tipo:'guardiao'},
-    {x:3260,tipo:'gelo'},{x:3710,tipo:'veloz'},{x:4320,tipo:'guardiao'}
+    {x:900,tipo:'goblin'},{x:1800,tipo:'morcego'},{x:2700,tipo:'goblin'},{x:3100,tipo:'morcego'},
+    {x:3650,tipo:'goblin'},{x:4550,tipo:'morcego'},{x:5550,tipo:'goblin'},{x:6200,tipo:'morcego'},
+    {x:7450,tipo:'arqueiro'},{x:8400,tipo:'planta'},{x:9400,tipo:'veloz'},{x:10400,tipo:'gelo'},
+    {x:11400,tipo:'planta'},{x:12450,tipo:'arqueiro'},{x:13500,tipo:'veloz'},{x:14600,tipo:'gelo'},
+    {x:15600,tipo:'veloz'},{x:16650,tipo:'gelo'},{x:17700,tipo:'guardiao'},{x:18800,tipo:'veloz'},
+    {x:19800,tipo:'guardiao'},{x:20900,tipo:'veloz'},{x:22000,tipo:'gelo'},{x:23200,tipo:'guardiao'},
+    {x:24300,tipo:'veloz'},{x:25350,tipo:'gelo'},{x:26400,tipo:'guardiao'},{x:27400,tipo:'gelo'}
 ];
 
 export const MISSOES_REINO=[

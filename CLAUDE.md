@@ -55,3 +55,5 @@ Instrução para construção de fases:
 Não fique pedindo confirmação entre os ciclos,
 exceto diante de uma decisão realmente destrutiva,
 ambígua ou que altere substancialmente o escopo.
+
+Se tiver alguma question para mim, se eu não responder em 2 min, use a opção recomandada como default. 

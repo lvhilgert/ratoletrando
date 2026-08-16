@@ -26,8 +26,8 @@ export class Carregamento extends Phaser.Scene {
             this.load.image(`letra-${letra}`,`assets/ratoletrando/jogo/letras/${arquivo}.png`)
         );
         for(let i=0;i<6;i++) this.load.image(`estrela-${i}`,`assets/ratoletrando/jogo/estrela/estrela-${i}.png`);
-        this.load.spritesheet('reino-cavaleiro','assets/reino-portas/cavaleiro-sprites-corrigido.png',{frameWidth:217,frameHeight:724,endFrame:9});
-        this.load.spritesheet('reino-slime','assets/reino-portas/slime-sprites.png',{frameWidth:362,frameHeight:724,endFrame:5});
+        this.load.spritesheet('reino-cavaleiro','assets/reino-portas/cavaleiro-sprites-espacado.png',{frameWidth:257,frameHeight:748,endFrame:9});
+        this.load.spritesheet('reino-slime','assets/reino-portas/slime-sprites-espacado.png',{frameWidth:402,frameHeight:748,endFrame:5});
         this.load.spritesheet('reino-objetos','assets/reino-portas/objetos.png',{frameWidth:354,frameHeight:443,endFrame:9});
         this.load.image('reino-bosque','assets/reino-portas/bosque-castelo.png');
         this.load.image('reino-panorama','assets/reino-portas/panorama-reinos.png');

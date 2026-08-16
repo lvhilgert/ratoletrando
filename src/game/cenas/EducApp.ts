@@ -12,8 +12,8 @@ const APLICATIVOS:Aplicativo[]=[
     {tipo:'contagem',nome:'ContaComigo',area:'MATEMÁTICA',descricao:'Conte objetos brincando',cor:0xd58a32,corClara:0xf8ead4,disponivel:true,cena:'ContaComigo'},
     {tipo:'soma',nome:'SomaTrilha',area:'MATEMÁTICA',descricao:'Resolva somas e subtrações',cor:0xc97939,corClara:0xf7e6d9,disponivel:true,cena:'SomaTrilha'},
     {tipo:'memoria',nome:'MemóLetras',area:'MISTA',descricao:'Encontre pares por associação',cor:0x7668a9,corClara:0xe9e5f4,disponivel:true,cena:'MemoLetras'},
-    {tipo:'reino',nome:'Reino das Portas',area:'MISTA',descricao:'Explore e abra portas mágicas',cor:0x397a69,corClara:0xdcefe7,disponivel:true,cena:'ReinoDasPortas'},
-    {tipo:'detetive',nome:'Detetive Mirim',area:'LINGUAGEM',descricao:'Investigue pistas e resolva casos',cor:0x55718c,corClara:0xe1eaf2,disponivel:true,cena:'DetetiveMirim'}
+    {tipo:'reino',nome:'Reino das Portas',area:'MISTA',descricao:'Explore e abra portas mágicas',cor:0x397a69,corClara:0xdcefe7,disponivel:true,cena:'ConfiguracaoReino'},
+    {tipo:'detetive',nome:'Detetive Mirim',area:'LINGUAGEM',descricao:'Investigue pistas e resolva casos',cor:0x55718c,corClara:0xe1eaf2,disponivel:true,cena:'CasosDetetive'}
 ];
 
 export class EducApp extends Phaser.Scene {
@@ -78,9 +78,9 @@ export class EducApp extends Phaser.Scene {
 
     private criarIcone(tipo:TipoIcone,cor:number):Phaser.GameObjects.Container {
         const c=this.add.container(0,0),g=this.add.graphics();c.add(g);if(tipo==='rato'){c.add(this.add.image(0,1,'rato',1).setDisplaySize(76,76));return c;}if(tipo==='reino'){c.add(this.add.image(0,0,'reino-cavaleiro',0).setDisplaySize(36,92));return c;}if(tipo==='detetive'){c.add(this.add.image(0,0,'detetive-jogador',1).setDisplaySize(32,92));return c;}g.lineStyle(4,cor,1);
-        if(tipo==='escrita'){g.fillStyle(0xffffff,1).fillRoundedRect(-27,-22,39,48,8).lineStyle(3,cor,.7).strokeRoundedRect(-27,-22,39,48,8);g.lineStyle(6,cor,1).lineBetween(-5,20,23,-15);g.fillStyle(cor,1).fillTriangle(18,-19,27,-10,29,-22);g.lineStyle(3,cor,.75).arc(24,-3,12,-.75,.75).arc(27,-3,20,-.7,.7);
+        if(tipo==='escrita'){g.fillStyle(0xffffff,1).fillRoundedRect(-27,-30,42,60,8).lineStyle(3,cor,.65).strokeRoundedRect(-27,-30,42,60,8);g.lineStyle(2,cor,.28).lineBetween(-20,-12,7,-12).lineBetween(-20,0,7,0).lineBetween(-20,12,7,12).lineBetween(-20,24,-2,24);c.add(this.add.image(13,6,'detetive-objetos',0).setDisplaySize(46,58).setAngle(-12));
         }else if(tipo==='monta'){[-29,2].forEach((px,i)=>{g.fillStyle(i?0xffffff:cor,1).fillRoundedRect(px,-18,27,35,7).lineStyle(3,cor,1).strokeRoundedRect(px,-18,27,35,7);c.add(this.add.text(px+13,-1,i?'B':'A',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'19px',color:i?`#${cor.toString(16).padStart(6,'0')}`:'#ffffff'}).setOrigin(.5));});
-        }else if(tipo==='contagem'){[-23,0,23].forEach((px,i)=>{g.fillStyle(i===1?0xf09b42:0xe56e58,1).fillCircle(px,i===1?3:8,14);g.fillStyle(0x549b63,1).fillEllipse(px+6,i===1?-14:-9,10,6);});
+        }else if(tipo==='contagem'){(([[-25,9,'fruta-maca',37],[3,-9,'fruta-cereja',30],[27,11,'fruta-melancia',35]] as [number,number,string,number][])).forEach(([px,py,textura,tamanho])=>c.add(this.add.image(px,py,textura).setDisplaySize(tamanho,tamanho)));
         }else if(tipo==='soma'){g.fillStyle(cor,1).fillRoundedRect(-32,-5,51,27,7).fillRoundedRect(-17,-25,27,24,6);g.fillStyle(0xffffff,1).fillRect(-11,-20,15,10);g.fillStyle(0x52665d,1).fillCircle(-19,24,8).fillCircle(14,24,8);c.add(this.add.text(29,-9,'+',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'27px',color:`#${cor.toString(16).padStart(6,'0')}`}).setOrigin(.5));
         }else{g.fillStyle(cor,.92).fillRoundedRect(-31,-24,39,49,8);g.fillStyle(0xffffff,1).fillRoundedRect(-7,-20,39,49,8);g.lineStyle(3,cor,1).strokeRoundedRect(-7,-20,39,49,8);c.add(this.add.text(-12,1,'A',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'18px',color:'#ffffff'}).setOrigin(.5));c.add(this.add.text(13,4,'A',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'18px',color:`#${cor.toString(16).padStart(6,'0')}`}).setOrigin(.5));}return c;
     }
