@@ -78,7 +78,8 @@ export class ReinoDasPortas extends Phaser.Scene {
         const tema=REGIOES_REINO[this.faseAtual],ceu=this.add.graphics(),distante=this.add.graphics(),proximo=this.add.graphics(),escuro=this.misturarCor(tema.cor,0x182b35,.58),suave=this.misturarCor(tema.cor,0xffffff,.68),destaque=this.misturarCor(tema.corDestaque,0xffffff,.45);
         ceu.fillGradientStyle(suave,suave,this.misturarCor(tema.cor,0xffffff,.38),this.misturarCor(tema.cor,0xffffff,.38),1).fillRect(0,0,960,640);
         if(tema.id==='castelo')ceu.fillGradientStyle(0xf7c47d,0xf7c47d,0x9d6a91,0x9d6a91,.72).fillRect(0,0,960,640);
-        for(let x=80;x<960;x+=190)ceu.fillStyle(0xffffff,.16).fillEllipse(x,125+(x%3)*18,150,34);
+        if(tema.id==='fogo')ceu.fillStyle(0xe48a58,1).fillRect(0,0,960,220).fillStyle(0xb95746,1).fillRect(0,220,960,220).fillStyle(0x713640,1).fillRect(0,440,960,200);
+        for(let x=80;x<960;x+=190)ceu.fillStyle(tema.id==='fogo'?0x4b3438:0xffffff,tema.id==='fogo'?.2:.16).fillEllipse(x,125+(x%3)*18,150,34);
         if(tema.id==='bosque'){
             for(let x=-30;x<1000;x+=120)distante.fillStyle(this.misturarCor(tema.cor,0x294f42,.42),.78).fillCircle(x,215,92).fillCircle(x+58,190,74).fillRect(x-26,215,45,115);
             for(let x=25;x<1000;x+=150)proximo.fillStyle(escuro,.72).fillRect(x,65,28,185).fillStyle(tema.cor,.82).fillCircle(x+14,45,64).fillCircle(x+55,68,49);
@@ -101,6 +102,10 @@ export class ReinoDasPortas extends Phaser.Scene {
         }else if(tema.id==='biblioteca'){
             for(let x=10;x<1000;x+=155){distante.fillStyle(escuro,.75).fillRect(x,35,125,295).fillStyle(tema.corDestaque,.2);for(let y=65;y<300;y+=42)distante.fillRect(x+15,y,95,12);}
             for(let x=40;x<1000;x+=180){proximo.fillStyle(this.misturarCor(tema.cor,0x2c2140,.62),.82).fillRect(x,18,140,232).lineStyle(5,tema.corDestaque,.35).strokeRect(x+13,38,114,175);proximo.fillStyle(destaque,.8).fillRoundedRect(x+45,75+(x%4)*24,42,27,4);}
+        }else if(tema.id==='fogo'){
+            for(let x=-120;x<1080;x+=265){distante.fillStyle(0x4b3032,.78).fillTriangle(x,330,x+145,55,x+305,330).fillStyle(0x2e292d,.82).fillTriangle(x+112,118,x+145,55,x+181,122).fillStyle(0xff7a25,.72).fillTriangle(x+125,132,x+145,77,x+163,132);}
+            distante.fillStyle(0xf05a28,.48).fillEllipse(480,316,1060,45).fillStyle(0xffc04a,.6).fillEllipse(480,320,920,18);
+            for(let x=-25;x<1000;x+=185){proximo.fillStyle(0x332b2d,.9).fillTriangle(x,250,x+65,92,x+132,250).fillCircle(x+145,210,58).fillStyle(0xcf4828,.85).fillEllipse(x+92,242,128,22).fillStyle(0xff9b2f,.9).fillEllipse(x+92,240,88,9);}
         }else{
             for(let x=-20;x<1000;x+=235){distante.fillStyle(this.misturarCor(tema.cor,0x57402e,.55),.76).fillRect(x,115,210,215).fillRect(x+25,42,58,110).fillRect(x+132,25,58,120).fillTriangle(x+20,42,x+54,0,x+88,42).fillTriangle(x+126,25,x+161,0,x+197,25);}
             for(let x=25;x<1000;x+=250){proximo.fillStyle(escuro,.8).fillRect(x,65,220,185).fillRect(x+30,8,62,100).fillRect(x+145,22,58,90).fillStyle(tema.corDestaque,.75).fillTriangle(x+91,20,x+142,37,x+91,54);}
@@ -179,6 +184,10 @@ export class ReinoDasPortas extends Phaser.Scene {
         }else if(tema.id==='biblioteca'){
             xs(10).forEach((x,i)=>{const livro=this.add.container(x,180+i%4*70).setDepth(4),g=this.add.graphics().fillStyle(i%2?0xb46f78:0x6d8fbd).fillRoundedRect(-20,-12,40,24,3).lineStyle(2,0xffe7a8,.7).lineBetween(0,-10,0,10);livro.add(g);this.tweens.add({targets:livro,y:livro.y-18,angle:i%2?6:-6,duration:1200+i*100,yoyo:true,repeat:-1,ease:'Sine.InOut'});});
             xs(14).forEach((x,i)=>{const poeira=this.add.circle(x,Phaser.Math.Between(120,520),2,0xffefd1,.5).setDepth(3);this.tweens.add({targets:poeira,y:poeira.y-45,x:x+18,alpha:0,duration:1400+i*80,yoyo:true,repeat:-1});});
+        }else if(tema.id==='fogo'){
+            xs(11).forEach((x,i)=>{const lava=this.add.container(x,544).setDepth(3),poca=this.add.ellipse(0,0,62+i%3*9,14,0xe94b25,.72).setStrokeStyle(3,0xffa62b,.9),brilho=this.add.ellipse(0,-1,35+i%2*8,5,0xffdf67,.8);lava.add([poca,brilho]);this.tweens.add({targets:brilho,scaleX:.68,alpha:.35,duration:520+i%4*70,yoyo:true,repeat:-1,ease:'Sine.InOut'});});
+            xs(18).forEach((x,i)=>{const brasa=this.add.circle(x,Phaser.Math.Between(390,535),2+i%3,i%3?0xff8a2a:0xffdd62,.9).setDepth(4);this.tweens.add({targets:brasa,y:brasa.y-Phaser.Math.Between(90,190),x:x+Phaser.Math.Between(-28,28),alpha:0,scale:.35,duration:900+i%5*130,delay:i*75,repeat:-1,ease:'Sine.Out'});});
+            xs(7).forEach((x,i)=>{const fumaca=this.add.ellipse(x,445+i%3*24,28+i%2*10,17+i%3*5,0x4a3b3c,.22).setDepth(3);this.tweens.add({targets:fumaca,y:fumaca.y-105,x:x+(i%2?28:-28),scale:1.8,alpha:0,duration:1900+i*140,repeat:-1,delay:i*170,ease:'Sine.Out'});});
         }else{
             xs(10).forEach((x,i)=>{const tocha=this.add.container(x,390+i%2*55).setDepth(4),suporte=this.add.rectangle(0,25,7,44,0x50382b),chama=this.add.ellipse(0,0,15,27,0xffa339).setStrokeStyle(3,0xffdf69);tocha.add([suporte,chama]);this.tweens.add({targets:chama,scaleX:.72,scaleY:1.18,alpha:.72,duration:180+i%3*45,yoyo:true,repeat:-1});});
             xs(9).forEach((x,i)=>{const bandeira=this.add.triangle(x,175+i%2*35,0,0,55,12,0,30,i%2?0xb34f5e:0x6d68a8,.9).setOrigin(0,.5).setDepth(3);this.tweens.add({targets:bandeira,scaleX:.82,skewY:.12,duration:600+i*45,yoyo:true,repeat:-1,ease:'Sine.InOut'});});
@@ -186,7 +195,7 @@ export class ReinoDasPortas extends Phaser.Scene {
     }
     private regiaoEm(_x:number){return REGIOES_REINO[this.faseAtual];}
     private corPoeiraRegiao():number {
-        const cores:Record<string,number>={bosque:0x78985d,vila:0xb4875f,caverna:0x71838a,montanha:0xe4edf2,pantano:0x687a4d,biblioteca:0x9b795a,castelo:0xa8825d};
+        const cores:Record<string,number>={bosque:0x78985d,vila:0xb4875f,caverna:0x71838a,montanha:0xe4edf2,pantano:0x687a4d,biblioteca:0x9b795a,castelo:0xa8825d,fogo:0x70423b};
         return cores[REGIOES_REINO[this.faseAtual].id]??REGIOES_REINO[this.faseAtual].cor;
     }
     private misturarCor(a:number,b:number,proporcao:number):number {const t=Phaser.Math.Clamp(proporcao,0,1),ar=(a>>16)&255,ag=(a>>8)&255,ab=a&255,br=(b>>16)&255,bg=(b>>8)&255,bb=b&255;return (Math.round(ar+(br-ar)*t)<<16)|(Math.round(ag+(bg-ag)*t)<<8)|Math.round(ab+(bb-ab)*t);}
