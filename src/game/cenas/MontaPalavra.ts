@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { servicoVoz } from '../../services/ServicoVoz';
+import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 import { DificuldadeMontaPalavra, PALAVRAS_MONTA_PALAVRA, PalavraMontaPalavra, QUANTIDADE_DISTRATORES } from '../dados/palavrasMontaPalavra';
 import { audioJogo } from '../sistemas/SistemaAudio';
 
@@ -23,7 +24,7 @@ export class MontaPalavra extends Phaser.Scene {
         this.desafio=PALAVRAS_MONTA_PALAVRA[this.indice%PALAVRAS_MONTA_PALAVRA.length];this.slots=[];this.pecas=[];this.concluido=false;
         this.add.graphics().fillGradientStyle(0xfbf9f2,0xfbf9f2,0xeee6cf,0xeee6cf,1).fillRect(0,0,960,640);
         const decoracao=this.add.graphics().setAlpha(.28);decoracao.fillStyle(0xe3b65e,.35).fillCircle(45,65,55).fillCircle(920,570,78).fillStyle(0xffffff,.85).fillCircle(900,65,58).fillCircle(60,575,72);
-        const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x96713b,12);voltar.on('pointerdown',()=>this.scene.start('EducApp'));
+        const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x96713b,12);voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
         this.add.text(480,34,'MontaPalavra',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'32px',fontStyle:'bold',color:'#6e522d'}).setOrigin(.5);
         this.add.text(884,34,`${this.indice+1} / ${PALAVRAS_MONTA_PALAVRA.length}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#816f54'}).setOrigin(1,.5);
         this.add.text(884,58,this.desafio.tema.toLocaleUpperCase('pt-BR'),{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'9px',color:'#8a775a',backgroundColor:'#f2e6c9',padding:{x:8,y:3}}).setOrigin(1,.5);

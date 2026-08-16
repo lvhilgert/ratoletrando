@@ -17,9 +17,9 @@ class ServicoVoz {
         });
     }
 
-    falar(texto:string,opcoes?:{velocidade?:number}):void {
+    falar(texto:string,opcoes?:{velocidade?:number;obrigatoria?:boolean}):void {
         const conteudo=texto.trim();
-        if(!PreferenciaVoz.obter()||!this.sintetizador||!conteudo)return;
+        if((!PreferenciaVoz.obter()&&!opcoes?.obrigatoria)||!this.sintetizador||!conteudo)return;
         this.parar();
         this.textoPendente=conteudo;
         this.velocidadePendente=opcoes?.velocidade??.85;

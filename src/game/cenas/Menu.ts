@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { ModoPalavras } from '../dados/palavras';
 import { PreferenciaModoPalavras } from '../sistemas/PreferenciaModoPalavras';
@@ -15,7 +16,7 @@ export class Menu extends Phaser.Scene {
         this.add.image(480,320,'menu-jardim').setDisplaySize(960,640);
         this.add.rectangle(480,320,960,640,0x174f55,.05);
         const voltar=this.add.text(24,22,'‹  EDUCAPP',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#ffffff',backgroundColor:'#276b58',padding:{x:13,y:8}}).setDepth(20).setInteractive({useHandCursor:true});
-        voltar.on('pointerover',()=>voltar.setScale(1.06));voltar.on('pointerout',()=>voltar.setScale(1));voltar.on('pointerdown',()=>this.scene.start('EducApp'));
+        voltar.on('pointerover',()=>voltar.setScale(1.06));voltar.on('pointerout',()=>voltar.setScale(1));voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
         for(let i=0;i<16;i++){const luz=this.add.circle(Phaser.Math.Between(35,925),Phaser.Math.Between(190,590),Phaser.Math.Between(2,4),i%2?0xffef72:0xffffff,.35);this.tweens.add({targets:luz,y:luz.y-Phaser.Math.Between(25,70),x:luz.x+Phaser.Math.Between(-25,25),alpha:{from:.15,to:.8},scale:{from:.6,to:1.3},yoyo:true,repeat:-1,duration:Phaser.Math.Between(1800,3600),delay:i*90,ease:'Sine.InOut'});}
         const titulo=this.add.container(480,88);
         const cores=['#ff3045','#48c94f','#20a9f5','#9a55e8','#ff9e1b','#ef4ec5','#18b9ae'];

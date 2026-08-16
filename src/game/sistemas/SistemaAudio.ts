@@ -14,6 +14,8 @@ export class SistemaAudio {
     private sinteticaTocavaAntesDaPausa=false;
     private aguardandoNovaFase=false;
     private modo:'sintetica'|'zelda'='sintetica';
+    private musicaReino?:number;
+    private musicaDetetive?:number;
 
     iniciarMusica():void {
         if(this.aguardandoNovaFase)this.aguardandoNovaFase=false;
@@ -65,9 +67,16 @@ export class SistemaAudio {
         if(this.miado&&this.miado.currentTime<4)void this.miado.play();
         this.sinteticaTocavaAntesDaPausa=false;
     }
-    efeito(tipo:'bolinha'|'comida'|'letra'|'erro'|'gato'|'vitoria'):void {
+    iniciarMusicaReino():void {
+        if(this.musicaReino)return;this.contexto??=new AudioContext();void this.contexto.resume();let passo=0;const notas=[261.63,329.63,392,440,392,329.63,293.66,349.23];
+        const tocar=()=>{if(!this.contexto)return;this.nota(notas[passo++%notas.length],0,'sine',.025,.55);};tocar();this.musicaReino=window.setInterval(tocar,620);
+    }
+    pararMusicaReino():void {if(this.musicaReino){window.clearInterval(this.musicaReino);this.musicaReino=undefined;}}
+    iniciarMusicaDetetive():void {if(this.musicaDetetive)return;this.contexto??=new AudioContext();void this.contexto.resume();let passo=0;const notas=[293.66,349.23,440,392,329.63,392,466.16,349.23];const tocar=()=>{if(this.contexto)this.nota(notas[passo++%notas.length],0,passo%3?'sine':'triangle',.022,.48);};tocar();this.musicaDetetive=window.setInterval(tocar,560);}
+    pararMusicaDetetive():void {if(this.musicaDetetive){window.clearInterval(this.musicaDetetive);this.musicaDetetive=undefined;}}
+    efeito(tipo:'bolinha'|'comida'|'letra'|'erro'|'gato'|'vitoria'|'pulo'|'moeda'|'espada'|'acerto'|'porta'|'dano'|'conclusao'|'pista'|'caderno'|'dialogo'|'caso'):void {
         this.contexto??=new AudioContext();void this.contexto.resume();
-        const seq={bolinha:[880],comida:[523,659,784],letra:[659,784,988],erro:[392,349],gato:[180,145],vitoria:[523,659,784,1047]}[tipo];
+        const seq={bolinha:[880],comida:[523,659,784],letra:[659,784,988],erro:[392,349],gato:[180,145],vitoria:[523,659,784,1047],pulo:[330,520],moeda:[740,988],espada:[280,520],acerto:[440,660],porta:[330,440,660],dano:[180,145],conclusao:[523,659,784,1047],pista:[659,880,1047],caderno:[440,554],dialogo:[523,659],caso:[523,659,784,1047,1318]}[tipo];
         seq.forEach((f,i)=>this.nota(f,i*.09,tipo==='gato'?'triangle':'sine',tipo==='gato'?.15:.10));
     }
     private iniciarSintetica():void {

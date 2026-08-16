@@ -10,6 +10,7 @@ import { PreferenciaModoPalavras } from '../sistemas/PreferenciaModoPalavras';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { ConfiguracaoFase, PosicaoGrade } from '../tipos/jogo';
 import { ModoPalavras } from '../dados/palavras';
+import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 
 const TILE=48, TOPO=136;
 interface LetraMapa extends Phaser.GameObjects.Image { letra?:string; coletada?:boolean }
@@ -57,6 +58,8 @@ export class Jogo extends Phaser.Scene {
     }
     update(tempo:number):void { if(this.terminou||this.pausado)return; this.rato.atualizar(); this.gatos.forEach(g=>g.atualizar(tempo,this.rato)); }
     private criarBotaoPausa():void {
+        const sair=this.add.text(775,103,'‹  EDUCAPP',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'10px',color:'#ffffff',backgroundColor:'#50756b',padding:{x:12,y:7}}).setOrigin(.5).setDepth(40).setInteractive({useHandCursor:true});
+        sair.on('pointerdown',()=>confirmarSaidaParaEducApp(this,{aoAbrir:()=>{this.pausado=true;this.physics.world.pause();this.anims.pauseAll();audioJogo.pausar();this.rato.definirPausado(true);},aoCancelar:()=>{this.pausado=false;this.physics.world.resume();this.anims.resumeAll();audioJogo.continuar();this.rato.definirPausado(false);}}));
         const botao=this.add.container(893,103).setDepth(40).setSize(88,28).setInteractive({useHandCursor:true});
         const sombra=this.add.graphics().fillStyle(0x173b46,.25).fillRoundedRect(-44,-11,88,28,14);
         const fundo=this.add.graphics().fillStyle(this.tema.borda,1).fillRoundedRect(-44,-14,88,28,14).lineStyle(2,0xffffff,.9).strokeRoundedRect(-44,-14,88,28,14);

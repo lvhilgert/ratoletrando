@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { DadosFimFase } from '../tipos/jogo';
 import { servicoVoz } from '../../services/ServicoVoz';
+import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 
 export class FimDaFase extends Phaser.Scene {
     constructor(){super('FimDaFase');}
@@ -12,6 +13,7 @@ export class FimDaFase extends Phaser.Scene {
         this.add.image(480,320,'menu-jardim').setDisplaySize(960,640);
         this.add.rectangle(480,320,960,640,0x173b46,.42);
         this.criarConfetes();
+        const voltar=this.add.text(24,22,'‹  EDUCAPP',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#ffffff',backgroundColor:'#397466',padding:{x:13,y:8}}).setDepth(50).setInteractive({useHandCursor:true});voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
 
         const painel=this.add.container(480,322).setScale(.82).setAlpha(0);
         const desenhar=(x:number,y:number,w:number,h:number,raio:number,cor:number,alpha=1):Phaser.GameObjects.Graphics=>{

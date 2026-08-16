@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { CategoriaObjeto, NivelContaComigo, NIVEIS_CONTA_COMIGO } from '../dados/configuracaoContaComigo';
 import { servicoVoz } from '../../services/ServicoVoz';
+import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 
 export class ContaComigo extends Phaser.Scene {
     private static ultimasQuantidades:Partial<Record<NivelContaComigo,number>>={};
@@ -27,7 +28,7 @@ export class ContaComigo extends Phaser.Scene {
         do{this.quantidade=Phaser.Math.Between(config.quantidadeMinima,config.quantidadeMaxima);}while(config.quantidadeMaxima>config.quantidadeMinima&&this.quantidade===ContaComigo.ultimasQuantidades[this.nivel]);ContaComigo.ultimasQuantidades[this.nivel]=this.quantidade;this.categoria=config.categorias[this.indice%config.categorias.length];
         this.add.graphics().fillGradientStyle(0xfbfaf3,0xfbfaf3,0xe9f1d8,0xe9f1d8,1).fillRect(0,0,960,640);
         const decor=this.add.graphics().setAlpha(.25);decor.fillStyle(0x8fc66d,.4).fillCircle(45,65,55).fillCircle(925,575,80).fillStyle(0xffffff,.9).fillCircle(900,66,58).fillCircle(55,575,70);
-        const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x628a48,12);voltar.on('pointerdown',()=>this.scene.start('EducApp'));
+        const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x628a48,12);voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
         this.add.text(480,33,'ContaComigo',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'32px',fontStyle:'bold',color:'#4c7137'}).setOrigin(.5);
         this.add.text(884,33,`${this.indice+1} / ${config.quantidadeDesafios}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#667c58'}).setOrigin(1,.5);
         this.criarSeletorNivel();

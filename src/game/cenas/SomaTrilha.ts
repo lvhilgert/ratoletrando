@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { NivelSomaTrilha, NIVEIS_SOMA_TRILHA } from '../dados/configuracaoSomaTrilha';
 import { servicoVoz } from '../../services/ServicoVoz';
+import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 
 interface Conta {a:number;b:number;resultado:number;simbolo:'+'|'−'}
 
@@ -28,7 +29,7 @@ export class SomaTrilha extends Phaser.Scene {
         const config=NIVEIS_SOMA_TRILHA[this.nivel];
         const tema=config.operacao==='soma'?[0xdff4f4,0xbfdca5]:[0xeee8f8,0xc7d7ee];this.add.graphics().fillGradientStyle(tema[0],tema[0],tema[1],tema[1],1).fillRect(0,0,960,640);
         const paisagem=this.add.graphics();paisagem.fillStyle(0xffffff,.5).fillEllipse(120,125,170,45).fillEllipse(805,145,190,48);paisagem.fillStyle(0x8fc878,.65).fillEllipse(140,555,390,180).fillEllipse(770,560,470,210);
-        const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x4e7c52,12);voltar.on('pointerdown',()=>this.scene.start('EducApp'));
+        const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x4e7c52,12);voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
         this.add.text(480,32,'SomaTrilha',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'32px',fontStyle:'bold',color:'#365d43'}).setOrigin(.5);
         this.textoProgresso=this.add.text(886,32,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#53715b'}).setOrigin(1,.5);
         this.criarSeletorNivel();

@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { servicoVoz } from '../../services/ServicoVoz';
 import { EXERCICIOS_OUVI_ESCREVI, ExercicioEscrita } from '../dados/exerciciosOuviEscrevi';
 import { audioJogo } from '../sistemas/SistemaAudio';
+import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 
 interface Ponto {x:number;y:number}
 
@@ -33,7 +34,7 @@ export class OuviEscrevi extends Phaser.Scene {
         const decoracao=this.add.graphics().setAlpha(.35);decoracao.fillStyle(0x9ed7cf,.35).fillCircle(45,70,48).fillCircle(925,580,76).fillStyle(0xffffff,.75).fillCircle(900,75,60).fillCircle(55,575,66);
 
         const voltar=this.criarBotao(74,22,120,36,'‹  EDUCAPP',0x397b70,12);
-        voltar.on('pointerdown',()=>this.scene.start('EducApp'));
+        voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
         this.add.text(480,31,'Ouvi e Escrevi',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'31px',fontStyle:'bold',color:'#2b665d'}).setOrigin(.5);
         this.textoModo=this.add.text(480,67,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'11px',color:'#ffffff',backgroundColor:'#4c978b',padding:{x:12,y:5}}).setOrigin(.5);
         this.textoProgresso=this.add.text(880,32,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#55776f'}).setOrigin(1,.5);
@@ -57,8 +58,8 @@ export class OuviEscrevi extends Phaser.Scene {
         const modelo=this.criarBotao(422,558,135,45,'MODELO',0x679a91,11);modelo.on('pointerdown',()=>{this.modeloVisivel=!this.modeloVisivel;this.modelo.setAlpha(this.modeloVisivel?.16:0);});
         const grossura=this.criarBotao(560,558,120,45,'TRAÇO  ●',0x617f98,11);grossura.on('pointerdown',()=>{this.espessura=this.espessura===12?18:this.espessura===18?8:12;(grossura.getData('texto') as Phaser.GameObjects.Text).setText(this.espessura===8?'TRAÇO  •':this.espessura===12?'TRAÇO  ●':'TRAÇO  ⬤');this.redesenhar();});
         this.botaoAcao=this.criarBotao(765,558,210,54,'CONFERIR  ✓',0x2e9b69,17);this.textoAcao=this.botaoAcao.getData('texto') as Phaser.GameObjects.Text;this.botaoAcao.on('pointerdown',()=>this.acaoPrincipal());
-        const partes=this.criarBotao(820,126,150,38,'OUVIR PARTES',0x5e86aa,11);partes.on('pointerdown',()=>servicoVoz.falar(this.exercicio.partes.join('... ')));
-        const lento=this.criarBotao(140,126,145,38,'OUVIR DEVAGAR',0x668ba7,10);lento.on('pointerdown',()=>servicoVoz.falar(this.exercicio.conteudo,{velocidade:.75}));
+        const partes=this.criarBotao(820,126,150,38,'OUVIR PARTES',0x5e86aa,11);partes.on('pointerdown',()=>servicoVoz.falar(this.exercicio.partes.join('... '),{obrigatoria:true}));
+        const lento=this.criarBotao(140,126,145,38,'OUVIR DEVAGAR',0x668ba7,10);lento.on('pointerdown',()=>servicoVoz.falar(this.exercicio.conteudo,{velocidade:.75,obrigatoria:true}));
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{servicoVoz.parar();this.input.removeAllListeners();});
         this.carregarExercicio();
@@ -67,7 +68,7 @@ export class OuviEscrevi extends Phaser.Scene {
     private carregarExercicio():void {
         this.exercicio=EXERCICIOS_OUVI_ESCREVI[this.indice%EXERCICIOS_OUVI_ESCREVI.length];this.conferido=false;this.modeloVisivel=false;this.modelo.setText(this.exercicio.conteudo).setFontSize(this.exercicio.conteudo.length>2?'92px':'150px').setAlpha(0);this.apagarTudo();this.resposta.setAlpha(0);this.textoModo.setText(this.exercicio.tipo.toLocaleUpperCase('pt-BR'));this.textoProgresso.setText(`${this.indice+1} / ${EXERCICIOS_OUVI_ESCREVI.length}`);this.textoAcao.setText('CONFERIR  ✓');this.time.delayedCall(420,()=>this.ouvir());
     }
-    private ouvir():void {servicoVoz.falar(this.exercicio.conteudo);}
+    private ouvir():void {servicoVoz.falar(this.exercicio.conteudo,{obrigatoria:true});}
 
     private iniciarTraco(p:Phaser.Input.Pointer):void {if(this.conferido||!this.dentroDaArea(p.worldX,p.worldY))return;audioJogo.efeito('bolinha');if('vibrate' in navigator)navigator.vibrate(8);this.ponteiroAtivo=p.id;this.tracoAtual=[{x:p.worldX,y:p.worldY}];this.tracos.push(this.tracoAtual);this.redesenhar();}
     private continuarTraco(p:Phaser.Input.Pointer):void {if(this.ponteiroAtivo!==p.id||!p.isDown||!this.tracoAtual)return;const ponto={x:Phaser.Math.Clamp(p.worldX,this.area.x+3,this.area.x+this.area.largura-3),y:Phaser.Math.Clamp(p.worldY,this.area.y+3,this.area.y+this.area.altura-3)},ultimo=this.tracoAtual[this.tracoAtual.length-1],distancia=Phaser.Math.Distance.Between(ultimo.x,ultimo.y,ponto.x,ponto.y);if(distancia<2)return;const passos=Math.max(1,Math.ceil(distancia/5));for(let i=1;i<=passos;i++)this.tracoAtual.push({x:Phaser.Math.Linear(ultimo.x,ponto.x,i/passos),y:Phaser.Math.Linear(ultimo.y,ponto.y,i/passos)});this.redesenhar();}
@@ -76,7 +77,7 @@ export class OuviEscrevi extends Phaser.Scene {
     private redesenhar():void {const raio=this.espessura/2;this.desenho.clear().lineStyle(this.espessura,0x315f87,1);this.tracos.forEach(traco=>{if(!traco.length)return;this.desenho.fillStyle(0x315f87,1).fillCircle(traco[0].x,traco[0].y,raio);for(let i=1;i<traco.length;i++){const a=traco[i-1],b=traco[i];this.desenho.lineBetween(a.x,a.y,b.x,b.y).fillCircle(b.x,b.y,raio);}});}
     private apagarTudo():void {this.tracos=[];this.tracoAtual=undefined;this.ponteiroAtivo=undefined;if(this.desenho)this.desenho.clear();}
     private desfazer():void {if(this.conferido)return;this.tracos.pop();this.redesenhar();}
-    private acaoPrincipal():void {if(this.conferido){this.indice=(this.indice+1)%EXERCICIOS_OUVI_ESCREVI.length;this.carregarExercicio();return;}this.conferido=true;servicoVoz.falar(this.exercicio.conteudo);this.modelo.setAlpha(.16);this.resposta.removeAll(true);this.resposta.add([this.add.graphics().fillStyle(0xe1f4e9,1).fillRoundedRect(-310,-27,620,54,19).lineStyle(2,0x56ae7e,.55).strokeRoundedRect(-310,-27,620,54,19),this.add.text(-280,0,'MODELO:',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#347359'}).setOrigin(0,.5),this.add.text(-115,0,this.exercicio.conteudo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'30px',fontStyle:'bold',color:'#245f48'}).setOrigin(.5)]);const tentar=this.criarBotao(190,0,190,38,'TENTAR DE NOVO',0x668b83,11);this.resposta.add(tentar);tentar.on('pointerdown',()=>{this.conferido=false;this.modelo.setAlpha(0);this.modeloVisivel=false;this.resposta.setAlpha(0);this.apagarTudo();this.textoAcao.setText('CONFERIR  ✓');this.ouvir();});this.resposta.setAlpha(0);this.tweens.add({targets:this.resposta,alpha:1,scale:{from:.9,to:1},duration:180,ease:'Back.Out'});this.textoAcao.setText('FICOU PARECIDA?  ›');}
+    private acaoPrincipal():void {if(this.conferido){this.indice=(this.indice+1)%EXERCICIOS_OUVI_ESCREVI.length;this.carregarExercicio();return;}this.conferido=true;servicoVoz.falar(this.exercicio.conteudo,{obrigatoria:true});this.modelo.setAlpha(.16);this.resposta.removeAll(true);this.resposta.add([this.add.graphics().fillStyle(0xe1f4e9,1).fillRoundedRect(-310,-27,620,54,19).lineStyle(2,0x56ae7e,.55).strokeRoundedRect(-310,-27,620,54,19),this.add.text(-280,0,'MODELO:',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#347359'}).setOrigin(0,.5),this.add.text(-115,0,this.exercicio.conteudo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'30px',fontStyle:'bold',color:'#245f48'}).setOrigin(.5)]);const tentar=this.criarBotao(190,0,190,38,'TENTAR DE NOVO',0x668b83,11);this.resposta.add(tentar);tentar.on('pointerdown',()=>{this.conferido=false;this.modelo.setAlpha(0);this.modeloVisivel=false;this.resposta.setAlpha(0);this.apagarTudo();this.textoAcao.setText('CONFERIR  ✓');this.ouvir();});this.resposta.setAlpha(0);this.tweens.add({targets:this.resposta,alpha:1,scale:{from:.9,to:1},duration:180,ease:'Back.Out'});this.textoAcao.setText('FICOU PARECIDA?  ›');}
 
     private criarBotao(x:number,y:number,largura:number,altura:number,rotulo:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(largura,altura).setInteractive({useHandCursor:true}),s=this.add.graphics().fillStyle(0x294f46,.17).fillRoundedRect(-largura/2,-altura/2+4,largura,altura,altura/2),f=this.add.graphics().fillStyle(cor,1).fillRoundedRect(-largura/2,-altura/2,largura,altura,altura/2),t=this.add.text(0,0,rotulo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5);c.add([s,f,t]);c.setData('texto',t);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
 }

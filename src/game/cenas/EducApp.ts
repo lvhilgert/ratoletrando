@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { PreferenciaVoz } from '../../services/PreferenciaVoz';
 import { servicoVoz } from '../../services/ServicoVoz';
 
-type TipoIcone='rato'|'escrita'|'monta'|'contagem'|'soma'|'memoria';
+type TipoIcone='rato'|'escrita'|'monta'|'contagem'|'soma'|'memoria'|'reino'|'detetive';
 interface Aplicativo {tipo:TipoIcone;nome:string;area:string;descricao:string;cor:number;corClara:number;disponivel:boolean;cena?:string}
 
 const APLICATIVOS:Aplicativo[]=[
@@ -11,7 +11,9 @@ const APLICATIVOS:Aplicativo[]=[
     {tipo:'monta',nome:'MontaPalavra',area:'LINGUAGEM',descricao:'Arraste letras e sílabas',cor:0x4c998c,corClara:0xdff1ed,disponivel:true,cena:'MontaPalavra'},
     {tipo:'contagem',nome:'ContaComigo',area:'MATEMÁTICA',descricao:'Conte objetos brincando',cor:0xd58a32,corClara:0xf8ead4,disponivel:true,cena:'ContaComigo'},
     {tipo:'soma',nome:'SomaTrilha',area:'MATEMÁTICA',descricao:'Resolva somas e subtrações',cor:0xc97939,corClara:0xf7e6d9,disponivel:true,cena:'SomaTrilha'},
-    {tipo:'memoria',nome:'MemóLetras',area:'MISTA',descricao:'Encontre pares por associação',cor:0x7668a9,corClara:0xe9e5f4,disponivel:true,cena:'MemoLetras'}
+    {tipo:'memoria',nome:'MemóLetras',area:'MISTA',descricao:'Encontre pares por associação',cor:0x7668a9,corClara:0xe9e5f4,disponivel:true,cena:'MemoLetras'},
+    {tipo:'reino',nome:'Reino das Portas',area:'MISTA',descricao:'Explore e abra portas mágicas',cor:0x397a69,corClara:0xdcefe7,disponivel:true,cena:'ReinoDasPortas'},
+    {tipo:'detetive',nome:'Detetive Mirim',area:'LINGUAGEM',descricao:'Investigue pistas e resolva casos',cor:0x55718c,corClara:0xe1eaf2,disponivel:true,cena:'DetetiveMirim'}
 ];
 
 export class EducApp extends Phaser.Scene {
@@ -26,19 +28,19 @@ export class EducApp extends Phaser.Scene {
         this.add.text(480,45,'EducApp',{fontFamily:'Arial Rounded MT Bold, Arial Black, Arial',fontSize:'43px',fontStyle:'bold',color:'#245d49',shadow:{offsetY:2,color:'#ffffff',blur:0,fill:true}}).setOrigin(.5);
         this.add.text(480,82,'Escolha uma aventura para aprender!',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'17px',color:'#587568'}).setOrigin(.5);
         this.criarControleVoz();
-        APLICATIVOS.forEach((app,i)=>this.criarCartao(app,190+(i%3)*290,211+Math.floor(i/3)*244));
+        APLICATIVOS.forEach((app,i)=>this.criarCartao(app,120+(i%4)*240,211+Math.floor(i/4)*244));
     }
 
     private criarControleVoz():void {
         let ativa=PreferenciaVoz.obter();
-        const controle=this.add.container(824,53).setSize(238,52).setInteractive({useHandCursor:true}).setDepth(10);
-        const fundo=this.add.graphics(),icone=this.add.graphics(),rotulo=this.add.text(-57,-7,'ACESSIBILIDADE',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'9px',color:'#557068',letterSpacing:.6}).setOrigin(.5),estado=this.add.text(-57,9,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'11px',fontStyle:'bold'}).setOrigin(.5),trilho=this.add.graphics(),botao=this.add.circle(82,0,10,0xffffff);
+        const controle=this.add.container(150,52).setSize(250,50).setInteractive({useHandCursor:true}).setDepth(10);
+        const fundo=this.add.graphics(),icone=this.add.graphics(),rotulo=this.add.text(-4,-8,'ACESSIBILIDADE POR VOZ',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'8px',color:'#60776e',letterSpacing:.25}).setOrigin(.5),estado=this.add.text(-4,8,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'10px',fontStyle:'bold'}).setOrigin(.5),trilho=this.add.graphics(),botao=this.add.circle(0,0,10,0xffffff);
         const desenhar=()=>{
-            fundo.clear().fillStyle(0xffffff,.9).fillRoundedRect(-119,-26,238,52,18).lineStyle(2,ativa?0x4b9a78:0xb4c5bd,.65).strokeRoundedRect(-119,-26,238,52,18);
-            icone.clear().fillStyle(ativa?0x438b6d:0x7a8b84,1).fillRoundedRect(-105,-7,9,14,2).fillTriangle(-96,-7,-84,-16,-84,16);
-            icone.lineStyle(2,ativa?0x438b6d:0x7a8b84,1).arc(-82,0,10,-.8,.8).strokePath().arc(-82,0,17,-.7,.7).strokePath();
-            if(!ativa)icone.lineStyle(3,0xb86666,1).lineBetween(-105,-16,-77,16);
-            trilho.clear().fillStyle(ativa?0x62b68d:0xc8d2ce,1).fillRoundedRect(65,-13,34,26,13);botao.setPosition(ativa?88:76,0);
+            fundo.clear().fillStyle(ativa?0xf5fbf8:0xffffff,.94).fillRoundedRect(-125,-25,250,50,17).lineStyle(2,ativa?0x4b9a78:0xc2cec9,.7).strokeRoundedRect(-125,-25,250,50,17);
+            icone.clear().fillStyle(ativa?0x438b6d:0x7a8b84,1).fillRoundedRect(-108,-7,9,14,2).fillTriangle(-99,-7,-87,-15,-87,15);
+            icone.lineStyle(2,ativa?0x438b6d:0x7a8b84,1).arc(-85,0,9,-.8,.8).strokePath().arc(-85,0,15,-.7,.7).strokePath();
+            if(!ativa)icone.lineStyle(3,0xb86666,1).lineBetween(-108,-15,-79,15);
+            trilho.clear().fillStyle(ativa?0x62b68d:0xc8d2ce,1).fillRoundedRect(82,-12,38,24,12);botao.setPosition(ativa?108:94,0);
             estado.setText(ativa?'VOZ ATIVADA':'VOZ DESATIVADA').setColor(ativa?'#34785b':'#74867e');
         };
         controle.add([fundo,icone,rotulo,estado,trilho,botao]);desenhar();
@@ -47,17 +49,17 @@ export class EducApp extends Phaser.Scene {
     }
 
     private criarCartao(app:Aplicativo,x:number,y:number):void {
-        const cartao=this.add.container(x,y).setSize(250,216).setInteractive({useHandCursor:true});
-        const sombra=this.add.graphics().fillStyle(0x315e4b,app.disponivel?.17:.1).fillRoundedRect(-123,-99,246,216,25);
-        const base=this.add.graphics().fillStyle(0xffffff,app.disponivel?1:.96).fillRoundedRect(-123,-106,246,216,25);
-        base.lineStyle(app.disponivel?3:2,app.cor,app.disponivel?.66:.28).strokeRoundedRect(-123,-106,246,216,25);
-        const topo=this.add.graphics().fillStyle(app.corClara,1).fillRoundedRect(-113,-96,226,91,19).fillStyle(app.cor,.1).fillCircle(0,-51,47);
-        const categoria=this.criarTag(-75,-83,app.area,app.cor,app.corClara);
-        const destaque=app.disponivel?this.criarTag(68,-83,'JOGUE AGORA',0xffffff,app.cor):undefined;
+        const cartao=this.add.container(x,y).setSize(210,216).setInteractive({useHandCursor:true});
+        const sombra=this.add.graphics().fillStyle(0x315e4b,app.disponivel?.17:.1).fillRoundedRect(-103,-99,206,216,25);
+        const base=this.add.graphics().fillStyle(0xffffff,app.disponivel?1:.96).fillRoundedRect(-103,-106,206,216,25);
+        base.lineStyle(app.disponivel?3:2,app.cor,app.disponivel?.66:.28).strokeRoundedRect(-103,-106,206,216,25);
+        const topo=this.add.graphics().fillStyle(app.corClara,1).fillRoundedRect(-94,-96,188,91,19).fillStyle(app.cor,.1).fillCircle(0,-51,43);
+        const categoria=this.criarTag(-57,-83,app.area,app.cor,app.corClara);
+        const destaque=app.disponivel?this.criarTag(51,-83,'JOGUE AGORA',0xffffff,app.cor):undefined;
         const icone=this.criarIcone(app.tipo,app.cor).setPosition(0,-48);
         if(app.disponivel)this.tweens.add({targets:icone,y:-52,yoyo:true,repeat:-1,duration:1500,ease:'Sine.InOut'});
-        const nome=this.add.text(0,10,app.nome,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'21px',fontStyle:'bold',color:'#294f40'}).setOrigin(.5);
-        const descricao=this.add.text(0,39,app.descricao,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#657d73',align:'center',wordWrap:{width:205}}).setOrigin(.5);
+        const nome=this.add.text(0,10,app.nome,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:app.nome.length>15?'17px':'19px',fontStyle:'bold',color:'#294f40'}).setOrigin(.5);
+        const descricao=this.add.text(0,39,app.descricao,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#657d73',align:'center',wordWrap:{width:180}}).setOrigin(.5);
         cartao.add([sombra,base,topo,categoria]);if(destaque)cartao.add(destaque);cartao.add([icone,nome,descricao]);
         if(app.disponivel){
             const botao=this.add.container(0,80),sombraBotao=this.add.graphics().fillStyle(0x234d3d,.2).fillRoundedRect(-78,-14,156,37,18),fundoBotao=this.add.graphics().fillStyle(app.cor,1).fillRoundedRect(-78,-18,156,37,18),brilho=this.add.graphics().fillStyle(0xffffff,.14).fillRoundedRect(-68,-14,136,9,5),texto=this.add.text(0,0,'▶  JOGAR',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'15px',color:'#ffffff'}).setOrigin(.5);
@@ -75,7 +77,7 @@ export class EducApp extends Phaser.Scene {
     }
 
     private criarIcone(tipo:TipoIcone,cor:number):Phaser.GameObjects.Container {
-        const c=this.add.container(0,0),g=this.add.graphics();c.add(g);if(tipo==='rato'){c.add(this.add.image(0,1,'rato',1).setDisplaySize(76,76));return c;}g.lineStyle(4,cor,1);
+        const c=this.add.container(0,0),g=this.add.graphics();c.add(g);if(tipo==='rato'){c.add(this.add.image(0,1,'rato',1).setDisplaySize(76,76));return c;}if(tipo==='reino'){c.add(this.add.image(0,0,'reino-cavaleiro',0).setDisplaySize(36,92));return c;}if(tipo==='detetive'){c.add(this.add.image(0,0,'detetive-jogador',1).setDisplaySize(32,92));return c;}g.lineStyle(4,cor,1);
         if(tipo==='escrita'){g.fillStyle(0xffffff,1).fillRoundedRect(-27,-22,39,48,8).lineStyle(3,cor,.7).strokeRoundedRect(-27,-22,39,48,8);g.lineStyle(6,cor,1).lineBetween(-5,20,23,-15);g.fillStyle(cor,1).fillTriangle(18,-19,27,-10,29,-22);g.lineStyle(3,cor,.75).arc(24,-3,12,-.75,.75).arc(27,-3,20,-.7,.7);
         }else if(tipo==='monta'){[-29,2].forEach((px,i)=>{g.fillStyle(i?0xffffff:cor,1).fillRoundedRect(px,-18,27,35,7).lineStyle(3,cor,1).strokeRoundedRect(px,-18,27,35,7);c.add(this.add.text(px+13,-1,i?'B':'A',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'19px',color:i?`#${cor.toString(16).padStart(6,'0')}`:'#ffffff'}).setOrigin(.5));});
         }else if(tipo==='contagem'){[-23,0,23].forEach((px,i)=>{g.fillStyle(i===1?0xf09b42:0xe56e58,1).fillCircle(px,i===1?3:8,14);g.fillStyle(0x549b63,1).fillEllipse(px+6,i===1?-14:-9,10,6);});
