@@ -61,10 +61,46 @@ export class ReinoDasPortas extends Phaser.Scene {
     }
     private criarCenario():void {
         const tema=REGIOES_REINO[this.faseAtual];
-        if(this.faseAtual===0)this.add.image(480,320,'reino-bosque').setDisplaySize(960,640).setScrollFactor(0).setDepth(-20);
-        else this.add.image(480,320,'reino-panorama').setDisplaySize(1600,640).setScrollFactor(0).setDepth(-20);
-        this.add.rectangle(480,320,960,640,tema.cor,.1).setScrollFactor(0).setDepth(-19);
+        const prefixo=`reino-parallax-${tema.id}`;this.criarTexturasParallax(prefixo);
+        this.add.tileSprite(0,0,this.larguraMundo+960,640,`${prefixo}-ceu`).setOrigin(0).setScrollFactor(.15,0).setDepth(-30);
+        const distante=this.add.tileSprite(0,210,this.larguraMundo+960,330,`${prefixo}-distante`).setOrigin(0).setScrollFactor(.4,0).setDepth(-24);
+        this.add.tileSprite(0,330,this.larguraMundo+960,250,`${prefixo}-proximo`).setOrigin(0).setScrollFactor(.7,0).setDepth(-12);
+        if(tema.id==='caverna'||tema.id==='biblioteca')this.tweens.add({targets:distante,alpha:.72,yoyo:true,repeat:-1,duration:1500,ease:'Sine.InOut'});
         this.add.text(180,355,tema.nome.toUpperCase(),{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'20px',fontStyle:'bold',color:'#ffffff',stroke:'#31554b',strokeThickness:5}).setOrigin(.5).setScrollFactor(0).setDepth(2);
+    }
+    private criarTexturasParallax(prefixo:string):void {
+        if(this.textures.exists(`${prefixo}-ceu`))return;
+        const tema=REGIOES_REINO[this.faseAtual],ceu=this.add.graphics(),distante=this.add.graphics(),proximo=this.add.graphics(),escuro=this.misturarCor(tema.cor,0x182b35,.58),suave=this.misturarCor(tema.cor,0xffffff,.68),destaque=this.misturarCor(tema.corDestaque,0xffffff,.45);
+        ceu.fillGradientStyle(suave,suave,this.misturarCor(tema.cor,0xffffff,.38),this.misturarCor(tema.cor,0xffffff,.38),1).fillRect(0,0,960,640);
+        if(tema.id==='castelo')ceu.fillGradientStyle(0xf7c47d,0xf7c47d,0x9d6a91,0x9d6a91,.72).fillRect(0,0,960,640);
+        for(let x=80;x<960;x+=190)ceu.fillStyle(0xffffff,.16).fillEllipse(x,125+(x%3)*18,150,34);
+        if(tema.id==='bosque'){
+            for(let x=-30;x<1000;x+=120)distante.fillStyle(this.misturarCor(tema.cor,0x294f42,.42),.78).fillCircle(x,215,92).fillCircle(x+58,190,74).fillRect(x-26,215,45,115);
+            for(let x=25;x<1000;x+=150)proximo.fillStyle(escuro,.72).fillRect(x,65,28,185).fillStyle(tema.cor,.82).fillCircle(x+14,45,64).fillCircle(x+55,68,49);
+            proximo.fillStyle(0xffffff,.2).fillEllipse(480,205,900,55);
+        }else if(tema.id==='vila'){
+            for(let x=0;x<960;x+=175){distante.fillStyle(this.misturarCor(tema.cor,0xffffff,.18),.8).fillRect(x+12,135,145,195).fillStyle(escuro,.7).fillTriangle(x,145,x+84,62,x+170,145).fillRect(x+116,75,21,55);}
+            for(let x=25;x<960;x+=190){proximo.fillStyle(escuro,.76).fillRect(x,100,165,150).fillStyle(tema.corDestaque,.5).fillTriangle(x-12,108,x+82,22,x+178,108).fillStyle(0xffffff,.24).fillCircle(x+130,35,20).fillCircle(x+150,10,27);}
+        }else if(tema.id==='caverna'){
+            ceu.fillStyle(0x142d3a,.52).fillRect(0,0,960,640);for(let x=0;x<960;x+=80)distante.fillStyle(escuro,.9).fillTriangle(x,0,x+38,Phaser.Math.Wrap(x,95,210),x+78,0);
+            for(let x=45;x<960;x+=145){distante.fillStyle(tema.corDestaque,.5).fillTriangle(x,270,x+20,170,x+42,270).fillStyle(0xffffff,.34).fillTriangle(x+12,245,x+20,185,x+27,245);}
+            for(let x=-30;x<1000;x+=130)proximo.fillStyle(0x172c35,.9).fillCircle(x,245,100).fillTriangle(x+35,210,x+80,65,x+120,225);
+        }else if(tema.id==='montanha'){
+            for(let x=-100;x<1050;x+=240){distante.fillStyle(escuro,.7).fillTriangle(x,330,x+145,35,x+300,330).fillStyle(0xffffff,.78).fillTriangle(x+92,142,x+145,35,x+202,145);}
+            for(let x=-20;x<1000;x+=210)proximo.fillStyle(this.misturarCor(tema.cor,0x30455d,.55),.82).fillTriangle(x,250,x+110,60,x+225,250);
+            proximo.fillStyle(0xffffff,.3).fillEllipse(260,210,430,48).fillEllipse(730,175,500,58);
+        }else if(tema.id==='pantano'){
+            for(let x=30;x<1000;x+=165){distante.lineStyle(25,escuro,.72).lineBetween(x,330,x+20,115).lineBetween(x+12,190,x-40,120).lineBetween(x+15,165,x+78,94);distante.fillStyle(escuro,.55).fillCircle(x-44,112,36).fillCircle(x+82,88,45);}
+            for(let x=0;x<1000;x+=230){proximo.lineStyle(32,0x263d32,.82).lineBetween(x+75,250,x+55,60).lineBetween(x+62,120,x+5,45).lineBetween(x+60,105,x+135,28);}
+            proximo.fillStyle(0xddeac8,.3).fillEllipse(480,220,980,75).fillStyle(tema.corDestaque,.18).fillEllipse(240,180,520,45);
+        }else if(tema.id==='biblioteca'){
+            for(let x=10;x<1000;x+=155){distante.fillStyle(escuro,.75).fillRect(x,35,125,295).fillStyle(tema.corDestaque,.2);for(let y=65;y<300;y+=42)distante.fillRect(x+15,y,95,12);}
+            for(let x=40;x<1000;x+=180){proximo.fillStyle(this.misturarCor(tema.cor,0x2c2140,.62),.82).fillRect(x,18,140,232).lineStyle(5,tema.corDestaque,.35).strokeRect(x+13,38,114,175);proximo.fillStyle(destaque,.8).fillRoundedRect(x+45,75+(x%4)*24,42,27,4);}
+        }else{
+            for(let x=-20;x<1000;x+=235){distante.fillStyle(this.misturarCor(tema.cor,0x57402e,.55),.76).fillRect(x,115,210,215).fillRect(x+25,42,58,110).fillRect(x+132,25,58,120).fillTriangle(x+20,42,x+54,0,x+88,42).fillTriangle(x+126,25,x+161,0,x+197,25);}
+            for(let x=25;x<1000;x+=250){proximo.fillStyle(escuro,.8).fillRect(x,65,220,185).fillRect(x+30,8,62,100).fillRect(x+145,22,58,90).fillStyle(tema.corDestaque,.75).fillTriangle(x+91,20,x+142,37,x+91,54);}
+        }
+        ceu.generateTexture(`${prefixo}-ceu`,960,640);distante.generateTexture(`${prefixo}-distante`,960,330);proximo.generateTexture(`${prefixo}-proximo`,960,250);ceu.destroy();distante.destroy();proximo.destroy();
     }
     private criarAnimacoes():void {
         if(!this.anims.exists('reino-idle'))this.anims.create({key:'reino-idle',frames:[{key:'reino-cavaleiro',frame:0}],frameRate:1,repeat:-1});
@@ -105,7 +141,6 @@ export class ReinoDasPortas extends Phaser.Scene {
     }
     private criarSegredos():void {[[1250,510],[2850,510],[4550,510],[5550,510]].forEach(([x,y])=>{const bau=this.add.container(x,y).setDepth(6),g=this.add.graphics().fillStyle(0x6d452b,1).fillRoundedRect(-28,-18,56,36,8).fillStyle(0xe0af43,1).fillRect(-28,-5,56,7).fillCircle(0,2,5);bau.add(g);const zona=this.physics.add.staticImage(x,y,'reino-objetos',2).setVisible(false).setSize(62,44);this.physics.add.overlap(this.cavaleiro,zona,()=>{if(!zona.active)return;zona.disableBody(true,true);this.tweens.add({targets:bau,y:y-18,alpha:0,duration:300,onComplete:()=>bau.destroy(true)});this.moedas+=3;this.textoMoedas?.setText(`${this.moedas}`);audioJogo.efeito('moeda');this.criarParticulas(x,y,this.regiaoEm(x).corDestaque,20);});});}
     private criarComposicoesCenario():void {
-        const tema=this.regiaoEm(0),morro=(x:number,w:number,h:number,cor:number)=>this.add.ellipse(x,570,w,h,cor,.82).setDepth(-8).setStrokeStyle(5,this.misturarCor(cor,0x000000,.2));morro(900,720,260,this.misturarCor(tema.cor,tema.corDestaque,.48));morro(2500,900,330,this.misturarCor(tema.cor,tema.corDestaque,.34));morro(4400,760,280,this.misturarCor(tema.cor,tema.corDestaque,.52));
         const barril=(x:number)=>{const c=this.add.container(x,520).setDepth(5),g=this.add.graphics().fillStyle(0x8f5b32).fillRoundedRect(-22,-30,44,60,12).lineStyle(5,0x55351f).strokeRoundedRect(-22,-30,44,60,12).lineStyle(4,0xd09a55).lineBetween(-20,-13,20,-13).lineBetween(-20,14,20,14);c.add(g);};[780,2360,4100,5420].forEach(barril);
         [560,2250,3920,5350].forEach((x,i)=>{this.add.image(x,490,'reino-objetos',6+i%4).setDisplaySize(125,125).setDepth(2);this.add.rectangle(x+72,535,105,14,0x6f4326).setAngle(i%2?8:-7).setDepth(3);});
         const colmeia=this.add.container(1180,330).setDepth(4),g=this.add.graphics().fillStyle(0xd9a532).fillEllipse(0,0,48,58).lineStyle(4,0x9c6a20).strokeEllipse(0,0,48,58).fillStyle(0x5c3b1d).fillCircle(0,12,7);colmeia.add(g);for(let i=0;i<4;i++){const abelha=this.add.container(1180+i*11,330+i*5).setDepth(5),corpo=this.add.ellipse(0,0,13,8,0xf4c542).setStrokeStyle(2,0x49351c),asa1=this.add.ellipse(-3,-6,7,6,0xffffff,.7),asa2=this.add.ellipse(4,-6,7,6,0xffffff,.7);abelha.add([asa1,asa2,corpo]);this.tweens.add({targets:abelha,x:abelha.x+Phaser.Math.Between(25,65),y:abelha.y+Phaser.Math.Between(-25,25),duration:750+i*170,yoyo:true,repeat:-1,ease:'Sine.InOut'});}
