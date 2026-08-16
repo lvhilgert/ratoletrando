@@ -1,6 +1,8 @@
 import * as Phaser from 'phaser';
+import { PreferenciaAudio } from '../../services/PreferenciaAudio';
 import { PreferenciaVoz } from '../../services/PreferenciaVoz';
 import { servicoVoz } from '../../services/ServicoVoz';
+import { audioJogo } from '../sistemas/SistemaAudio';
 
 type TipoIcone='rato'|'escrita'|'monta'|'contagem'|'soma'|'memoria'|'reino'|'detetive';
 interface Aplicativo {tipo:TipoIcone;nome:string;area:string;descricao:string;cor:number;corClara:number;disponivel:boolean;cena?:string}
@@ -28,7 +30,33 @@ export class EducApp extends Phaser.Scene {
         this.add.text(480,45,'EducApp',{fontFamily:'Arial Rounded MT Bold, Arial Black, Arial',fontSize:'43px',fontStyle:'bold',color:'#245d49',shadow:{offsetY:2,color:'#ffffff',blur:0,fill:true}}).setOrigin(.5);
         this.add.text(480,82,'Escolha uma aventura para aprender!',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'17px',color:'#587568'}).setOrigin(.5);
         this.criarControleVoz();
+        this.criarControleAudio();
         APLICATIVOS.forEach((app,i)=>this.criarCartao(app,120+(i%4)*240,211+Math.floor(i/4)*244));
+    }
+
+    private criarControleAudio():void {
+        const controle=this.add.container(810,52).setDepth(10);
+        const fundo=this.add.graphics().fillStyle(0xffffff,.94).fillRoundedRect(-135,-30,270,60,17).lineStyle(2,0x4b9a78,.7).strokeRoundedRect(-135,-30,270,60,17);
+        const icone=this.add.graphics();
+        icone.fillStyle(0x438b6d,1).fillRoundedRect(-120,-7,8,14,2).fillTriangle(-112,-7,-101,-14,-101,14);
+        icone.lineStyle(2,0x438b6d,1).arc(-99,0,8,-.8,.8).strokePath();
+        controle.add([fundo,icone]);
+
+        const criarSlider=(y:number,rotulo:string,valorInicial:number,aoAlterar:(valor:number)=>void):void=>{
+            const xInicio=23,largura=91;
+            const texto=this.add.text(-88,y,rotulo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'9px',fontStyle:'bold',color:'#526e62'}).setOrigin(0,.5);
+            const trilho=this.add.graphics().fillStyle(0xc8dcd3,1).fillRoundedRect(xInicio,y-3,largura,6,3);
+            const preenchimento=this.add.graphics();
+            const botao=this.add.circle(xInicio+largura*valorInicial,y,8,0x438b6d).setStrokeStyle(2,0xffffff);
+            const percentual=this.add.text(129,y,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'8px',color:'#34785b'}).setOrigin(1,.5);
+            const zona=this.add.zone(xInicio+largura/2,y,largura+18,22).setInteractive({useHandCursor:true});
+            const desenhar=(valor:number)=>{const v=Math.max(0,Math.min(1,valor));preenchimento.clear().fillStyle(0x62b68d,1).fillRoundedRect(xInicio,y-3,Math.max(1,largura*v),6,3);botao.x=xInicio+largura*v;percentual.setText(`${Math.round(v*100)}%`);aoAlterar(v);};
+            const peloPonteiro=(pointer:Phaser.Input.Pointer)=>desenhar((pointer.worldX-controle.x-xInicio)/largura);
+            zona.on('pointerdown',peloPonteiro).on('pointermove',(pointer:Phaser.Input.Pointer)=>{if(pointer.isDown)peloPonteiro(pointer);});
+            controle.add([texto,trilho,preenchimento,botao,percentual,zona]);desenhar(valorInicial);
+        };
+        criarSlider(-13,'MÚSICA',PreferenciaAudio.obterVolumeMusica(),v=>audioJogo.definirVolumeMusica(v));
+        criarSlider(13,'EFEITOS',PreferenciaAudio.obterVolumeEfeitos(),v=>audioJogo.definirVolumeEfeitos(v));
     }
 
     private criarControleVoz():void {
