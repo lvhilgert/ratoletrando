@@ -9,9 +9,11 @@ import { ArqueiroReino } from '../entidades/ArqueiroReino';
 import { CogumeloSaltadorReino } from '../entidades/CogumeloSaltadorReino';
 import { FuracaoFolhasReino } from '../entidades/FuracaoFolhasReino';
 import { CavaleiroEspantalhoReino } from '../entidades/CavaleiroEspantalhoReino';
+import { GoblinReino } from '../entidades/GoblinReino';
+import { PlantaReino } from '../entidades/PlantaReino';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
-import { EQUIPAMENTOS_REINO, MISSOES_REINO, REGIOES_REINO } from '../dados/mundoReinoPortas';
+import { EQUIPAMENTOS_REINO, INIMIGOS_POR_REGIAO, MISSOES_REINO, REGIOES_REINO } from '../dados/mundoReinoPortas';
 import { progressoReino } from '../sistemas/ProgressoReino';
 
 interface PortaReino {x:number;categoria:CategoriaDesafio;sprite:Phaser.Physics.Arcade.Sprite;aberta:boolean}
@@ -122,13 +124,14 @@ export class ReinoDasPortas extends Phaser.Scene {
         pontos.forEach(([x,y])=>{const moeda=this.physics.add.sprite(x,y,'reino-objetos',2).setDisplaySize(46,46).setDepth(6);const body=moeda.body as Phaser.Physics.Arcade.Body;body.setAllowGravity(false).setCircle(120,55,100);this.tweens.add({targets:moeda,y:y-10,angle:360,yoyo:true,repeat:-1,duration:650+Phaser.Math.Between(0,250)});const brilho=this.add.circle(x,y,28,0xffed91,.12).setDepth(5);this.tweens.add({targets:brilho,scale:1.45,alpha:0,yoyo:true,repeat:-1,duration:700});this.physics.add.overlap(this.cavaleiro,moeda,()=>{if(!moeda.active)return;brilho.destroy();moeda.disableBody(true,true);this.moedas++;this.textoMoedas?.setText(`${this.moedas}`);audioJogo.efeito('moeda');this.criarParticulas(moeda.x,moeda.y,0xffd85a,12);});});
     }
     private criarInimigos():void {
-        const tipos=Phaser.Utils.Array.Shuffle(['slime','morcego','cogumelo','furacao','arqueiro','espantalho']);
-        [900,1800,2700,3800,4700,5500].forEach((x,i)=>{const tipo=tipos[i],y=tipo==='morcego'?350:tipo==='furacao'?430:i===2?390:500;let inimigo:InimigoReino;
+        INIMIGOS_POR_REGIAO[REGIOES_REINO[this.faseAtual].id].forEach(({x,y,tipo})=>{let inimigo:InimigoReino;
             if(tipo==='morcego')inimigo=new MorcegoReino(this,x,y,this.cavaleiro);
             else if(tipo==='cogumelo')inimigo=new CogumeloSaltadorReino(this,x,y,this.cavaleiro);
             else if(tipo==='furacao')inimigo=new FuracaoFolhasReino(this,x,y);
             else if(tipo==='arqueiro')inimigo=new ArqueiroReino(this,x,y,this.cavaleiro,()=>this.dano(inimigo));
             else if(tipo==='espantalho')inimigo=new CavaleiroEspantalhoReino(this,x,y,this.cavaleiro);
+            else if(tipo==='goblin')inimigo=new GoblinReino(this,x,y,this.cavaleiro);
+            else if(tipo==='planta')inimigo=new PlantaReino(this,x,y);
             else inimigo=new SlimeReino(this,x,y);
             this.inimigos.push(inimigo);if(inimigo.colideComPlataformas)this.physics.add.collider(inimigo.corpoColisao,this.plataformas);this.physics.add.overlap(this.cavaleiro,inimigo.corpoColisao,()=>this.dano(inimigo));
         });
@@ -146,12 +149,32 @@ export class ReinoDasPortas extends Phaser.Scene {
         const colmeia=this.add.container(1180,330).setDepth(4),g=this.add.graphics().fillStyle(0xd9a532).fillEllipse(0,0,48,58).lineStyle(4,0x9c6a20).strokeEllipse(0,0,48,58).fillStyle(0x5c3b1d).fillCircle(0,12,7);colmeia.add(g);for(let i=0;i<4;i++){const abelha=this.add.container(1180+i*11,330+i*5).setDepth(5),corpo=this.add.ellipse(0,0,13,8,0xf4c542).setStrokeStyle(2,0x49351c),asa1=this.add.ellipse(-3,-6,7,6,0xffffff,.7),asa2=this.add.ellipse(4,-6,7,6,0xffffff,.7);abelha.add([asa1,asa2,corpo]);this.tweens.add({targets:abelha,x:abelha.x+Phaser.Math.Between(25,65),y:abelha.y+Phaser.Math.Between(-25,25),duration:750+i*170,yoyo:true,repeat:-1,ease:'Sine.InOut'});}
     }
     private criarAmbiente():void {
-        for(let i=0;i<112;i++){const x=Phaser.Math.Between(0,this.larguraMundo),y=Phaser.Math.Between(80,500),r=this.regiaoEm(x),p=this.add.circle(x,y,Phaser.Math.Between(2,4),i%3?r.corDestaque:0xffffff,Phaser.Math.FloatBetween(.18,.45)).setDepth(1);this.tweens.add({targets:p,y:y-Phaser.Math.Between(25,70),x:x+Phaser.Math.Between(-18,18),alpha:0,yoyo:true,repeat:-1,duration:Phaser.Math.Between(1800,4200)});}
         this.criarParticulasRegionais();
-        for(let i=0;i<28;i++){const x=Phaser.Math.Between(0,this.larguraMundo),folha=this.add.ellipse(x,Phaser.Math.Between(40,420),10,5,i%2?0x8fbd45:0xd7a642,.55).setDepth(2).setAngle(Phaser.Math.Between(0,180));this.tweens.add({targets:folha,y:570,x:x+Phaser.Math.Between(-80,80),angle:folha.angle+360,alpha:.1,duration:3500+i*130,repeat:-1,onRepeat:()=>{folha.y=Phaser.Math.Between(20,120);folha.x=Phaser.Math.Between(0,this.larguraMundo);}});}
     }
     private criarParticulasRegionais():void {
-        const tema=REGIOES_REINO[this.faseAtual];for(let i=0;i<22;i++){const x=Phaser.Math.Between(40,this.larguraMundo-40),y=Phaser.Math.Between(90,530),neve=tema.id==='montanha',pantano=tema.id==='pantano',p=this.add.circle(x,pantano?Phaser.Math.Between(500,545):y,Phaser.Math.Between(2,5),neve?0xffffff:tema.corDestaque,neve?.72:.32).setDepth(2);this.tweens.add({targets:p,y:pantano?p.y-80:neve?555:y-55,x:x+Phaser.Math.Between(-25,25),alpha:0,yoyo:!neve,repeat:-1,duration:1500+i*95,onRepeat:()=>{if(neve)p.y=Phaser.Math.Between(70,150);}});}
+        const tema=REGIOES_REINO[this.faseAtual],xs=(n:number)=>Array.from({length:n},(_,i)=>220+i*(this.larguraMundo-440)/Math.max(1,n-1));
+        if(tema.id==='bosque'){
+            xs(14).forEach((x,i)=>{const g=this.add.graphics().setPosition(x,542).setDepth(3);g.fillStyle(i%2?0xf6d86b:0xee8fb1).fillCircle(0,-10,5).fillCircle(8,-6,5).fillCircle(-8,-6,5).lineStyle(3,0x4f873f).lineBetween(0,-3,0,14);});
+            xs(7).forEach((x,i)=>{const b=this.add.container(x,250+i%3*55).setDepth(4),corpo=this.add.ellipse(0,0,5,14,0x49352c),asas=[this.add.ellipse(-7,0,11,16,0xf4a6c2,.85),this.add.ellipse(7,0,11,16,0x8edbf0,.85)];b.add([...asas,corpo]);this.tweens.add({targets:b,x:x+90,y:b.y-35,duration:1800+i*170,yoyo:true,repeat:-1,ease:'Sine.InOut'});this.tweens.add({targets:asas,scaleX:.25,duration:180,yoyo:true,repeat:-1});});
+        }else if(tema.id==='vila'){
+            xs(8).forEach(x=>{this.add.graphics().setDepth(3).lineStyle(7,0x8b5a32).lineBetween(x,515,x,558).lineBetween(x+48,515,x+48,558).lineStyle(5,0xc28a50).lineBetween(x-5,527,x+53,527).lineBetween(x-5,545,x+53,545);});
+            xs(5).forEach((x,i)=>{const galinha=this.add.container(x,515).setDepth(5),corpo=this.add.ellipse(0,0,29,22,0xf7eee0).setStrokeStyle(2,0x865d42),cabeca=this.add.circle(13,-12,9,0xf7eee0).setStrokeStyle(2,0x865d42),bico=this.add.triangle(23,-12,0,0,10,4,0,8,0xe7a83d);galinha.add([corpo,cabeca,bico]);this.tweens.add({targets:galinha,x:x+35,duration:900+i*110,yoyo:true,repeat:-1});this.tweens.add({targets:galinha,angle:8,duration:260,yoyo:true,repeat:-1});});
+        }else if(tema.id==='caverna'){
+            xs(10).forEach((x,i)=>{this.add.graphics().setDepth(3).fillStyle(i%2?0x6de7ed:0x9a86ef,.8).fillTriangle(x,550,x+12,510-i%3*8,x+24,550).fillStyle(0xffffff,.35).fillTriangle(x+8,542,x+12,518,x+15,542);});
+            xs(12).forEach((x,i)=>{const p=this.add.circle(x,Phaser.Math.Between(180,500),3,i%2?0x9df5df:0xffeb8a,.8).setDepth(4);this.tweens.add({targets:p,alpha:.15,scale:2,x:x+25,y:p.y-35,duration:800+i*90,yoyo:true,repeat:-1,ease:'Sine.InOut'});});
+        }else if(tema.id==='montanha'){
+            xs(12).forEach((x,i)=>this.add.ellipse(x,545-(i%2)*12,18,8,0x6e8297,.32).setAngle(i%2?22:-22).setDepth(3));
+            xs(8).forEach((x,i)=>{const y=180+i%3*90,rajada=this.add.graphics().setDepth(4).lineStyle(3,0xffffff,.45).lineBetween(x,y,x+38,y-14).lineBetween(x+38,y-14,x+82,y+8).lineBetween(x+82,y+8,x+120,y);this.tweens.add({targets:rajada,x:120,alpha:0,duration:1300+i*120,yoyo:true,repeat:-1});});
+        }else if(tema.id==='pantano'){
+            xs(10).forEach((x,i)=>this.add.ellipse(x,548,34+i%3*8,13,0x91b85c,.6).setAngle(i%2?12:-12).setDepth(3));
+            xs(14).forEach((x,i)=>{const bolha=this.add.circle(x,545,3+i%3,0xb9e6a2,.18).setStrokeStyle(1,0xdaf5bd,.6).setDepth(4);this.tweens.add({targets:bolha,y:490-i%4*8,alpha:0,scale:1.8,duration:900+i*85,repeat:-1,delay:i*120});});
+        }else if(tema.id==='biblioteca'){
+            xs(10).forEach((x,i)=>{const livro=this.add.container(x,180+i%4*70).setDepth(4),g=this.add.graphics().fillStyle(i%2?0xb46f78:0x6d8fbd).fillRoundedRect(-20,-12,40,24,3).lineStyle(2,0xffe7a8,.7).lineBetween(0,-10,0,10);livro.add(g);this.tweens.add({targets:livro,y:livro.y-18,angle:i%2?6:-6,duration:1200+i*100,yoyo:true,repeat:-1,ease:'Sine.InOut'});});
+            xs(14).forEach((x,i)=>{const poeira=this.add.circle(x,Phaser.Math.Between(120,520),2,0xffefd1,.5).setDepth(3);this.tweens.add({targets:poeira,y:poeira.y-45,x:x+18,alpha:0,duration:1400+i*80,yoyo:true,repeat:-1});});
+        }else{
+            xs(10).forEach((x,i)=>{const tocha=this.add.container(x,390+i%2*55).setDepth(4),suporte=this.add.rectangle(0,25,7,44,0x50382b),chama=this.add.ellipse(0,0,15,27,0xffa339).setStrokeStyle(3,0xffdf69);tocha.add([suporte,chama]);this.tweens.add({targets:chama,scaleX:.72,scaleY:1.18,alpha:.72,duration:180+i%3*45,yoyo:true,repeat:-1});});
+            xs(9).forEach((x,i)=>{const bandeira=this.add.triangle(x,175+i%2*35,0,0,55,12,0,30,i%2?0xb34f5e:0x6d68a8,.9).setOrigin(0,.5).setDepth(3);this.tweens.add({targets:bandeira,scaleX:.82,skewY:.12,duration:600+i*45,yoyo:true,repeat:-1,ease:'Sine.InOut'});});
+        }
     }
     private regiaoEm(_x:number){return REGIOES_REINO[this.faseAtual];}
     private misturarCor(a:number,b:number,proporcao:number):number {const t=Phaser.Math.Clamp(proporcao,0,1),ar=(a>>16)&255,ag=(a>>8)&255,ab=a&255,br=(b>>16)&255,bg=(b>>8)&255,bb=b&255;return (Math.round(ar+(br-ar)*t)<<16)|(Math.round(ag+(bg-ag)*t)<<8)|Math.round(ab+(bb-ab)*t);}

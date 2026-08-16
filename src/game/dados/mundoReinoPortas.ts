@@ -1,18 +1,30 @@
 export type TemaReino='bosque'|'vila'|'caverna'|'montanha'|'pantano'|'biblioteca'|'castelo';
-export type TipoInimigo='slime'|'saltador'|'guardiao'|'veloz'|'gelo'|'morcego'|'goblin'|'arqueiro'|'planta';
+export type TipoInimigo='slime'|'morcego'|'cogumelo'|'furacao'|'arqueiro'|'espantalho'|'goblin'|'planta';
 
-export interface RegiaoReino {id:TemaReino;nome:string;inicio:number;fim:number;cor:number;corDestaque:number}
+export interface RegiaoReino {id:TemaReino;nome:string;cor:number;corDestaque:number}
 export interface EquipamentoReino {id:string;nome:string;tipo:'arma'|'roupa'|'companheiro';descricao:string;preco:number}
+export interface PosicaoInimigoReino {x:number;y:number;tipo:TipoInimigo}
 
 export const REGIOES_REINO:RegiaoReino[]=[
-    {id:'bosque',nome:'Bosque dos Números',inicio:0,fim:3200,cor:0x6e9b52,corDestaque:0xb6df72},
-    {id:'vila',nome:'Vila das Palavras',inicio:3200,fim:7000,cor:0xb88758,corDestaque:0xf0c477},
-    {id:'caverna',nome:'Caverna dos Ecos',inicio:7000,fim:11000,cor:0x447f91,corDestaque:0x65d9df},
-    {id:'montanha',nome:'Montanha das Formas',inicio:11000,fim:15200,cor:0x7189a8,corDestaque:0xc8e4f4},
-    {id:'pantano',nome:'Pântano das Poções',inicio:15200,fim:19400,cor:0x658752,corDestaque:0xb4cf6c},
-    {id:'biblioteca',nome:'Biblioteca Encantada',inicio:19400,fim:23800,cor:0x765b96,corDestaque:0xd2adf0},
-    {id:'castelo',nome:'Castelo do Rei Confuso',inicio:23800,fim:28000,cor:0xb98a45,corDestaque:0xffdc75}
+    {id:'bosque',nome:'Bosque dos Números',cor:0x6e9b52,corDestaque:0xb6df72},
+    {id:'vila',nome:'Vila das Palavras',cor:0xb88758,corDestaque:0xf0c477},
+    {id:'caverna',nome:'Caverna dos Ecos',cor:0x447f91,corDestaque:0x65d9df},
+    {id:'montanha',nome:'Montanha das Formas',cor:0x7189a8,corDestaque:0xc8e4f4},
+    {id:'pantano',nome:'Pântano das Poções',cor:0x658752,corDestaque:0xb4cf6c},
+    {id:'biblioteca',nome:'Biblioteca Encantada',cor:0x765b96,corDestaque:0xd2adf0},
+    {id:'castelo',nome:'Castelo do Rei Confuso',cor:0xb98a45,corDestaque:0xffdc75}
 ];
+
+const pontos=(tipos:TipoInimigo[],xs:number[]):PosicaoInimigoReino[]=>xs.map((x,i)=>({x,y:tipos[i]==='morcego'?330:tipos[i]==='furacao'?420:500,tipo:tipos[i]}));
+export const INIMIGOS_POR_REGIAO:Record<TemaReino,PosicaoInimigoReino[]>={
+    bosque:pontos(['slime','cogumelo','goblin','slime','cogumelo','morcego','goblin','furacao','slime','cogumelo'],[520,980,1340,1940,2380,2860,3540,3980,4620,5480]),
+    vila:pontos(['goblin','slime','espantalho','cogumelo','goblin','arqueiro','slime','espantalho','goblin','cogumelo'],[500,920,1300,2080,2480,2920,3700,4100,4500,5480]),
+    caverna:pontos(['morcego','planta','slime','morcego','planta','cogumelo','morcego','furacao','planta','morcego','goblin'],[500,920,1320,2040,2440,2860,3700,4140,4540,5380,5660]),
+    montanha:pontos(['furacao','goblin','morcego','espantalho','furacao','arqueiro','slime','morcego','goblin','furacao','espantalho','arqueiro'],[500,900,1300,2020,2420,2860,3700,4060,4420,4700,5380,5660]),
+    pantano:pontos(['planta','slime','morcego','planta','cogumelo','furacao','planta','morcego','goblin','slime','planta','morcego','cogumelo'],[500,880,1260,1980,2340,2700,2980,3700,4020,4340,4620,5380,5660]),
+    biblioteca:pontos(['goblin','morcego','arqueiro','planta','espantalho','furacao','morcego','goblin','arqueiro','planta','espantalho','cogumelo','morcego','goblin'],[500,820,1260,1980,2260,2540,2860,3700,3980,4260,4540,4740,5380,5660]),
+    castelo:pontos(['goblin','arqueiro','espantalho','morcego','planta','furacao','goblin','arqueiro','cogumelo','espantalho','morcego','planta','furacao','goblin','arqueiro','espantalho'],[480,780,1080,1360,1940,2220,2500,2780,3020,3660,3940,4220,4500,4740,5380,5660])
+};
 
 export const EQUIPAMENTOS_REINO:EquipamentoReino[]=[
     {id:'espada',nome:'Espada do Aprendiz',tipo:'arma',descricao:'Golpe equilibrado',preco:0},
@@ -27,16 +39,6 @@ export const EQUIPAMENTOS_REINO:EquipamentoReino[]=[
     {id:'raposa',nome:'Raposa Curiosa',tipo:'companheiro',descricao:'Indica segredos',preco:60},
     {id:'tartaruga',nome:'Tartaruga Guardiã',tipo:'companheiro',descricao:'Escudo adicional',preco:75},
     {id:'dragao',nome:'Dragão de Luz',tipo:'companheiro',descricao:'Ilumina caminhos',preco:100}
-];
-
-export const POSICOES_INIMIGOS:Array<{x:number;tipo:TipoInimigo}>=[
-    {x:900,tipo:'goblin'},{x:1800,tipo:'morcego'},{x:2700,tipo:'goblin'},{x:3100,tipo:'morcego'},
-    {x:3650,tipo:'goblin'},{x:4550,tipo:'morcego'},{x:5550,tipo:'goblin'},{x:6200,tipo:'morcego'},
-    {x:7450,tipo:'arqueiro'},{x:8400,tipo:'planta'},{x:9400,tipo:'veloz'},{x:10400,tipo:'gelo'},
-    {x:11400,tipo:'planta'},{x:12450,tipo:'arqueiro'},{x:13500,tipo:'veloz'},{x:14600,tipo:'gelo'},
-    {x:15600,tipo:'veloz'},{x:16650,tipo:'gelo'},{x:17700,tipo:'guardiao'},{x:18800,tipo:'veloz'},
-    {x:19800,tipo:'guardiao'},{x:20900,tipo:'veloz'},{x:22000,tipo:'gelo'},{x:23200,tipo:'guardiao'},
-    {x:24300,tipo:'veloz'},{x:25350,tipo:'gelo'},{x:26400,tipo:'guardiao'},{x:27400,tipo:'gelo'}
 ];
 
 export const MISSOES_REINO=[
