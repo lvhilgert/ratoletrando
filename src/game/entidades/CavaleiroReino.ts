@@ -21,6 +21,8 @@ export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
     private proximoDash=0;
     private corRoupa=0xffffff;
     private corPoeira=0xc9b58b;
+    private multiplicadorVelocidade=1;
+    private multiplicadorPulo=1;
     private sombra:Phaser.GameObjects.Ellipse;
     private arma?:Phaser.GameObjects.Container;private companheiro?:Phaser.GameObjects.Container;
     private tipoArma='espada';private movimentoArma?:Phaser.Tweens.Tween;private movimentoCompanheiro?:Phaser.Tweens.Tween;private proximaPoeira=0;
@@ -35,7 +37,7 @@ export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
         if(noChao){this.ultimoContatoChao=this.scene.time.now;this.coyoteDisponivel=true;this.puloAereoUsado=false;if(!this.estavaNoChao&&this.velocidadeQuedaAnterior>430)this.impactarPouso();if(this.saltoGuardadoAte>=this.scene.time.now)this.executarPulo();}
         this.estavaNoChao=noChao;this.velocidadeQuedaAnterior=corpo.velocity.y;
         if(bloqueado){this.setVelocityX(0);this.pararRespiracao();return;}
-        const velocidade=this.agachado?95:230;
+        const velocidade=(this.agachado?95:230)*this.multiplicadorVelocidade;
         if(direcao){this.pararRespiracao();this.olhando=direcao;this.setFlipX(direcao<0);this.setVelocityX(direcao*velocidade);if(!this.atacando&&noChao){this.anims.play('reino-correr',true);this.criarPoeira(false);}}
         else {this.setVelocityX(0);if(!this.atacando&&noChao){this.anims.play('reino-idle',true);if(!this.agachado)this.iniciarRespiracao();}}
         if(!noChao&&!this.atacando){this.pararRespiracao();this.setFrame(corpo.velocity.y<0?5:6);}this.atualizarEquipamentos();
@@ -47,7 +49,7 @@ export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
     }
     sustentarPulo(pressionado:boolean):void {
         const corpo=this.body as Phaser.Physics.Arcade.Body;
-        if(pressionado&&corpo.velocity.y<0&&this.scene.time.now-this.inicioPulo<105)corpo.setVelocityY(Math.max(-620,corpo.velocity.y-15));
+        if(pressionado&&corpo.velocity.y<0&&this.scene.time.now-this.inicioPulo<105)corpo.setVelocityY(Math.max(-620*this.multiplicadorPulo,corpo.velocity.y-15*this.multiplicadorPulo));
     }
     encerrarPulo():void {const corpo=this.body as Phaser.Physics.Arcade.Body;if(corpo.velocity.y<-235)corpo.setVelocityY(-235);this.inicioPulo=0;}
     agachar(ativo:boolean,bloqueado:boolean):void {
@@ -59,13 +61,14 @@ export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
     }
     resetarEstado():void {this.scene.tweens.killTweensOf(this);this.agachado=false;this.atacando=false;this.defendendo=false;this.coyoteDisponivel=false;this.puloAereoUsado=false;this.inicioPulo=0;this.saltoGuardadoAte=0;this.estavaNoChao=false;this.pararRespiracao();const corpo=this.body as Phaser.Physics.Arcade.Body;corpo.setGravityY(0);this.setScale(CavaleiroReino.ESCALA_NORMAL).setTint(this.corRoupa);corpo.setSize(120,230).setOffset(68,252);}
     aplicarRoupa(cor:number):void {this.corRoupa=cor;this.setTint(cor);}
+    definirEfeitoPocao(multiplicadorVelocidade=1,multiplicadorPulo=1):void {this.multiplicadorVelocidade=multiplicadorVelocidade;this.multiplicadorPulo=multiplicadorPulo;(this.body as Phaser.Physics.Arcade.Body).setMaxVelocity(multiplicadorVelocidade>1?380:250,760);}
     definirCorPoeira(cor:number):void {this.corPoeira=cor;}
     aplicarEquipamento(equipado:EquipadoReino):void {this.tipoArma=equipado.arma;this.movimentoCompanheiro?.stop();this.arma?.destroy(true);this.companheiro?.destroy(true);this.arma=this.criarArma(equipado.arma).setDepth(9);if(equipado.companheiro){this.companheiro=this.criarCompanheiro(equipado.companheiro).setPosition(this.x-this.olhando*48,this.y-55).setDepth(9);this.movimentoCompanheiro=this.scene.tweens.add({targets:this.companheiro.first,y:-7,duration:700,yoyo:true,repeat:-1,ease:'Sine.InOut'});}this.atualizarEquipamentos();}
     defender(ativo:boolean):void {this.defendendo=ativo;if(ativo&&!this.atacando){this.setVelocityX(0);this.setTint(0xbfe9ff);}else this.setTint(this.corRoupa);}
     dash():boolean {if(this.scene.time.now<this.proximoDash||this.defendendo)return false;this.proximoDash=this.scene.time.now+850;this.invulneravel=true;this.setVelocity(this.olhando*520,0);this.setAlpha(.72);this.scene.time.delayedCall(170,()=>{this.setVelocityX(this.olhando*190);this.setAlpha(1);this.invulneravel=false;});return true;}
     atacar(duracao=220):void {if(this.atacando)return;this.pararRespiracao();if(this.agachado)this.restaurarForma();this.atacando=true;this.setVelocityX(0);this.setScale(CavaleiroReino.ESCALA_NORMAL);this.anims.play('reino-atacar',true);this.animarArma(duracao);this.scene.time.delayedCall(duracao,()=>{if(!this.atacando)return;this.setScale(CavaleiroReino.ESCALA_NORMAL);this.atacando=false;if(this.body?.blocked.down)this.anims.play('reino-idle',true);});}
     levarDano(origemX:number):void {this.pararRespiracao();if(this.agachado)this.restaurarForma();this.invulneravel=true;this.setFrame(9).setVelocity((this.x<origemX?-1:1)*260,-260);this.scene.tweens.add({targets:this,alpha:.28,yoyo:true,repeat:5,duration:85,onComplete:()=>{this.alpha=1;this.invulneravel=false;}});}
-    private executarPulo(velocidadeY=-570):void {if(this.agachado)this.restaurarForma();this.coyoteDisponivel=false;this.saltoGuardadoAte=0;this.inicioPulo=this.scene.time.now;this.setVelocityY(velocidadeY);this.setFrame(5);}
+    private executarPulo(velocidadeY=-570):void {if(this.agachado)this.restaurarForma();this.coyoteDisponivel=false;this.saltoGuardadoAte=0;this.inicioPulo=this.scene.time.now;this.setVelocityY(velocidadeY*this.multiplicadorPulo);this.setFrame(5);}
     private restaurarForma():void {this.agachado=false;this.ajustarForma(CavaleiroReino.ESCALA_NORMAL,CavaleiroReino.ESCALA_NORMAL,120,230,68,252);}
     private ajustarForma(escalaX:number,escalaY:number,largura:number,altura:number,offsetX:number,offsetY:number):void {const corpo=this.body as Phaser.Physics.Arcade.Body,base=corpo.bottom;this.setScale(escalaX,escalaY);corpo.setSize(largura,altura).setOffset(offsetX,offsetY);corpo.updateFromGameObject();this.y+=base-corpo.bottom;}
     private impactarPouso():void {if(this.agachado||this.atacando)return;this.pararRespiracao();this.criarPoeira(true);this.setScale(.37,.27);this.scene.tweens.add({targets:this,scaleX:CavaleiroReino.ESCALA_NORMAL,scaleY:CavaleiroReino.ESCALA_NORMAL,duration:100,ease:'Sine.Out'});}
