@@ -33,6 +33,7 @@ export class Carregamento extends Phaser.Scene {
         this.load.spritesheet('reino-furacao','assets/reino-portas/furacao-folhas-sprites.png',{frameWidth:682,frameHeight:768,endFrame:2});
         this.load.spritesheet('reino-gnomo-noz','assets/reino-portas/gnomo-noz-sprites.png',{frameWidth:498,frameHeight:788,endFrame:3});
         this.load.spritesheet('reino-espantalho','assets/reino-portas/cavaleiro-espantalho-sprites.png',{frameWidth:543,frameHeight:724,endFrame:3});
+        this.load.spritesheet('reino-mimico-porta','assets/reino-portas/mimico-porta-sprites.png',{frameWidth:415,frameHeight:756,endFrame:4});
         this.load.spritesheet('reino-objetos','assets/reino-portas/objetos.png',{frameWidth:354,frameHeight:443,endFrame:9});
         this.load.image('reino-bosque','assets/reino-portas/bosque-castelo.png');
         this.load.image('reino-panorama','assets/reino-portas/panorama-reinos.png');
