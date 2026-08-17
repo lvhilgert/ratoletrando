@@ -2,7 +2,7 @@ export type TemaReino='bosque'|'vila'|'caverna'|'montanha'|'pantano'|'biblioteca
 export type TipoInimigo='slime'|'morcego'|'cogumelo'|'furacao'|'arqueiro'|'espantalho'|'goblin'|'planta';
 
 export interface RegiaoReino {id:TemaReino;nome:string;cor:number;corDestaque:number}
-export interface EquipamentoReino {id:string;nome:string;tipo:'arma'|'roupa'|'companheiro';descricao:string;preco:number}
+export interface EquipamentoReino {id:string;nome:string;tipo:'arma'|'roupa'|'companheiro';descricao:string;preco:number;precoGemas?:number}
 export interface PosicaoInimigoReino {x:number;y:number;tipo:TipoInimigo}
 
 export const REGIOES_REINO:RegiaoReino[]=[
@@ -40,7 +40,8 @@ export const EQUIPAMENTOS_REINO:EquipamentoReino[]=[
     {id:'coruja',nome:'Coruja Sábia',tipo:'companheiro',descricao:'Oferece dicas',preco:40},
     {id:'raposa',nome:'Raposa Curiosa',tipo:'companheiro',descricao:'Indica segredos',preco:60},
     {id:'tartaruga',nome:'Tartaruga Guardiã',tipo:'companheiro',descricao:'Escudo adicional',preco:75},
-    {id:'dragao',nome:'Dragão de Luz',tipo:'companheiro',descricao:'Ilumina caminhos',preco:100}
+    {id:'dragao',nome:'Dragão de Luz',tipo:'companheiro',descricao:'Ilumina caminhos',preco:100},
+    {id:'espada-cristal',nome:'Espada de Cristal',tipo:'arma',descricao:'Lâmina lendária',preco:0,precoGemas:1}
 ];
 
 export const MISSOES_REINO=[
