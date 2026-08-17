@@ -173,7 +173,8 @@ export class ReinoDasPortas extends Phaser.Scene {
         const mimico=new MimicoPortaReino(this,5520,480,this.cavaleiro,Math.floor(this.faseAtual/2),REGIOES_REINO[this.faseAtual].id);this.inimigos.push(mimico);this.physics.add.collider(mimico,this.plataformas);this.physics.add.overlap(this.cavaleiro,mimico,()=>this.dano(mimico));
     }
     private criarPortas():void {
-        const categorias:CategoriaDesafio[]=['matematica','letras','silabas'];
+        const todasCategorias:CategoriaDesafio[]=['matematica','letras','silabas','quantidade'];
+        const categorias=Array.from({length:3},(_,i)=>todasCategorias[(this.faseAtual+i)%todasCategorias.length]);
         [1600,3300,5000].forEach((x,i)=>{const d={x,categoria:categorias[i]};
             const sprite=this.physics.add.staticSprite(d.x,469,'reino-objetos',0).setDisplaySize(132,190).setDepth(6),emblema=this.criarEmblemaCategoria(d.categoria,d.x,337,1).setDepth(8);const body=sprite.body as Phaser.Physics.Arcade.StaticBody;body.setSize(100,180).setOffset(130,230);this.physics.add.collider(this.cavaleiro,sprite);this.tweens.add({targets:emblema,y:emblema.y-9,scale:1.06,duration:900+i*130,yoyo:true,repeat:-1,ease:'Sine.InOut'});this.portas.push({...d,sprite,emblema,aberta:false});
         });
