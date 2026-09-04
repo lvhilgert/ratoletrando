@@ -1,8 +1,9 @@
 import * as Phaser from 'phaser';
 import { InimigoReino } from './InimigoReino';
+import { configurarAtorTerrestre } from '../sistemas/TerrestreReino';
 export class CavaleiroEspantalhoReino extends Phaser.Physics.Arcade.Sprite implements InimigoReino {
     readonly colideComPlataformas=true;get corpoColisao():Phaser.Physics.Arcade.Sprite{return this;}derrotado=false;private vida=3;private direcao=-1;private readonly origemX:number;private atacandoAte=0;
-    constructor(cena:Phaser.Scene,x:number,y:number,private readonly alvo:Phaser.Physics.Arcade.Sprite){super(cena,x,y,'reino-espantalho',0);cena.add.existing(this);cena.physics.add.existing(this);this.origemX=x;this.setScale(.18).setDepth(8);(this.body as Phaser.Physics.Arcade.Body).setSize(270,360).setOffset(135,310).setMaxVelocity(190,650);}
+    constructor(cena:Phaser.Scene,x:number,y:number,private readonly alvo:Phaser.Physics.Arcade.Sprite){super(cena,x,y,'reino-espantalho',0);cena.add.existing(this);cena.physics.add.existing(this);this.origemX=x;this.setScale(.18).setDepth(8);configurarAtorTerrestre(this,{largura:270,altura:360,offsetX:135,velocidadeMaxima:[190,650]});}
     atualizar():void {if(this.derrotado)return;const agora=this.scene.time.now,dx=this.alvo.x-this.x;if(agora<this.atacandoAte){this.setFrame(2).setVelocityX(this.direcao*175);}else if(Math.abs(dx)<180&&Math.abs(this.alvo.y-this.y)<90){this.direcao=Math.sign(dx)||this.direcao;this.atacandoAte=agora+420;}else{if(this.x<this.origemX-100)this.direcao=1;else if(this.x>this.origemX+100)this.direcao=-1;this.setFrame(0).setVelocityX(this.direcao*38);}this.setFlipX(this.direcao>0);}
     atingir():boolean {if(this.derrotado)return false;if(--this.vida>0){this.setFrame(1).setAlpha(.45);this.scene.time.delayedCall(130,()=>{if(this.active)this.setAlpha(1);});return false;}this.derrotar();return true;}derrotar():void {if(this.derrotado)return;this.derrotado=true;this.setVelocity(0,0).disableBody().setFrame(3);this.scene.tweens.add({targets:this,alpha:0,y:this.y+25,duration:700,onComplete:()=>this.destroy()});}
 }

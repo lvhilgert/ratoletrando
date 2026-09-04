@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { InimigoReino } from './InimigoReino';
 import type { TemaReino } from '../dados/mundoReinoPortas';
+import { configurarAtorTerrestre } from '../sistemas/TerrestreReino';
 
 interface PadraoAtaqueMimico {
     velocidade:number;
@@ -14,7 +15,7 @@ export class MimicoPortaReino extends Phaser.Physics.Arcade.Sprite implements In
     readonly colideComPlataformas=true;get corpoColisao():Phaser.Physics.Arcade.Sprite{return this;}derrotado=false;
     private vida:number;private estado:'dormindo'|'andando'|'ataque'='dormindo';private estadoAte=0;private direcao=-1;
     private readonly padrao:PadraoAtaqueMimico;private golpesRestantes=0;private preparandoCombo=false;
-    constructor(cena:Phaser.Scene,x:number,y:number,private readonly alvo:Phaser.Physics.Arcade.Sprite,bonusVida=0,regiao:TemaReino='bosque'){super(cena,x,y,'reino-mimico-porta',0);cena.add.existing(this);cena.physics.add.existing(this);this.vida=5+bonusVida;this.padrao=this.criarPadrao(regiao);this.setScale(.21).setDepth(9);(this.body as Phaser.Physics.Arcade.Body).setSize(245,430).setOffset(82,233).setMaxVelocity(260,650);}
+    constructor(cena:Phaser.Scene,x:number,y:number,private readonly alvo:Phaser.Physics.Arcade.Sprite,bonusVida=0,regiao:TemaReino='bosque'){super(cena,x,y,'reino-mimico-porta',0);cena.add.existing(this);cena.physics.add.existing(this);this.vida=5+bonusVida;this.padrao=this.criarPadrao(regiao);this.setScale(.21).setDepth(9);configurarAtorTerrestre(this,{largura:245,altura:430,offsetX:82,velocidadeMaxima:[260,650]});}
     atualizar():void {
         if(this.derrotado)return;const agora=this.scene.time.now,dx=this.alvo.x-this.x,perto=Math.abs(dx)<430;
         if(this.estado==='dormindo'&&perto){this.estado='andando';this.setFrame(1);this.estadoAte=agora+500;}

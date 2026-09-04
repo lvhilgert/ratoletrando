@@ -1,5 +1,5 @@
 export type TemaReino='bosque'|'vila'|'caverna'|'montanha'|'pantano'|'biblioteca'|'castelo'|'fogo';
-export type TipoInimigo='slime'|'morcego'|'cogumelo'|'furacao'|'arqueiro'|'espantalho'|'goblin'|'planta';
+export type TipoInimigo='slime'|'morcego'|'cogumelo'|'furacao'|'arqueiro'|'espantalho'|'goblin'|'planta'|'golem-lava'|'diabrete-fogo';
 
 export interface RegiaoReino {id:TemaReino;nome:string;cor:number;corDestaque:number}
 export interface EquipamentoReino {id:string;nome:string;tipo:'arma'|'roupa'|'companheiro';descricao:string;preco:number;precoGemas?:number}
@@ -25,23 +25,23 @@ export const INIMIGOS_POR_REGIAO:Record<TemaReino,PosicaoInimigoReino[]>={
     pantano:pontos(['planta','slime','morcego','planta','cogumelo','furacao','planta','morcego','goblin','slime','planta','morcego','cogumelo'],[500,880,1260,1980,2340,2700,2980,3700,4020,4340,4620,5380,5660]),
     biblioteca:pontos(['goblin','morcego','arqueiro','planta','espantalho','furacao','morcego','goblin','arqueiro','planta','espantalho','cogumelo','morcego','goblin'],[500,820,1260,1980,2260,2540,2860,3700,3980,4260,4540,4740,5380,5660]),
     castelo:pontos(['goblin','arqueiro','espantalho','morcego','planta','furacao','goblin','arqueiro','cogumelo','espantalho','morcego','planta','furacao','goblin','arqueiro','espantalho'],[480,780,1080,1360,1940,2220,2500,2780,3020,3660,3940,4220,4500,4740,5380,5660]),
-    fogo:pontos(['furacao','goblin','morcego','arqueiro','slime','planta','espantalho','cogumelo','furacao','goblin','morcego','arqueiro','planta','espantalho','slime','cogumelo'],[470,760,1050,1340,1920,2200,2480,2760,3040,3640,3920,4200,4480,4760,5380,5660])
+    fogo:pontos(['diabrete-fogo','golem-lava','morcego','arqueiro','diabrete-fogo','golem-lava','morcego','diabrete-fogo','golem-lava','morcego','arqueiro','diabrete-fogo','golem-lava','morcego'],[470,760,1050,1340,1920,2200,2480,2760,3040,3640,3920,4200,4480,4760])
 };
 
 export const EQUIPAMENTOS_REINO:EquipamentoReino[]=[
-    {id:'espada',nome:'Espada do Aprendiz',tipo:'arma',descricao:'Golpe equilibrado',preco:0},
-    {id:'espada-rapida',nome:'Espada Veloz',tipo:'arma',descricao:'Combo mais rápido',preco:25},
-    {id:'martelo',nome:'Martelo Real',tipo:'arma',descricao:'Quebra armaduras',preco:45},
-    {id:'lanca',nome:'Lança Longa',tipo:'arma',descricao:'Maior alcance',preco:55},
-    {id:'arco',nome:'Arco do Bosque',tipo:'arma',descricao:'Acerta alvos distantes',preco:70},
-    {id:'armadura-verde',nome:'Armadura do Bosque',tipo:'roupa',descricao:'Visual verde',preco:20},
-    {id:'armadura-azul',nome:'Armadura dos Ecos',tipo:'roupa',descricao:'Visual azul',preco:35},
-    {id:'capa-mago',nome:'Capa das Palavras',tipo:'roupa',descricao:'Visual mágico',preco:50},
-    {id:'coruja',nome:'Coruja Sábia',tipo:'companheiro',descricao:'Oferece dicas',preco:40},
-    {id:'raposa',nome:'Raposa Curiosa',tipo:'companheiro',descricao:'Indica segredos',preco:60},
-    {id:'tartaruga',nome:'Tartaruga Guardiã',tipo:'companheiro',descricao:'Escudo adicional',preco:75},
-    {id:'dragao',nome:'Dragão de Luz',tipo:'companheiro',descricao:'Ilumina caminhos',preco:100},
-    {id:'espada-cristal',nome:'Espada de Cristal',tipo:'arma',descricao:'Lâmina lendária',preco:0,precoGemas:1}
+    {id:'espada',nome:'Espada do Aprendiz',tipo:'arma',descricao:'Ataque equilibrado, de alcance curto.',preco:0},
+    {id:'espada-rapida',nome:'Espada Veloz',tipo:'arma',descricao:'Ataca mais rápido.',preco:25},
+    {id:'martelo',nome:'Martelo Real',tipo:'arma',descricao:'Alcance maior e derrota inimigos com um golpe; ataca mais devagar.',preco:45},
+    {id:'lanca',nome:'Lança Longa',tipo:'arma',descricao:'Atinge inimigos de mais longe.',preco:55},
+    {id:'arco',nome:'Arco do Bosque',tipo:'arma',descricao:'Dispara uma flecha a distância.',preco:70},
+    {id:'armadura-verde',nome:'Armadura do Bosque',tipo:'roupa',descricao:'Sem efeito visual ou de jogo por enquanto.',preco:20},
+    {id:'armadura-azul',nome:'Armadura dos Ecos',tipo:'roupa',descricao:'Sem efeito visual ou de jogo por enquanto.',preco:35},
+    {id:'capa-mago',nome:'Capa das Palavras',tipo:'roupa',descricao:'Sem efeito visual ou de jogo por enquanto.',preco:50},
+    {id:'coruja',nome:'Coruja Sábia',tipo:'companheiro',descricao:'Bloqueia uma alternativa errada em cada desafio de porta.',preco:40},
+    {id:'raposa',nome:'Raposa Curiosa',tipo:'companheiro',descricao:'Acompanha o cavaleiro; por enquanto, é apenas visual.',preco:60},
+    {id:'tartaruga',nome:'Tartaruga Guardiã',tipo:'companheiro',descricao:'Acompanha o cavaleiro; por enquanto, é apenas visual.',preco:75},
+    {id:'dragao',nome:'Dragão de Luz',tipo:'companheiro',descricao:'Acompanha o cavaleiro; por enquanto, é apenas visual.',preco:100},
+    {id:'espada-cristal',nome:'Espada de Cristal',tipo:'arma',descricao:'Aparência lendária; por enquanto, sem bônus extra.',preco:0,precoGemas:1}
 ];
 
 export const MISSOES_REINO=[

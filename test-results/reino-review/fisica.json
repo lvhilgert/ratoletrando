@@ -1,0 +1,30 @@
+{
+  "falhas": [],
+  "preparado": {
+    "topo": 495,
+    "inicio": {
+      "top": 529,
+      "bottom": 606.5633388692413,
+      "vy": -570
+    },
+    "processa": false
+  },
+  "meio": {
+    "top": 387.7418519416539,
+    "bottom": 465.9418519416539,
+    "vy": -248.0000000000002
+  },
+  "fim": {
+    "condicaoDePouso": true
+  },
+  "atravessou": true,
+  "pousou": true,
+  "bloqueio": {
+    "heroi": 0,
+    "inimigo": 270
+  },
+  "pisao": {
+    "rebote": -390,
+    "atingiu": true
+  }
+}

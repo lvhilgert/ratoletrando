@@ -1,0 +1,149 @@
+{
+  "falhas": [],
+  "fases": [
+    {
+      "fase": 0,
+      "tema": "bosque",
+      "inimigos": 10,
+      "heroi": {
+        "w": 108.80000000000001,
+        "h": 254.32000000000002
+      },
+      "totalMoedas": 0,
+      "texturas": {
+        "terreno": true,
+        "itens": true,
+        "escudo": true
+      }
+    },
+    {
+      "fase": 1,
+      "tema": "vila",
+      "inimigos": 8,
+      "heroi": {
+        "w": 108.80000000000001,
+        "h": 254.32000000000002
+      },
+      "totalMoedas": 0,
+      "texturas": {
+        "terreno": true,
+        "itens": true,
+        "escudo": true
+      }
+    },
+    {
+      "fase": 2,
+      "tema": "caverna",
+      "inimigos": 10,
+      "heroi": {
+        "w": 108.95627997383572,
+        "h": 253.8085737856226
+      },
+      "totalMoedas": 0,
+      "texturas": {
+        "terreno": true,
+        "itens": true,
+        "escudo": true
+      }
+    },
+    {
+      "fase": 3,
+      "tema": "montanha",
+      "inimigos": 10,
+      "heroi": {
+        "w": 109.81608498378964,
+        "h": 250.99486189054838
+      },
+      "totalMoedas": 0,
+      "texturas": {
+        "terreno": true,
+        "itens": true,
+        "escudo": true
+      }
+    },
+    {
+      "fase": 4,
+      "tema": "pantano",
+      "inimigos": 13,
+      "heroi": {
+        "w": 109.88347123282085,
+        "h": 250.77434039059375
+      },
+      "totalMoedas": 0,
+      "texturas": {
+        "terreno": true,
+        "itens": true,
+        "escudo": true
+      }
+    },
+    {
+      "fase": 5,
+      "tema": "biblioteca",
+      "inimigos": 11,
+      "heroi": {
+        "w": 109.8443998360603,
+        "h": 250.9022015364927
+      },
+      "totalMoedas": 0,
+      "texturas": {
+        "terreno": true,
+        "itens": true,
+        "escudo": true
+      }
+    },
+    {
+      "fase": 6,
+      "tema": "castelo",
+      "inimigos": 13,
+      "heroi": {
+        "w": 109.39532577792446,
+        "h": 252.37179639174224
+      },
+      "totalMoedas": 0,
+      "texturas": {
+        "terreno": true,
+        "itens": true,
+        "escudo": true
+      }
+    },
+    {
+      "fase": 7,
+      "tema": "fogo",
+      "inimigos": 14,
+      "heroi": {
+        "w": 109.75280844133044,
+        "h": 251.20193437574613
+      },
+      "totalMoedas": 0,
+      "texturas": {
+        "terreno": true,
+        "itens": true,
+        "escudo": true
+      }
+    }
+  ],
+  "escudo": {
+    "ativo": true,
+    "frame": 1,
+    "visivel": true
+  },
+  "teclado": true,
+  "focoAntes": [
+    -210
+  ],
+  "focoDepois": [
+    -70
+  ],
+  "voo": {
+    "jogador": {
+      "w": 54,
+      "h": 36
+    },
+    "obstaculo": {
+      "w": 70,
+      "h": 78
+    },
+    "decorrido": 3033.300000000003,
+    "encerrado": false
+  }
+}

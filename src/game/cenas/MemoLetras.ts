@@ -3,6 +3,7 @@ import { audioJogo } from '../sistemas/SistemaAudio';
 import { ASSOCIACOES_MEMO_LETRAS, DificuldadeMemoLetras, ItemAssociacao, PARES_POR_DIFICULDADE, RegraAssociacao } from '../dados/associacoesMemoLetras';
 import { servicoVoz } from '../../services/ServicoVoz';
 import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
+import { mostrarModalConclusao } from '../sistemas/ModalConclusao';
 
 interface Carta extends Phaser.GameObjects.Container {grupo:string;item:ItemAssociacao;aberta:boolean;encontrada:boolean;frente:Phaser.GameObjects.Container;verso:Phaser.GameObjects.Container}
 
@@ -78,22 +79,7 @@ export class MemoLetras extends Phaser.Scene {
         this.timerFeedback?.remove(false);
         audioJogo.efeito('vitoria');
         servicoVoz.falar(`Parabéns! Você encontrou todos os pares! ${this.paresEncontrados.join('. ')}`);
-        const fundo=this.add.rectangle(480,320,960,640,0x241c38,.5).setDepth(19).setInteractive();
-        this.feedback.setDepth(21).setPosition(480,320);
-        this.feedback.removeAll(true);
-        this.feedback.add([
-            this.add.graphics().fillStyle(0x2f4d3d,.2).fillRoundedRect(-220,-96,440,198,28),
-            this.add.graphics().fillStyle(0xffffff,1).fillRoundedRect(-220,-104,440,198,28).lineStyle(4,0x5c9b72,.75).strokeRoundedRect(-220,-104,440,198,28),
-            this.add.star(-118,-60,5,7,15,0xffd84f).setStrokeStyle(2,0xffffff),
-            this.add.star(118,-60,5,7,15,0xffd84f).setStrokeStyle(2,0xffffff),
-            this.add.text(0,-60,'PARABÉNS!',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'29px',fontStyle:'bold',color:'#3f7a58'}).setOrigin(.5),
-            this.add.text(0,-20,`Você encontrou os ${PARES_POR_DIFICULDADE[this.dificuldade]} pares!`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'16px',color:'#5c6f66'}).setOrigin(.5)
-        ]);
-        const novamente=this.botao(0,44,240,50,'▶  JOGAR DE NOVO',0x5c9270,16);
-        this.feedback.add(novamente);
-        novamente.on('pointerdown',()=>{fundo.destroy();this.scene.restart({dificuldade:this.dificuldade});});
-        this.feedback.setAlpha(0).setScale(.85);
-        this.tweens.add({targets:this.feedback,alpha:1,scale:1,duration:280,ease:'Back.Out'});
+        const dificuldades:DificuldadeMemoLetras[]=['inicial','intermediario','avancado'],proxima=dificuldades[(dificuldades.indexOf(this.dificuldade)+1)%dificuldades.length];mostrarModalConclusao(this,{titulo:'TODOS OS PARES!',mensagem:`Você encontrou os ${PARES_POR_DIFICULDADE[this.dificuldade]} pares. O que deseja fazer agora?`,cor:0x8069ad,aoJogarNovamente:()=>this.scene.restart({dificuldade:this.dificuldade}),aoOutroNivel:()=>this.scene.restart({dificuldade:proxima})});
         this.criarConfeteVitoria();
     }
     private criarConfeteVitoria():void {

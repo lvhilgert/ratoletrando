@@ -1,0 +1,17 @@
+{
+  "falhas": [],
+  "antes": {
+    "hud": "30",
+    "salvo": 30
+  },
+  "compra": {
+    "moedas": 5,
+    "possui": true,
+    "equipada": "espada-rapida",
+    "alturaSprite": 349.99999999999994,
+    "hud": "5"
+  },
+  "persistencia": "5",
+  "arqueiro": true,
+  "flechas": 1
+}

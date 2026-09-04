@@ -13,7 +13,11 @@
     "dev": "node log.js dev & vite --config vite/config.dev.mjs",
     "build": "node log.js build & vite build --config vite/config.prod.mjs",
     "dev-nolog": "vite --config vite/config.dev.mjs",
-    "build-nolog": "vite build --config vite/config.prod.mjs"
+    "build-nolog": "vite build --config vite/config.prod.mjs",
+    "test:terrestres": "node --experimental-strip-types src/game/sistemas/GeometriaTerrestre.test.mjs",
+    "test:desafios": "node --experimental-strip-types src/game/sistemas/DesafiosReino.test.mjs",
+    "test:levels": "node --experimental-strip-types src/game/sistemas/LevelReino.test.mjs",
+    "test:voo": "node --experimental-strip-types src/game/sistemas/MovimentoVooDragao.test.mjs"
   },
   "devDependencies": {
     "typescript": "~5.7.2",
