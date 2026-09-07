@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser';
 import { medirLimitesOpacos, medirTopoApoiavel, type LimitesOpacos } from './GeometriaTerrestre';
 
-type VisualTerrestre=Phaser.GameObjects.Image|Phaser.GameObjects.Sprite;
+type VisualTerrestre=Phaser.GameObjects.Image|Phaser.GameObjects.Sprite|Phaser.GameObjects.TileSprite;
 type Corpo=Phaser.Physics.Arcade.Body|Phaser.Physics.Arcade.StaticBody;
 type LimitesTerrestres=LimitesOpacos&{apoio:number};
 const limitesPorFrame=new Map<string,LimitesTerrestres>();
@@ -16,7 +16,7 @@ export interface ConfiguracaoAtorTerrestre {
 
 export interface SuperficieMovelReino {
     corpo:Phaser.GameObjects.Rectangle;
-    visual:Phaser.GameObjects.Image;
+    visual:Phaser.GameObjects.TileSprite;
 }
 
 const limitesVisiveis=(visual:VisualTerrestre):LimitesTerrestres=>{
@@ -64,12 +64,12 @@ export const configurarAtorTerrestre=<T extends Phaser.Physics.Arcade.Sprite>(sp
 
 /** Cria arte e collider na primeira faixa horizontal contínua da superfície. */
 export const criarSuperficie=(cena:Phaser.Scene,grupo:Phaser.Physics.Arcade.StaticGroup,x:number,y:number,largura:number,alturaVisual:number,alturaFisica:number,textura='reino-plataforma',frame?:string|number):Corpo=>{
-    const visual=cena.add.image(x,y,textura,frame).setDisplaySize(largura,alturaVisual).setDepth(3),topo=topoApoiavel(visual),objeto=cena.add.rectangle(x,topo+alturaFisica/2,largura,alturaFisica,0xffffff,0);
+    const visual=cena.add.tileSprite(x,y,largura,alturaVisual,textura,frame).setTileScale(alturaVisual/cena.textures.getFrame(textura,frame).height).setDepth(3),topo=topoApoiavel(visual),objeto=cena.add.rectangle(x,topo+alturaFisica/2,largura,alturaFisica,0xffffff,0);
     objeto.setData('visual',visual);grupo.add(objeto);const corpo=objeto.body as Phaser.Physics.Arcade.StaticBody;corpo.updateFromGameObject();return corpo;
 };
 
 export const criarSuperficieMovel=(cena:Phaser.Scene,grupo:Phaser.Physics.Arcade.Group,x:number,y:number,largura:number,alturaVisual=44,alturaFisica=26,textura='reino-plataforma',frame?:string|number):SuperficieMovelReino=>{
-    const visual=cena.add.image(x,y,textura,frame).setDisplaySize(largura,alturaVisual).setDepth(3),topo=topoApoiavel(visual),objeto=cena.add.rectangle(x,topo+alturaFisica/2,largura,alturaFisica,0xffffff,0);
+    const visual=cena.add.tileSprite(x,y,largura,alturaVisual,textura,frame).setTileScale(alturaVisual/cena.textures.getFrame(textura,frame).height).setDepth(3),topo=topoApoiavel(visual),objeto=cena.add.rectangle(x,topo+alturaFisica/2,largura,alturaFisica,0xffffff,0);
     grupo.add(objeto);const corpo=objeto.body as Phaser.Physics.Arcade.Body;corpo.setAllowGravity(false).setImmovable(true);corpo.pushable=false;
     const deslocamentoVisualY=y-objeto.y,sincronizar=()=>visual.setPosition(objeto.x,objeto.y+deslocamentoVisualY);cena.events.on(Phaser.Scenes.Events.POST_UPDATE,sincronizar);objeto.once(Phaser.GameObjects.Events.DESTROY,()=>cena.events.off(Phaser.Scenes.Events.POST_UPDATE,sincronizar));
     return {corpo:objeto,visual};
