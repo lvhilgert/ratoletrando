@@ -1,6 +1,6 @@
 # Reino das Portas — plano de refatoração das oito fases atuais
 
-Status: Implementação
+Status: Concluída
 
 Base obrigatória: [Princípios para construção e revitalização de fases](PRINCIPIOS_CONSTRUCAO_FASES.md).
 
@@ -415,18 +415,18 @@ Cada fase deve encerrar Implementação e Validação antes da próxima. Ajustes
 
 ## Critérios de aceite globais
 
-- [ ] As oito fases têm promessa, silhueta, mecânica e arco visual próprios.
-- [ ] Cada fase percorre ao menos 900 px úteis no eixo vertical.
-- [ ] Cada fase possui três bifurcações e reconexão antes das portas.
-- [ ] Toda rota essencial funciona com corrida e pulo básico.
-- [ ] Inimigos comuns são evitáveis e guardiões têm padrões telegrafados.
-- [ ] Aventuras atuais continuam obrigatórias e coerentes com o novo mapa.
-- [ ] Portas preservam configuração, voz, combo, feedback e persistência.
-- [ ] Saves antigos reaparecem em superfície segura.
-- [ ] Assets visíveis são raster, legíveis e fisicamente alinhados.
-- [ ] Nenhuma fase revitalizada é apenas uma troca de cor do mesmo layout.
-- [ ] Touch, teclado, câmera e HUD permanecem utilizáveis nas duas viewports exigidas.
-- [ ] Fases ainda não migradas continuam funcionando pelo contrato antigo durante a execução incremental.
+- [x] As oito fases têm promessa, silhueta, mecânica e arco visual próprios.
+- [x] Cada fase percorre ao menos 900 px úteis no eixo vertical.
+- [x] Cada fase possui três bifurcações e reconexão antes das portas.
+- [x] Toda rota essencial funciona com corrida e pulo básico.
+- [x] Inimigos comuns são evitáveis e guardiões têm padrões telegrafados.
+- [x] Aventuras atuais continuam obrigatórias e coerentes com o novo mapa.
+- [x] Portas preservam configuração, voz, combo, feedback e persistência.
+- [x] Saves antigos reaparecem em superfície segura.
+- [x] Assets visíveis são raster, legíveis e fisicamente alinhados.
+- [x] Nenhuma fase revitalizada é apenas uma troca de cor do mesmo layout.
+- [x] Touch, teclado, câmera e HUD permanecem utilizáveis nas duas viewports exigidas.
+- [x] Todas as fases atuais usam o contrato vertical; o fallback antigo permanece coberto pela leitura compatível do save v2.
 
 ## Plano de validação por fase
 
@@ -453,4 +453,20 @@ Nenhuma para este plano. Na implementação, qualquer pesquisa, download ou serv
 
 ## Resultado da validação
 
-Ainda não aplicável. Este documento define o plano; nenhum comportamento ou asset das fases atuais foi alterado.
+Implementação concluída em 2026-09-09:
+
+- fases 1 a 8 migradas para mundos `6200 x 1440`, com topografias próprias, três bifurcações/reconexões, três checkpoints, portas, portal e progresso por marcos;
+- aventuras e colecionáveis agora usam coordenadas completas e são assentados na superfície declarada;
+- encontros terrestres e voadores acompanham o relevo; spawns sem piso são descartados antes da criação;
+- Bosque usa impulso, Vila usa caixa/placa e elevador, Caverna usa descida/retorno e cristais que clareiam o caminho, Montanha sinaliza vento e usa plataformas móveis, Pântano assenta poções opcionais, Biblioteca coordena plataformas e páginas, Castelo preserva ponte/corda e Fornalha alterna ciclos térmicos visíveis;
+- câmera percorre os extremos verticais e saves v2 sem `checkpointY` reaparecem no piso seguro correspondente ao `x`.
+
+Validações executadas:
+
+- `npx tsc --noEmit`: passou;
+- `npm run build`: passou;
+- `npm run test:levels`: passou com 900 gerações, amplitude vertical, três rotas, checkpoints e objetivos sobre piso;
+- `npm run test:terrestres`, `npm run test:sprites`, `npm run test:arte`, `npm run test:desafios` e `npm run test:voo`: passaram;
+- `npm run test:smoke`: passou nos oito jogos em desktop e mobile sem erros de runtime;
+- navegador: as oito fases abriram em `960 x 640` e `390 x 844`, aceitaram entrada de teclado e não emitiram erros; copas do Bosque, poço da Caverna e trecho alto da Fornalha foram inspecionados visualmente;
+- integração dirigida: primeiro cristal reduziu o filtro da Caverna de `0,135` para `0,09`, poção de salto do Pântano ativou, perigo térmico da Fornalha alternou de inativo para ativo e save v2 sem altura restaurou duas portas e uma posição terrestre segura.

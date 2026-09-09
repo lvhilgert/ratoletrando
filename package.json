@@ -16,10 +16,13 @@
     "build-nolog": "vite build --config vite/config.prod.mjs",
     "test:terrestres": "node --experimental-strip-types src/game/sistemas/GeometriaTerrestre.test.mjs",
     "test:desafios": "node --experimental-strip-types src/game/sistemas/DesafiosReino.test.mjs",
+    "test:balanca-moedas": "node scripts/test-balanca-moedas.mjs",
     "test:levels": "node --experimental-strip-types src/game/sistemas/LevelReino.test.mjs",
+    "test:mecanismos": "node --experimental-strip-types src/game/sistemas/MecanismosExpansaoReino.test.mjs",
     "test:voo": "node --experimental-strip-types src/game/sistemas/MovimentoVooDragao.test.mjs",
     "test:sprites": "node --experimental-strip-types src/game/sistemas/FramesArmasReino.test.mjs",
     "test:neve": "node scripts/test-fase-neve.mjs",
+    "test:expansao": "node scripts/test-expansao-reino.mjs",
     "test:arte": "node scripts/verificar-arte-procedural.mjs",
     "test:smoke": "node scripts/smoke-educapp.mjs"
   },

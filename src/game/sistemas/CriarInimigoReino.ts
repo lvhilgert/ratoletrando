@@ -14,10 +14,12 @@ import { SlimeReino } from '../entidades/SlimeReino';
 import { PinguimSentinelaReino } from '../entidades/PinguimSentinelaReino';
 import { GnomoNeveiroReino } from '../entidades/GnomoNeveiroReino';
 import { GuardiaoMamuteReino } from '../entidades/GuardiaoMamuteReino';
+import { InimigoExpansaoReino } from '../entidades/InimigoExpansaoReino';
 
 export const criarInimigoReino=(cena:Phaser.Scene,tipo:TipoInimigo,x:number,y:number,cavaleiro:CavaleiroReino,piso:number,aoDano:(inimigo:InimigoReino)=>void,plataformas?:Phaser.Physics.Arcade.StaticGroup):InimigoReino=>{
     let inimigo:InimigoReino;
-    if(tipo==='pinguim')inimigo=new PinguimSentinelaReino(cena,x,y,cavaleiro);
+    if(['caranguejo','gaivota','caranguejo-farol','sentinela-musgo','tatu-pedra','urubu','gigante-basalto'].includes(tipo))inimigo=new InimigoExpansaoReino(cena,x,y,cavaleiro,tipo as ConstructorParameters<typeof InimigoExpansaoReino>[4]);
+    else if(tipo==='pinguim')inimigo=new PinguimSentinelaReino(cena,x,y,cavaleiro);
     else if(tipo==='gnomo-neve')inimigo=new GnomoNeveiroReino(cena,x,y,cavaleiro,plataformas!,()=>aoDano(inimigo));
     else if(tipo==='mamute')inimigo=new GuardiaoMamuteReino(cena,x,y,cavaleiro);
     else if(tipo==='morcego')inimigo=new MorcegoReino(cena,x,y,cavaleiro);

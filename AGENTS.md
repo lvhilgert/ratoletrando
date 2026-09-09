@@ -27,7 +27,9 @@ O pedido do usuário já autoriza o comportamento que ele solicita diretamente. 
 - Personagens e objetos vivos devem ter movimento. Prefira animações de spritesheet e tweens sutis a elementos estáticos.
 - Spritesheets novos ou alterados devem usar células uniformes com margem transparente. Nenhum pixel opaco pode tocar a borda da célula ou invadir a célula vizinha; use no mínimo 8 px ou 4% da menor dimensão da célula, o que for maior.
 - Não use placeholder procedural para compensar asset ausente. Planeje ou gere o asset antes de implementar a interface final.
+- Não considere fase, bioma ou personagem implementado enquanto alguma chave de textura consumida não possuir arquivo carregado. Antes de concluir, valide o carregamento sem erros e inspecione a cena real; o placeholder de textura do Phaser é falha bloqueante, não entrega parcial.
 - Em jogos 2D terrestres, personagens, inimigos e objetos apoiados devem usar um conceito explícito de chão. A base visual do asset deve coincidir com a superfície física; árvores e demais elementos enraizados nascem no chão, nunca em um `y` visual arbitrário.
+- Moedas e demais coletáveis obrigatórios devem nascer fora de paredes, terrenos e obstáculos, sobre uma rota alcançável pela criança. Todo gerador de fase valida o volume completo do coletável, não apenas seu ponto central.
 
 ## Convenções técnicas
 

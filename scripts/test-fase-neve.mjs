@@ -27,11 +27,16 @@ try{
         const estado=await pagina.evaluate(()=>{
             const cena=window.__ratoletrando.scene.getScene('ReinoDasPortas');
             const texturas=['reino-fundo-neve','reino-pinguim','reino-gnomo-neve','reino-mamute','reino-objetos-neve'];
+            const margens=['reino-pinguim','reino-gnomo-neve','reino-mamute'].flatMap(chave=>{
+                const imagem=cena.textures.get(chave).getSourceImage(),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');canvas.width=imagem.width;canvas.height=imagem.height;ctx.drawImage(imagem,0,0);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+                return Array.from({length:6},(_,frame)=>{let esquerda=384,direita=384,topo=768,base=768;for(let y=0;y<768;y++)for(let x=0;x<384;x++)if(pixels[((y*canvas.width)+(frame*384+x))*4+3]>8){esquerda=Math.min(esquerda,x);direita=Math.min(direita,383-x);topo=Math.min(topo,y);base=Math.min(base,767-y);}return {chave,frame,esquerda,direita,topo,base};});
+            });
             return {
                 texturas:Object.fromEntries(texturas.map(chave=>[chave,cena.textures.exists(chave)])),
                 inimigos:cena.inimigos.map(inimigo=>inimigo.texture?.key),
                 terrenos:cena.children.list.filter(obj=>obj.texture?.key==='reino-terrenos-biomas').map(obj=>Number(obj.frame.name)),
                 fundo:cena.children.list.some(obj=>obj.texture?.key==='reino-fundo-neve'),
+                margens,
                 viewport:{width:innerWidth,height:innerHeight,scrollX:document.documentElement.scrollWidth>document.documentElement.clientWidth,scrollY:document.documentElement.scrollHeight>document.documentElement.clientHeight}
             };
         });
@@ -39,6 +44,7 @@ try{
         assert.ok(['reino-pinguim','reino-gnomo-neve','reino-mamute'].every(chave=>estado.inimigos.includes(chave)),`${nome}: inimigos de neve devem usar sprites próprios`);
         assert.ok(estado.terrenos.length>0&&estado.terrenos.every(frame=>frame===3),`${nome}: terreno deve usar neve (frame 3), nunca lava (frame 7)`);
         assert.equal(estado.fundo,true,`${nome}: fundo de neve visível`);
+        assert.ok(estado.margens.every(frame=>Math.min(frame.esquerda,frame.direita,frame.topo,frame.base)>=16),`${nome}: sprites devem preservar 16 px de margem por célula`);
         assert.deepEqual([estado.viewport.scrollX,estado.viewport.scrollY],[false,false],`${nome}: jogo sem rolagem externa`);
 
         await pagina.keyboard.down('ArrowRight');await pagina.waitForTimeout(450);await pagina.keyboard.up('ArrowRight');

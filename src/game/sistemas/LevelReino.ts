@@ -1,11 +1,12 @@
 export type TipoTrechoReino='intro'|'colina'|'gap'|'rota-alta'|'escada'|'ponte-quebrada'|'movel'|'descanso'|'portao'|'final';
+import { gerarMoedasReino, moedaSobrepoeTerreno } from './MoedasReino.ts';
 export interface PontoReino {x:number;y:number}
 export interface TerrenoReino {x:number;largura:number;topo:number;gelo?:boolean}
 export interface PlataformaReino {x:number;topo:number;largura:number;movel?:'x'|'y';especial?:'quebravel'|'impulso';gelo?:boolean;amplitude?:number}
 export interface RotaReino {id:string;inicio:PontoReino;fim:PontoReino;segura:PontoReino[];agil:PontoReino[]}
-export interface NivelReino {seed:number;largura:number;altura:number;limiteQueda:number;spawn:PontoReino;portal:PontoReino;portas:PontoReino[];trechos:TipoTrechoReino[];terrenos:TerrenoReino[];plataformas:PlataformaReino[];moedas:PontoReino[];gaps:{inicio:number;fim:number}[];checkpoints:PontoReino[];marcos:PontoReino[];rotas?:RotaReino[]}
-export interface PerfilBiomaReino {chao:number;topo:number;detalhe:number;plataforma:number;atmosfera:'folhas'|'vida'|'cristais'|'vento'|'nevoa'|'magia'|'tochas'|'brasas'|'neve'}
-export type TipoAventuraReino='chave'|'placa'|'cristais'|'alavanca'|'resgate'|'paginas'|'corda'|'guardiao';
+export interface NivelReino {seed:number;largura:number;altura:number;limiteQueda:number;spawn:PontoReino;portal:PontoReino;portas:PontoReino[];trechos:TipoTrechoReino[];terrenos:TerrenoReino[];plataformas:PlataformaReino[];moedas:PontoReino[];gaps:{inicio:number;fim:number;controladoPor?:string}[];checkpoints:PontoReino[];marcos:PontoReino[];rotas?:RotaReino[]}
+export interface PerfilBiomaReino {chao:number;topo:number;detalhe:number;plataforma:number;atmosfera:'folhas'|'vida'|'cristais'|'vento'|'nevoa'|'magia'|'tochas'|'brasas'|'neve'|'maresia'|'luar'|'poeira'}
+export type TipoAventuraReino='chave'|'placa'|'cristais'|'alavanca'|'resgate'|'paginas'|'corda'|'guardiao'|'moinhos'|'lua'|'rochas';
 export interface AventuraReino {id:string;tipo:TipoAventuraReino;nome:string;instrucao:string;icone:string;eventos:string[];posicoes:PontoReino[];bloqueio?:PontoReino}
 export const AVENTURAS_REINO:AventuraReino[]=[
     {id:'chave-clareira',tipo:'chave',nome:'CHAVE DA CLAREIRA',instrucao:'Suba, encontre a chave e abra o portão.',icone:'🔑',eventos:['portao-ambiental'],posicoes:[{x:2100,y:900}],bloqueio:{x:3150,y:690}},
@@ -17,6 +18,9 @@ export const AVENTURAS_REINO:AventuraReino[]=[
     {id:'travessia-muralha',tipo:'corda',nome:'TRAVESSIA DA MURALHA',instrucao:'Corte a corda para liberar a ponte.',icone:'✂',eventos:['corda-cortada'],posicoes:[{x:3500,y:550}]},
     {id:'guardiao-fornalha',tipo:'guardiao',nome:'GUARDIÃO DA FORNALHA',instrucao:'Derrote o guardião diante do portal.',icone:'♜',eventos:['guardiao-derrotado'],posicoes:[{x:5520,y:140}]},
     {id:'guardiao-picos',tipo:'guardiao',nome:'GUARDIÃO DOS PICOS',instrucao:'Supere o Mamute e alcance a aurora.',icone:'❄',eventos:['guardiao-derrotado'],posicoes:[{x:5520,y:160}]},
+    {id:'farol-dos-moinhos',tipo:'moinhos',nome:'ACENDA O FAROL',instrucao:'ATAQUE para girar as três manivelas.',icone:'⚙',eventos:['costa-manivela-1-4','costa-manivela-2-4','costa-manivela-3-4','costa-farol-aceso','costa-guardiao-superado'],posicoes:[{x:560,y:1260},{x:2520,y:840},{x:4380,y:510}]},
+    {id:'raposa-luz',tipo:'lua',nome:'LIBERTE A RAPOSA',instrucao:'ATAQUE as travas da grade.',icone:'♡',eventos:['lua-placa-1','lua-raiz-cortada','lua-trava-1','lua-trava-2','lua-trava-3','lua-raposa-liberta','lua-guardiao-superado'],posicoes:[{x:520,y:320},{x:2440,y:820},{x:4140,y:1020},{x:4230,y:1020},{x:4320,y:1020}]},
+    {id:'ponte-dos-colossos',tipo:'rochas',nome:'FORME A PONTE',instrucao:'ATAQUE a pedra pelo lado da seta.',icone:'●',eventos:['canion-parede-1-aberta','canion-rampa-2-baixa','canion-ponte-formada','canion-guardiao-superado'],posicoes:[{x:520,y:360},{x:2520,y:1010},{x:4140,y:760}]},
 ];
 export const PERFIS_BIOMA_REINO:Record<string,PerfilBiomaReino>={
     bosque:{chao:0x765238,topo:0x72a94e,detalhe:0xb8d66c,plataforma:0x658b48,atmosfera:'folhas'},
@@ -28,7 +32,12 @@ export const PERFIS_BIOMA_REINO:Record<string,PerfilBiomaReino>={
     castelo:{chao:0x515967,topo:0x858e9b,detalhe:0xd0b36c,plataforma:0x68717e,atmosfera:'tochas'},
     fogo:{chao:0x3b3030,topo:0x6f4840,detalhe:0xff8b3d,plataforma:0x59413b,atmosfera:'brasas'},
     neve:{chao:0x7ba1b7,topo:0xf4fbff,detalhe:0x8ee7f2,plataforma:0xa9d9e8,atmosfera:'neve'},
+    costa:{chao:0x76543d,topo:0xe0bd72,detalhe:0xff8b72,plataforma:0xc98b58,atmosfera:'maresia'},
+    'ruinas-lua':{chao:0x4d4a68,topo:0xd8d2be,detalhe:0xd6b7ff,plataforma:0x8b87a5,atmosfera:'luar'},
+    canion:{chao:0x5a3f38,topo:0xd58a4b,detalhe:0x79bde7,plataforma:0x485a72,atmosfera:'poeira'},
 };
+
+import { nivelCanionDosColossos, nivelCostaDosMoinhos, nivelRuinasDaLua } from './NiveisExpansaoReino.ts';
 
 const CENTROS=[425,1200,1900,2600,3300,4000,4700,5550],LARGURAS=[850,650,650,650,650,650,650,1300];
 const TOPOS_VERTICAIS=[
@@ -72,11 +81,14 @@ const criarNivelVertical=(fase:number,seed:number):NivelReino=>{
     const plataformas:PlataformaReino[]=[];rotas.forEach(r=>{r.segura.forEach(({x,y})=>plataformas.push({x,topo:y,largura:205}));r.agil.forEach(({x,y})=>plataformas.push({x,topo:y,largura:150}));});plataformas.push(...EXTRAS_VERTICAIS[fase]);
     const portas=[2050,4000,5400].map(x=>ponto(x,topoEm(x)-81)),portal=ponto(5950,topoEm(5950)-95),spawn=ponto(120,topoEm(120)-120),checkpoints=[2150,4200,5250].map(x=>ponto(x,topoEm(x)-10));
     const gaps=terrenos.slice(0,-1).map((t,i)=>({inicio:t.x+t.largura/2,fim:terrenos[i+1].x-terrenos[i+1].largura/2})).filter(g=>g.fim>g.inicio);
-    return {seed,largura:6200,altura:1440,limiteQueda:1410,spawn,portal,portas,trechos:TRECHOS_VERTICAIS[fase],terrenos,plataformas,moedas:plataformas.map(p=>ponto(p.x,p.topo-48)),gaps,checkpoints,marcos:[spawn,...portas,portal],rotas};
+    return {seed,largura:6200,altura:1440,limiteQueda:1410,spawn,portal,portas,trechos:TRECHOS_VERTICAIS[fase],terrenos,plataformas,moedas:gerarMoedasReino(plataformas,terrenos),gaps,checkpoints,marcos:[spawn,...portas,portal],rotas};
 };
 
 export const gerarNivelReino=(fase:number,seed:number):NivelReino=>{
     if(fase===8)return nivelPicosDasTrilhas(seed);
+    if(fase===9)return nivelCostaDosMoinhos(seed);
+    if(fase===10)return nivelRuinasDaLua(seed);
+    if(fase===11)return nivelCanionDosColossos(seed);
     return criarNivelVertical(fase,seed);
 };
 
@@ -96,7 +108,7 @@ const nivelPicosDasTrilhas=(seed:number):NivelReino=>{
         {x:3820,topo:455,largura:190},{x:4100,topo:390,largura:170},{x:4370,topo:330,largura:170},{x:4660,topo:275,largura:150,especial:'quebravel'},
         {x:3820,topo:590,largura:220},{x:4100,topo:530,largura:220,gelo:true},{x:4380,topo:470,largura:220},{x:4780,topo:360,largura:170},
     ];
-    const moedas:PontoReino[]=[...plataformas.map(p=>({x:p.x,y:p.topo-48})),{x:560,y:1195},{x:1870,y:910},{x:3470,y:545},{x:5000,y:260},{x:5480,y:245}];
+    const moedas:PontoReino[]=[...gerarMoedasReino(plataformas,terrenos),...([{x:560,y:1195},{x:1870,y:910},{x:3470,y:545},{x:5000,y:260},{x:5480,y:245}] as PontoReino[]).filter(m=>!moedaSobrepoeTerreno(m,terrenos))];
     const rotas:RotaReino[]=[
         {id:'muralha',inicio:{x:780,y:1260},fim:{x:1600,y:1060},segura:[{x:880,y:1210},{x:1120,y:1170},{x:1360,y:1120}],agil:[{x:820,y:1160},{x:980,y:1080},{x:1160,y:1000},{x:1370,y:940}]},
         {id:'elevadores',inicio:{x:2140,y:980},fim:{x:3520,y:610},segura:[{x:2220,y:970},{x:2480,y:900},{x:2740,y:830},{x:3010,y:700},{x:3200,y:650},{x:3390,y:585}],agil:[{x:2180,y:900},{x:2370,y:825},{x:2570,y:750},{x:2790,y:680},{x:3010,y:700},{x:3200,y:650},{x:3390,y:585}]},
@@ -108,12 +120,14 @@ const nivelPicosDasTrilhas=(seed:number):NivelReino=>{
 export const validarNivelReino=(nivel:NivelReino):string[]=>{
     const erros:string[]=[];
     if(!nivel.terrenos.some(t=>t.x-t.largura/2<=nivel.spawn.x&&t.x+t.largura/2>=nivel.spawn.x))erros.push('spawn sem piso');
-    nivel.gaps.forEach(g=>{if(g.fim-g.inicio>180)erros.push('gap impossível');if(nivel.portas.some(p=>p.x>g.inicio&&p.x<g.fim))erros.push('portão no gap');});
+    nivel.gaps.forEach(g=>{if(g.fim-g.inicio>180&&!g.controladoPor)erros.push('gap impossível');if(nivel.portas.some(p=>p.x>g.inicio&&p.x<g.fim))erros.push('portão no gap');});
     nivel.plataformas.forEach(p=>{if(p.topo<80||p.topo>nivel.altura-80)erros.push('plataforma fora do mundo');});
+    if(nivel.moedas.some(m=>moedaSobrepoeTerreno(m,nivel.terrenos)))erros.push('moeda dentro do terreno');
     nivel.checkpoints.forEach(p=>{if(!nivel.terrenos.some(t=>p.x>=t.x-t.largura/2+30&&p.x<=t.x+t.largura/2-30))erros.push('checkpoint inseguro');});
+    [...nivel.portas,nivel.portal].forEach(p=>{if(!nivel.terrenos.some(t=>p.x>=t.x-t.largura/2&&p.x<=t.x+t.largura/2))erros.push('objetivo sem piso');});
     if(nivel.rotas&&nivel.rotas.length!==3)erros.push('fase vertical sem três bifurcações');
     const alturas=[...nivel.terrenos.map(t=>t.topo),...nivel.plataformas.map(p=>p.topo)];if(nivel.altura>=1280&&Math.max(...alturas)-Math.min(...alturas)<900)erros.push('progressão vertical insuficiente');
-    nivel.rotas?.forEach(rota=>[rota.segura,rota.agil].forEach(caminho=>{const pontos=[rota.inicio,...caminho,rota.fim];for(let i=1;i<pontos.length;i++)if(pontos[i].x-pontos[i-1].x>330||pontos[i-1].y-pontos[i].y>170)erros.push(`salto impossível: ${rota.id}`);}));
+    nivel.rotas?.forEach(rota=>[rota.segura,rota.agil].forEach(caminho=>{const pontos=[rota.inicio,...caminho,rota.fim];for(let i=1;i<pontos.length;i++)if(pontos[i].x-pontos[i-1].x>330||Math.abs(pontos[i-1].y-pontos[i].y)>170)erros.push(`salto impossível: ${rota.id}`);}));
     return erros;
 };
 

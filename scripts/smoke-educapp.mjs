@@ -35,7 +35,7 @@ const arrastarLogico=async(page,x1,y1,x2,y2)=>{
 const voltarEducApp=async page=>{
     await page.evaluate(()=>window.__ratoletrando?.scene.getScenes(true)[0]?.scene.start('EducApp'));
     await page.waitForFunction(()=>window.__ratoletrando?.scene.getScene('EducApp')?.scene.isActive(),null,{timeout:15000});
-    await page.waitForTimeout(250);
+    await page.waitForTimeout(500);
 };
 
 await mkdir(saida,{recursive:true});
@@ -78,7 +78,7 @@ try{
                 await clicarLogico(pagina,480,455);await pagina.waitForFunction(()=>window.__ratoletrando?.scene.getScene('Jogo')?.scene.isActive(),null,{timeout:15000});
                 await pagina.keyboard.press('ArrowRight');await pagina.waitForTimeout(300);await pagina.screenshot({path:`${saida}/ratoletrando-jogo-${sufixo}.png`});
             }else if(nome==='reino-portas'){
-                await clicarLogico(pagina,480,573);await pagina.waitForFunction(()=>window.__ratoletrando?.scene.getScene('ReinoDasPortas')?.scene.isActive(),null,{timeout:15000});
+                await clicarLogico(pagina,480,573);try{await pagina.waitForFunction(()=>window.__ratoletrando?.scene.getScene('ReinoDasPortas')?.scene.isActive(),null,{timeout:15000});}catch(erro){throw new Error(`reino-portas: aguardava ReinoDasPortas; ativas: ${(await cenaAtiva(pagina)).join(', ')}; erros: ${[...new Set(erros)].join(' | ')}`,{cause:erro});}
                 await pagina.keyboard.press('ArrowRight');await pagina.waitForTimeout(500);await pagina.screenshot({path:`${saida}/reino-jogo-${sufixo}.png`});await clicarLogico(pagina,748,42);await pagina.waitForTimeout(250);await pagina.screenshot({path:`${saida}/reino-jornada-${sufixo}.png`});
             }else if(nome==='detetive-mirim'){
                 await clicarLogico(pagina,140,195);await pagina.waitForFunction(()=>window.__ratoletrando?.scene.getScene('FaseDetetive')?.scene.isActive(),null,{timeout:15000});

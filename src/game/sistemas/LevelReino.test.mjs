@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { AVENTURAS_REINO, gerarNivelReino, progressoPorMarcos, sobrepoeGap, validarAventurasReino, validarNivelReino } from './LevelReino.ts';
+import { moedaSobrepoeTerreno } from './MoedasReino.ts';
 
-for(let fase=0;fase<9;fase++)for(let seed=1;seed<=100;seed++){
+for(let fase=0;fase<12;fase++)for(let seed=1;seed<=100;seed++){
     const nivel=gerarNivelReino(fase,seed),repetido=gerarNivelReino(fase,seed);
     assert.deepEqual(nivel,repetido,'a mesma seed deve reproduzir o nível');
     assert.deepEqual(validarNivelReino(nivel),[],`fase ${fase+1}, seed ${seed}`);
@@ -9,6 +10,8 @@ for(let fase=0;fase<9;fase++)for(let seed=1;seed<=100;seed++){
     assert.ok(nivel.plataformas.length>=4);
     assert.equal(nivel.checkpoints.length,3);
     assert.equal(nivel.altura,1440);
+    assert.ok(nivel.moedas.length>0);
+    assert.equal(nivel.moedas.some(m=>moedaSobrepoeTerreno(m,nivel.terrenos)),false,'moedas não podem atravessar terreno');
     assert.equal(nivel.rotas?.length,3);
     const alturas=[...nivel.terrenos.map(t=>t.topo),...nivel.plataformas.map(p=>p.topo)];
     assert.ok(Math.max(...alturas)-Math.min(...alturas)>=900);
@@ -21,14 +24,18 @@ assert.equal(neve.rotas?.length,3);
 assert.ok(neve.spawn.y-neve.portal.y>=900);
 assert.equal(progressoPorMarcos(neve,120,1140,0),0);
 assert.equal(progressoPorMarcos(neve,5950,220,3),1);
-assert.equal(AVENTURAS_REINO.length,9);
+assert.equal(AVENTURAS_REINO.length,12);
 assert.deepEqual(validarAventurasReino(),[]);
 assert.equal(sobrepoeGap({gaps:[{inicio:100,fim:200}]},80,50),true);
 assert.equal(sobrepoeGap({gaps:[{inicio:100,fim:200}]},70,50),false);
-for(let fase=0;fase<9;fase++){
+for(let fase=0;fase<12;fase++){
     const nivel=gerarNivelReino(fase,7),aventura=AVENTURAS_REINO[fase];
     for(const {x} of aventura.posicoes)assert.ok(nivel.terrenos.some(t=>x>=t.x-t.largura/2&&x<=t.x+t.largura/2)||nivel.plataformas.some(p=>x>=p.x-p.largura/2&&x<=p.x+p.largura/2),`${aventura.id} fora de superfície`);
     if(['alavanca','corda'].includes(aventura.tipo))assert.ok(nivel.gaps.length>=2);
 }
 const aventuraSalva={fase:3,seed:77,eventos:['ponte-ativada']};assert.deepEqual(JSON.parse(JSON.stringify(aventuraSalva)),aventuraSalva);
-console.log('levels: 900 gerações, fase vertical e 9 microaventuras validadas');
+const [costa,lua,canion]=[9,10,11].map(fase=>gerarNivelReino(fase,1));
+assert.deepEqual(costa.portas,[{x:1900,y:909},{x:3500,y:599},{x:5050,y:309}]);
+assert.deepEqual(lua.spawn,{x:120,y:200});
+assert.equal(canion.gaps.find(g=>g.controladoPor)?.controladoPor,'canion-ponte-formada');
+console.log('levels: 1200 gerações, 12 fases e microaventuras validadas');

@@ -29,7 +29,7 @@ export const criarHudReino=(cena:Phaser.Scene,moedas:number,botao:(x:number,y:nu
     return {coracoes,textoMoedas,textoRegiao,barraProgresso,textoInimigos,barraPocao,textoPocao,hudPocao,textoObjetivo};
 };
 
-export const criarControlesTouchReino=(cena:Phaser.Scene,acoes:{esquerda:(ativa:boolean)=>void;direita:(ativa:boolean)=>void;dash:()=>void;defesa:(ativa:boolean)=>void;pular:()=>void;encerrarPulo:()=>void;atacar:()=>void}):void=>{
+export const criarControlesTouchReino=(cena:Phaser.Scene,acoes:{esquerda:(ativa:boolean)=>void;direita:(ativa:boolean)=>void;dash:()=>void;defesa:(ativa:boolean)=>void;pular:()=>void;encerrarPulo:()=>void;atacar:(ativa:boolean)=>void}):void=>{
     if(!window.matchMedia('(pointer: coarse)').matches)return;
     const pressionavel=(x:number,y:number,rotulo:string,cor:number,down:()=>void,up?:()=>void)=>{const c=cena.add.container(x,y).setScrollFactor(0).setDepth(40).setSize(72,72).setInteractive({useHandCursor:true});c.add([circuloRaster(cena,0,4,68,0x173d34,.25),circuloRaster(cena,0,0,72,0xffffff,.65),circuloRaster(cena,0,0,66,cor,.72),cena.add.text(0,0,rotulo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:rotulo==='DASH'?'13px':'25px',fontStyle:'bold',color:'#ffffff'}).setOrigin(.5)]);c.on('pointerdown',()=>{c.setScale(.92);down();});const soltar=()=>{c.setScale(1);up?.();};c.on('pointerup',soltar).on('pointerout',soltar);};
     pressionavel(72,555,'◀',0x3f8271,()=>acoes.esquerda(true),()=>acoes.esquerda(false));
@@ -37,5 +37,5 @@ export const criarControlesTouchReino=(cena:Phaser.Scene,acoes:{esquerda:(ativa:
     pressionavel(640,555,'DASH',0x8667a7,acoes.dash);
     pressionavel(720,555,'◆',0x507fa4,()=>acoes.defesa(true),()=>acoes.defesa(false));
     pressionavel(805,555,'↑',0x4d82aa,acoes.pular,acoes.encerrarPulo);
-    pressionavel(886,555,'⚔',0xb77b43,acoes.atacar);
+    pressionavel(886,555,'⚔',0xb77b43,()=>acoes.atacar(true),()=>acoes.atacar(false));
 };

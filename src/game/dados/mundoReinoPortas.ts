@@ -1,5 +1,5 @@
-export type TemaReino='bosque'|'vila'|'caverna'|'montanha'|'pantano'|'biblioteca'|'castelo'|'fogo'|'neve';
-export type TipoInimigo='slime'|'morcego'|'cogumelo'|'furacao'|'arqueiro'|'espantalho'|'goblin'|'planta'|'golem-lava'|'diabrete-fogo'|'pinguim'|'gnomo-neve'|'mamute';
+export type TemaReino='bosque'|'vila'|'caverna'|'montanha'|'pantano'|'biblioteca'|'castelo'|'fogo'|'neve'|'costa'|'ruinas-lua'|'canion';
+export type TipoInimigo='slime'|'morcego'|'cogumelo'|'furacao'|'arqueiro'|'espantalho'|'goblin'|'planta'|'golem-lava'|'diabrete-fogo'|'pinguim'|'gnomo-neve'|'mamute'|'caranguejo'|'gaivota'|'caranguejo-farol'|'sentinela-musgo'|'tatu-pedra'|'urubu'|'gigante-basalto';
 
 export interface RegiaoReino {id:TemaReino;nome:string;cor:number;corDestaque:number}
 export interface EquipamentoReino {id:string;nome:string;tipo:'arma'|'roupa'|'companheiro';descricao:string;preco:number;precoGemas?:number}
@@ -14,7 +14,10 @@ export const REGIOES_REINO:RegiaoReino[]=[
     {id:'biblioteca',nome:'Biblioteca Encantada',cor:0x765b96,corDestaque:0xd2adf0},
     {id:'castelo',nome:'Castelo do Rei Confuso',cor:0xb98a45,corDestaque:0xffdc75},
     {id:'fogo',nome:'Fornalha das Chamas',cor:0x9e3f2b,corDestaque:0xffa62b},
-    {id:'neve',nome:'Picos das Trilhas',cor:0x397aa1,corDestaque:0xbff7ff}
+    {id:'neve',nome:'Picos das Trilhas',cor:0x397aa1,corDestaque:0xbff7ff},
+    {id:'costa',nome:'Costa dos Moinhos',cor:0x168fa6,corDestaque:0xffa37f},
+    {id:'ruinas-lua',nome:'Ruínas da Lua',cor:0x6652a5,corDestaque:0xe0c6ff},
+    {id:'canion',nome:'Cânion dos Colossos',cor:0xb35f32,corDestaque:0x8ed7ff}
 ];
 
 const pontos=(tipos:TipoInimigo[],xs:number[]):PosicaoInimigoReino[]=>xs.map((x,i)=>({x,y:tipos[i]==='morcego'?330:tipos[i]==='furacao'?420:500,tipo:tipos[i]}));
@@ -27,7 +30,10 @@ export const INIMIGOS_POR_REGIAO:Record<TemaReino,PosicaoInimigoReino[]>={
     biblioteca:pontos(['goblin','morcego','arqueiro','planta','espantalho','furacao','morcego','goblin','arqueiro','planta','espantalho','cogumelo','morcego','goblin'],[500,820,1260,1980,2260,2540,2860,3700,3980,4260,4540,4740,5380,5660]),
     castelo:pontos(['goblin','arqueiro','espantalho','morcego','planta','furacao','goblin','arqueiro','cogumelo','espantalho','morcego','planta','furacao','goblin','arqueiro','espantalho'],[480,780,1080,1360,1940,2220,2500,2780,3020,3660,3940,4220,4500,4740,5380,5660]),
     fogo:pontos(['diabrete-fogo','golem-lava','morcego','arqueiro','diabrete-fogo','golem-lava','morcego','diabrete-fogo','golem-lava','morcego','arqueiro','diabrete-fogo','golem-lava','morcego'],[470,760,1050,1340,1920,2200,2480,2760,3040,3640,3920,4200,4480,4760]),
-    neve:[{x:650,y:1100,tipo:'pinguim'},{x:1450,y:940,tipo:'pinguim'},{x:2540,y:780,tipo:'gnomo-neve'},{x:3260,y:510,tipo:'gnomo-neve'},{x:4050,y:340,tipo:'pinguim'},{x:4450,y:260,tipo:'gnomo-neve'},{x:5520,y:160,tipo:'mamute'}]
+    neve:[{x:650,y:1100,tipo:'pinguim'},{x:1450,y:940,tipo:'pinguim'},{x:2540,y:780,tipo:'gnomo-neve'},{x:3260,y:510,tipo:'gnomo-neve'},{x:4050,y:340,tipo:'pinguim'},{x:4450,y:260,tipo:'gnomo-neve'},{x:5520,y:160,tipo:'mamute'}],
+    costa:[{x:1250,y:0,tipo:'caranguejo'},{x:2260,y:0,tipo:'gaivota'},{x:3100,y:0,tipo:'caranguejo'},{x:3920,y:0,tipo:'gaivota'},{x:4700,y:0,tipo:'caranguejo'},{x:5540,y:0,tipo:'caranguejo-farol'}],
+    'ruinas-lua':[{x:1350,y:0,tipo:'morcego'},{x:2860,y:0,tipo:'planta'},{x:5520,y:0,tipo:'sentinela-musgo'}],
+    canion:[{x:1320,y:0,tipo:'tatu-pedra'},{x:2500,y:0,tipo:'urubu'},{x:3180,y:0,tipo:'tatu-pedra'},{x:4020,y:0,tipo:'urubu'},{x:5540,y:0,tipo:'gigante-basalto'}]
 };
 
 export const EQUIPAMENTOS_REINO:EquipamentoReino[]=[

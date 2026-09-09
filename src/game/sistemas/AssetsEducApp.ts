@@ -72,6 +72,15 @@ export const carregarAssetsReino=(cena:Phaser.Scene):void=>{
     folha(cena,'reino-pinguim','assets/reino-portas/personagens/pinguim-sentinela/pinguim-sentinela-estados.png',{frameWidth:384,frameHeight:768,endFrame:5});
     folha(cena,'reino-gnomo-neve','assets/reino-portas/personagens/gnomo-neveiro/gnomo-neveiro-estados.png',{frameWidth:384,frameHeight:768,endFrame:5});
     folha(cena,'reino-mamute','assets/reino-portas/personagens/guardiao-mamute/guardiao-mamute-estados.png',{frameWidth:384,frameHeight:768,endFrame:5});
+    folha(cena,'reino-caranguejo','assets/reino-portas/personagens/caranguejo-marinheiro/caranguejo-marinheiro-estados.png',{frameWidth:237,frameHeight:237,endFrame:3});
+    folha(cena,'reino-gaivota','assets/reino-portas/personagens/gaivota-carga/gaivota-carga-estados.png',{frameWidth:237,frameHeight:237,endFrame:3});
+    folha(cena,'reino-caranguejo-farol','assets/reino-portas/personagens/caranguejo-farol/caranguejo-farol-estados.png',{frameWidth:237,frameHeight:237,endFrame:3});
+    folha(cena,'reino-raposa-luz','assets/reino-portas/personagens/raposa-luz/raposa-luz-estados.png',{frameWidth:237,frameHeight:237,endFrame:3});
+    folha(cena,'reino-sentinela-musgo','assets/reino-portas/personagens/sentinela-musgo/sentinela-musgo-estados.png',{frameWidth:237,frameHeight:237,endFrame:3});
+    folha(cena,'reino-tatu-pedra','assets/reino-portas/personagens/tatu-pedra/tatu-pedra-estados.png',{frameWidth:237,frameHeight:237,endFrame:3});
+    folha(cena,'reino-gigante-basalto','assets/reino-portas/personagens/gigante-basalto/gigante-basalto-estados.png',{frameWidth:237,frameHeight:237,endFrame:3});
+    folha(cena,'reino-urubu','assets/reino-portas/personagens/urubu-canion/urubu-canion-estados.png',{frameWidth:543,frameHeight:724,endFrame:3});
+    folha(cena,'reino-objetos-expansao','assets/reino-portas/objetos-expansao.png',{frameWidth:362,frameHeight:362,endFrame:11});
     folha(cena,'reino-objetos-neve','assets/reino-portas/objetos-neve.png',{frameWidth:627,frameHeight:627,endFrame:3});
     folha(cena,'reino-objetos','assets/reino-portas/objetos.png',{frameWidth:354,frameHeight:443,endFrame:9});
     folha(cena,'reino-planta','assets/reino-portas/reino-planta-sprites.png',{frameWidth:768,frameHeight:1024,endFrame:1});
@@ -82,7 +91,7 @@ export const carregarAssetsReino=(cena:Phaser.Scene):void=>{
     folha(cena,'reino-companheiro-coruja-mover','assets/reino-portas/reino-companheiro-coruja-sprites.png',{frameWidth:887,frameHeight:887,endFrame:1});
     folha(cena,'reino-companheiro-dragao-mover','assets/reino-portas/reino-companheiro-dragao-sprites.png',{frameWidth:768,frameHeight:1024,endFrame:1});
     ['arqueiro','arvore-colmeia','chao-flores','galinhas','espinhos','lava','prop-bau-tonel','tronco','colmeia','borboletas','plataforma','companheiro-coruja','companheiro-raposa','companheiro-tartaruga','companheiro-dragao','floresta-prop','caverna-prop','fazenda-prop'].forEach(id=>imagem(cena,`reino-${id}`,`assets/reino-portas/reino-${id}.png`));
-    ['bosque','vila','caverna','montanha','pantano','biblioteca','castelo','fogo','neve'].forEach(id=>imagem(cena,`reino-fundo-${id}`,`assets/reino-portas/${id==='bosque'?'bosque-castelo':`fundo-${id}`}.png`));
+    ['bosque','vila','caverna','montanha','pantano','biblioteca','castelo','fogo','neve','costa','ruinas-lua','canion'].forEach(id=>imagem(cena,`reino-fundo-${id}`,`assets/reino-portas/${id==='bosque'?'bosque-castelo':`fundo-${id}`}.png`));
     imagem(cena,'reino-panorama','assets/reino-portas/panorama-reinos.png');
 };
 

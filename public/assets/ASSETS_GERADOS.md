@@ -12,6 +12,21 @@ Gerada com a ferramenta de imagem integrada, sem download externo, em estilo de 
 - `detetive-mirim/fundo-gramado.png`, `fundo-escorregador.png`, `fundo-balancos.png`, `fundo-caixa-areia.png`: áreas externas escolares, horizonte e chão consistentes.
 - `ratoletrando/jogo/queijo.png`: queijo amarelo isolado, fundo transparente.
 - `ratoletrando/jogo/bolinha.png`: bola infantil colorida isolada, fundo transparente.
+- `reino-portas/fundo-neve.png`: panorama original dos Picos das Trilhas com vale gelado e aurora.
+- `reino-portas/objetos-neve.png`: folha 2 x 2 com bloco de gelo, bola de neve, placa de trilha e floco.
+- `reino-portas/personagens/pinguim-sentinela/pinguim-sentinela-estados.png`: seis poses de patrulha, antecipação, ataque e recuperação.
+- `reino-portas/personagens/gnomo-neveiro/gnomo-neveiro-estados.png`: seis poses de espera, mira, lançamento e recuperação.
+- `reino-portas/personagens/guardiao-mamute/guardiao-mamute-estados.png`: seis poses de espera, preparação, investida e recuperação.
+
+Os assets de neve possuem procedência detalhada em `reino-portas/source-neve.json` e nos `source.json` de cada personagem.
+
+## Expansão do Reino — fases 10 a 12
+
+- `reino-portas/fundo-costa.png`, `fundo-ruinas-lua.png` e `fundo-canion.png`: panoramas originais dos novos biomas.
+- `reino-portas/objetos-expansao.png`: atlas 4 x 3 de mecanismos e transformações ambientais.
+- `reino-portas/personagens/*`: folhas de quatro poses dos oito novos personagens, com procedência individual.
+
+A criação original, dimensões e ausência de referências externas estão registradas em `reino-portas/source-expansao.json` e nos `source.json` individuais.
 
 ## Arte técnica
 

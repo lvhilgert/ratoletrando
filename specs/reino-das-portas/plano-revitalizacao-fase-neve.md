@@ -1,6 +1,6 @@
 # Reino das Portas — plano de revitalização e fase de neve
 
-Status: Implementação — aguardando autorização dos assets remotos
+Status: Implementação — correção visual e assets finais integrados
 
 Data da pesquisa: 2026-09-08
 
@@ -419,7 +419,7 @@ Pontos fixos que precisam desaparecer da lógica da neve: `y > 620`, câmera com
 
 ## Autorizações e propriedade intelectual
 
-A pesquisa web de artigos foi solicitada pelo usuário e realizada. Nenhum asset externo foi baixado.
+A pesquisa web de artigos foi solicitada pelo usuário e realizada. Nenhum asset externo foi baixado. Em 2026-09-09, o usuário autorizou explicitamente o gerador de imagens integrado para produzir a arte original da fase.
 
 Para implementação futura, geração de arte original pode usar o processo local sem copiar propriedade de terceiros. Nova pesquisa ou download de referências/áudio/assets exigirá autorização explícita imediatamente antes do acesso. Toda fonte terá URL, autor, licença, uso e data em `source.json`; material protegido ou com licença desconhecida será apenas referência e ficará fora do build.
 
@@ -439,4 +439,14 @@ Validações já executadas:
 - `npm run test:terrestres`: passou;
 - `npm run test:arte`: passou.
 
-Pendente: gerar e integrar os PNGs originais, executar build e validar visualmente a fase em 960 x 640 e viewport estreita. O gerador de imagens é um serviço remoto e aguarda autorização explícita conforme `AGENTS.md`.
+Correção visual concluída em 2026-09-09:
+
+- gerados e integrados fundo de neve, objetos de gelo e folhas de seis poses do Pinguim Sentinela, Gnomo Neveiro e Guardião Mamute, todos com procedência local;
+- corrigida a causa do chão de lava: a fase 9 usava por limite o frame 7 do atlas; agora seleciona explicitamente o frame 3 de neve já existente;
+- removidas todas as referências às chaves ausentes `reino-bloco-gelo`, `reino-bola-neve`, `reino-seta-trilha` e `reino-floco-neve`, consolidadas na folha `reino-objetos-neve`;
+- `npx tsc --noEmit`, `npm run build`, `npm run test:levels`, `npm run test:terrestres`, `npm run test:sprites` e `npm run test:arte`: passaram;
+- `npm run test:neve`: passou em 960 x 640 e 390 x 844, confirmando fundo, frame 3 do terreno, texturas próprias dos três inimigos, margens transparentes, console limpo e ausência de rolagem externa;
+- `npm run test:desafios`, `npm run test:voo` e `npm run test:smoke`: passaram; o smoke percorreu os oito jogos em desktop e viewport estreita;
+- evidências: `test-results/fase-neve/`.
+
+Pendente no plano amplo: validação infantil e balanceamento completo de todas as rotas e encontros, que não fazem parte desta correção visual.

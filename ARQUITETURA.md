@@ -42,7 +42,7 @@ Especificação -> Implementação -> Validação
 | ContaComigo | `ContaComigo.ts` | `configuracaoContaComigo.ts` |
 | SomaTrilha | `SomaTrilha.ts` | `configuracaoSomaTrilha.ts` |
 | MemóLetras | `MemoLetras.ts` | `associacoesMemoLetras.ts` |
-| Reino das Portas | `ConfiguracaoReino.ts`, `ReinoDasPortas.ts`, `VooDragaoReino.ts` | `HudReino.ts`, `CriarInimigoReino.ts`, `EstadoAventuraReino.ts`, arquivos `*Reino.ts`, `mundoReinoPortas.ts`, `catalogoPalavrasReino.ts`, `TerrestreReino.ts` e `MovimentoVooDragao.ts` |
+| Reino das Portas | `ConfiguracaoReino.ts`, `ReinoDasPortas.ts`, `VooDragaoReino.ts` | `HudReino.ts`, `CriarInimigoReino.ts`, `EstadoAventuraReino.ts`, `LevelReino.ts`, `MoedasReino.ts`, `NiveisExpansaoReino.ts`, `MecanismosExpansaoReino.ts`, arquivos `*Reino.ts`, `mundoReinoPortas.ts`, `catalogoPalavrasReino.ts`, `TerrestreReino.ts` e `MovimentoVooDragao.ts` |
 | Detetive Mirim | `CasosDetetive.ts`, `FaseDetetive.ts` | `dados/casos/`, `casosDetetive.ts`, `tiposDetetive.ts`, `DetetiveJogador.ts`, `ProgressoDetetive.ts` |
 
 Pastas-base:
@@ -114,6 +114,7 @@ Trate suas chaves e formatos como contrato. Uma mudança exige fallback para sav
 ## Pontos de atenção atuais
 
 - `ReinoDasPortas.ts` ainda coordena o mundo, mas HUD, criação de inimigos e estado de aventura já possuem módulos próprios.
+- As fases autorais 10–12 vivem em `NiveisExpansaoReino.ts`; suas regras de restauração e mecanismos concretos ficam em `RegrasMecanismosExpansaoReino.ts` e `MecanismosExpansaoReino.ts`.
 - O catálogo carrega somente seus recursos; RatoLetrando, Reino e Detetive completam a carga ao entrar em seus respectivos domínios.
 - Arte permanente usa imagens raster. `npm run test:arte` impede novas primitivas visíveis sem uma exceção explícita permitida por `AGENTS.md`.
 - O template legado `src/game/scenes/` foi removido após busca confirmar zero importadores; toda cena ativa vive em `src/game/cenas/` e é registrada por `src/game/main.ts`.

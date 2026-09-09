@@ -1,0 +1,9 @@
+{
+  "ferramenta": "OpenAI image_gen",
+  "criado_em": "2026-09-09",
+  "licenca": "criacao_original",
+  "uso": "asset_final",
+  "arquivos": ["fundo-costa.png", "fundo-ruinas-lua.png", "fundo-canion.png", "objetos-expansao.png"],
+  "referencias": [],
+  "observacoes": "Arte original gerada para o plano das fases 10 a 12; nenhum asset externo foi incorporado. O atlas de objetos usa células 362 x 362 em grade 4 x 3."
+}

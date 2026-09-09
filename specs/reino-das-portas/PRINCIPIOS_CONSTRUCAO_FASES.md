@@ -119,6 +119,30 @@ Papéis úteis:
 
 Todo obstáculo novo é apresentado sozinho. Estados móveis exibem trajetória ou batente. Estados temporários reaparecem após falha; prêmio obrigatório nunca é de tentativa única.
 
+### Causa e consequência legíveis
+
+Todo mecanismo obrigatório segue o ciclo `ver o problema -> encontrar o acionador -> agir -> ver a transformação -> atravessar`.
+
+- A criança vê a parede, grade, ponte ausente ou destino antes de precisar procurar a solução.
+- Acionador e consequência ficam no mesmo enquadramento sempre que possível. Quando não couberem, uma câmera guiada mostra a consequência por no máximo 1,2 s e devolve o controle em piso seguro.
+- O mundo alterado permanece visualmente diferente: manivela girada, trava aberta, parede recolhida, pedra encaixada ou aliado livre. O HUD apenas confirma o que a cena já comunica.
+- Durante a transformação, ataques inimigos e perigos próximos pausam; o controle só é retomado quando existe apoio seguro.
+- O estado final é persistente e idempotente: recarregar não repete a cerimônia nem recria o bloqueio.
+- Um mecanismo não pode exigir a travessia que ele próprio ainda precisa liberar.
+
+A câmera direcionada por área e o breve foco na consequência adaptam práticas descritas por Kirby and the Forgotten Land e Tiny Thor: [entrevista da Nintendo sobre câmera, marcos e superfícies](https://www.nintendo.com/en-ca/whatsnew/ask-the-developer-vol-4-kirby-and-the-forgotten-land-part-2/) e [artigo técnico de câmera do Tiny Thor](https://asylumsquare.com/backstage/2017-11-25/Camera-Logic-in-a-2D-Platformer).
+
+### Interações repetidas sem barreira motora
+
+- Repetição serve para dar peso a uma ação, nunca para medir velocidade de dedos.
+- Não há cronômetro oculto, perda de progresso entre toques nem exigência de cadência rápida.
+- Toda ação de múltiplos toques também aceita manter pressionado o mesmo comando por até 1,5 s; com assistência, um toque completa a ação.
+- Cada toque produz avanço visível, som distinto e mudança de pose. Use no máximo quatro etapas para uma interação obrigatória.
+- A dica mostra a ação (`ATAQUE`) e o ícone do dispositivo atual; não fixa uma tecla quando teclado, gamepad e touch usam comandos diferentes.
+- Nenhum mecanismo exige dois botões simultâneos, gesto de precisão ou alternância rápida.
+
+Essa regra aplica a recomendação oficial da Microsoft de evitar button mashing e oferecer alternativa menos exigente quando houver repetição: [Xbox Accessibility Guideline 107](https://learn.microsoft.com/en-us/xbox/accessibility/xbox-accessibility-guidelines/107).
+
 ## 8. Inimigos como problemas legíveis
 
 Cada inimigo tem um papel espacial único e uma máquina de estados pequena:
@@ -274,8 +298,9 @@ Donkey Kong Country é referência para atmosfera progressiva e camadas de cená
 - [ ] Portas em áreas seguras.
 - [ ] Inimigos com antecipação, ataque e recuperação.
 - [ ] Falha rápida e checkpoint seguro.
+- [ ] Problema, acionador e consequência formam um ciclo causal visível.
+- [ ] Interação repetida possui alternativa por segurar e assistência, sem limite de velocidade.
 - [ ] Hierarquia visual e arco atmosférico.
 - [ ] Chão, hitboxes, escala e assets definidos.
 - [ ] Compatibilidade de save preservada.
 - [ ] Rotas, física, regressão e viewports validadas.
-

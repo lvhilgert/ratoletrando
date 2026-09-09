@@ -31,7 +31,7 @@ Valide em camadas proporcionais ao risco:
 1. **Estática:** TypeScript e build quando aplicável.
 2. **Regra:** teste unitário pequeno para lógica, geometria, progressão ou persistência alterada.
 3. **Integração:** cena abre, fluxo principal funciona, saída/reentrada e save continuam válidos.
-4. **Visual e interação:** resolução 960 x 640 e viewport estreita, console limpo, assets íntegros, movimento, chão, colisões, toque e leitura.
+4. **Visual e interação:** resolução 960 x 640 e viewport estreita, console limpo, todas as chaves de textura resolvidas em arquivos reais, assets íntegros, movimento, chão, colisões, toque e leitura. Placeholder de textura do Phaser reprova a validação.
 5. **Regressão:** testes relacionados do `package.json` e critérios da spec conferidos um a um.
 
 Registre comandos, evidências e resultado na própria spec. Uma falha devolve o trabalho à Implementação. Não marque como concluído com critério de aceite pendente.

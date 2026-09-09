@@ -35,5 +35,5 @@ export const criarMiniJogoBalancaReino=(cena:Phaser.Scene,pai:Phaser.GameObjects
     function removerDoPrato(bloco:Phaser.GameObjects.Container):void {const estado=estados.get(bloco)!;if(estado.slot===undefined)return;const slot=estado.slot;ocupacao[slot]=undefined;estado.slot=undefined;pratos[dados.dropSide].slots[slot].setAlpha(1);atualizarBalanca();}
     function voltar(bloco:Phaser.GameObjects.Container):void {const estado=estados.get(bloco)!;cena.tweens.add({targets:bloco,x:estado.origemX,y:estado.origemY,scale:1,duration:230,ease:'Back.Out'});}
     function destacarPrato(ativo:boolean):void {pratos[dados.dropSide].realce.setAlpha(ativo?.95:0);}
-    return {destruir:()=>{tweenBalanca?.stop();blocos.forEach(bloco=>cena.input.setDraggable(bloco,false));}};
+    return {destruir:()=>{tweenBalanca?.stop();blocos.forEach(bloco=>{if(bloco.input)cena.input.setDraggable(bloco,false);});}};
 };
