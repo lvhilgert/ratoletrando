@@ -4,6 +4,7 @@ import { CategoriaObjeto, NivelContaComigo, NIVEIS_CONTA_COMIGO } from '../dados
 import { servicoVoz } from '../../services/ServicoVoz';
 import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 import { mostrarModalConclusao } from '../sistemas/ModalConclusao';
+import { botaoRaster, circuloRaster, painelRaster } from '../sistemas/ArteRaster';
 
 export class ContaComigo extends Phaser.Scene {
     private static ultimasQuantidades:Partial<Record<NivelContaComigo,number>>={};
@@ -19,7 +20,7 @@ export class ContaComigo extends Phaser.Scene {
     private concluido=false;
     private altoContraste=false;
     private tentativas=0;
-    private pote!:Phaser.GameObjects.Graphics;
+    private pote!:Phaser.GameObjects.Container;
 
     constructor(){super('ContaComigo');}
     init(dados:{nivel?:NivelContaComigo;indice?:number}):void {this.nivel=dados.nivel??'nivel1';this.indice=dados.indice??0;}
@@ -27,18 +28,18 @@ export class ContaComigo extends Phaser.Scene {
     create():void {
         const config=NIVEIS_CONTA_COMIGO[this.nivel];this.objetos=[];this.contados=[];this.botoesResposta=[];this.concluido=false;this.tentativas=0;
         do{this.quantidade=Phaser.Math.Between(config.quantidadeMinima,config.quantidadeMaxima);}while(config.quantidadeMaxima>config.quantidadeMinima&&this.quantidade===ContaComigo.ultimasQuantidades[this.nivel]);ContaComigo.ultimasQuantidades[this.nivel]=this.quantidade;this.categoria=config.categorias[this.indice%config.categorias.length];
-        this.add.graphics().fillGradientStyle(0xfbfaf3,0xfbfaf3,0xe9f1d8,0xe9f1d8,1).fillRect(0,0,960,640);
-        const decor=this.add.graphics().setAlpha(.25);decor.fillStyle(0x8fc66d,.4).fillCircle(45,65,55).fillCircle(925,575,80).fillStyle(0xffffff,.9).fillCircle(900,66,58).fillCircle(55,575,70);
+        this.add.image(480,320,'minijogos-fundo').setDisplaySize(960,640);
+        [[45,65,110,0x8fc66d,.1],[925,575,160,0x8fc66d,.1],[900,66,116,0xffffff,.23],[55,575,140,0xffffff,.23]].forEach(([x,y,d,cor,a])=>circuloRaster(this,x,y,d,cor,a));
         const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x628a48,12);voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
         this.add.text(480,33,'ContaComigo',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'32px',fontStyle:'bold',color:'#4c7137'}).setOrigin(.5);
         this.add.text(884,33,`${this.indice+1} / ${config.quantidadeDesafios}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#667c58'}).setOrigin(1,.5);
         this.criarSeletorNivel();
-        const contraste=this.botao(822,77,130,31,'ALTO CONTRASTE',0x70836a,9);contraste.on('pointerdown',()=>{this.altoContraste=!this.altoContraste;contraste.setAlpha(this.altoContraste?1:.72);this.objetos.forEach(o=>{const h=o.getData('halo') as Phaser.GameObjects.Arc;if(o.getData('contado'))h.setFillStyle(this.altoContraste?0xffe36e:0xccebc5,.7).setStrokeStyle(4,this.altoContraste?0x245a9b:0x5da857,1);});});
+        const contraste=this.botao(822,77,130,31,'ALTO CONTRASTE',0x70836a,9);contraste.on('pointerdown',()=>{this.altoContraste=!this.altoContraste;contraste.setAlpha(this.altoContraste?1:.72);this.objetos.forEach(o=>{const h=o.getData('halo') as Phaser.GameObjects.Image;if(o.getData('contado'))h.setTint(this.altoContraste?0xffe36e:0xccebc5).setAlpha(.7);});});
         this.add.text(480,113,'QUANTOS OBJETOS EXISTEM?',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'19px',fontStyle:'bold',color:'#52713e',letterSpacing:.5}).setOrigin(.5);
-        this.add.graphics().fillStyle(0x35572e,.1).fillRoundedRect(63,143,840,315,28).fillStyle(0xffffff,.94).fillRoundedRect(60,137,840,315,28).lineStyle(3,0xa9cb91,.55).strokeRoundedRect(60,137,840,315,28);
+        painelRaster(this,483,300,840,315,0x35572e,.1);painelRaster(this,480,294,846,321,0xa9cb91,.55);painelRaster(this,480,294,840,315,0xffffff,.94);
         this.criarObjetos();
         this.textoContagem=this.add.text(480,476,'TOQUE NOS OBJETOS PARA CONTAR',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'14px',color:'#71836a'}).setOrigin(.5);
-        this.pote=this.add.graphics();this.desenharPote();
+        this.pote=this.add.container(865,475);this.desenharPote();
         this.criarAlternativas();
         this.feedback=this.add.container(480,600).setAlpha(0);
         this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>servicoVoz.parar());
@@ -57,18 +58,18 @@ export class ContaComigo extends Phaser.Scene {
 
     private criarObjeto(x:number,y:number,indice:number):Phaser.GameObjects.Container {
         const avancado=NIVEIS_CONTA_COMIGO[this.nivel].quantidadeMaxima>20,tamanhoToque=avancado?50:64,c=this.add.container(x,y).setSize(tamanhoToque,tamanhoToque).setInteractive({useHandCursor:true});
-        const halo=this.add.circle(0,0,avancado?25:31,0x73bd68,0).setStrokeStyle(3,0x5da857,0);
+        const halo=circuloRaster(this,0,0,avancado?50:62,0x73bd68,0);
         const tamanho=avancado?46:54;
         if(this.categoria==='frutas'){
             const texturas=['fruta-maca','fruta-cereja','fruta-melancia'];c.add([halo,this.add.image(0,0,texturas[indice%texturas.length]).setDisplaySize(tamanho,tamanho)]);
         }else if(this.categoria==='estrelas')c.add([halo,this.add.image(0,0,'estrela-0').setDisplaySize(tamanho,tamanho)]);
-        else c.add([halo,this.add.circle(0,0,23,indice%2?0x66bceb:0xf2a85c).setStrokeStyle(4,0xffffff),this.add.circle(-7,-7,6,0xffffff,.4)]);
-        const badge=this.add.container(22,-21).setAlpha(0);badge.add([this.add.circle(0,0,13,0x3d8f62).setStrokeStyle(2,0xffffff),this.add.text(0,0,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#ffffff'}).setOrigin(.5)]);c.add(badge);c.setData({contado:false,halo,badge,textoBadge:badge.list[1]});c.on('pointerdown',()=>this.alternarContagem(c));return c;
+        else c.add([halo,circuloRaster(this,0,0,46,indice%2?0x66bceb:0xf2a85c),circuloRaster(this,-7,-7,12,0xffffff,.4)]);
+        const badge=this.add.container(22,-21).setAlpha(0);badge.add([circuloRaster(this,0,0,26,0x3d8f62),this.add.text(0,0,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#ffffff'}).setOrigin(.5)]);c.add(badge);c.setData({contado:false,halo,badge,textoBadge:badge.list[1]});c.on('pointerdown',()=>this.alternarContagem(c));return c;
     }
 
     private alternarContagem(objeto:Phaser.GameObjects.Container):void {
-        if(this.concluido)return;const contado=objeto.getData('contado') as boolean,halo=objeto.getData('halo') as Phaser.GameObjects.Arc,badge=objeto.getData('badge') as Phaser.GameObjects.Container;
-        objeto.setData('contado',!contado);if('vibrate' in navigator)navigator.vibrate(10);if(contado){this.contados=this.contados.filter(item=>item!==objeto);halo.setFillStyle(0x73bd68,0).setStrokeStyle(3,0x5da857,0);badge.setAlpha(0);}else{this.contados.push(objeto);halo.setFillStyle(this.altoContraste?0xffe36e:0xccebc5,.65).setStrokeStyle(this.altoContraste?4:3,this.altoContraste?0x245a9b:0x5da857,.95);badge.setAlpha(1);this.tweens.add({targets:objeto,scale:1.16,yoyo:true,duration:110,ease:'Sine.Out'});}this.atualizarNumeracao();this.desenharPote();if(this.contados.length)servicoVoz.falar(`${this.contados.length}`);
+        if(this.concluido)return;const contado=objeto.getData('contado') as boolean,halo=objeto.getData('halo') as Phaser.GameObjects.Image,badge=objeto.getData('badge') as Phaser.GameObjects.Container;
+        objeto.setData('contado',!contado);if('vibrate' in navigator)navigator.vibrate(10);if(contado){this.contados=this.contados.filter(item=>item!==objeto);halo.setTint(0x73bd68).setAlpha(0);badge.setAlpha(0);}else{this.contados.push(objeto);halo.setTint(this.altoContraste?0xffe36e:0xccebc5).setAlpha(.65);badge.setAlpha(1);this.tweens.add({targets:objeto,scale:1.16,yoyo:true,duration:110,ease:'Sine.Out'});}this.atualizarNumeracao();this.desenharPote();if(this.contados.length)servicoVoz.falar(`${this.contados.length}`);
     }
     private atualizarNumeracao():void {this.contados.forEach((objeto,i)=>(objeto.getData('textoBadge') as Phaser.GameObjects.Text).setText(`${i+1}`));this.textoContagem.setText(this.contados.length?`VOCÊ CONTOU:  ${this.contados.length}`:'TOQUE NOS OBJETOS PARA CONTAR');}
 
@@ -82,7 +83,7 @@ export class ContaComigo extends Phaser.Scene {
     private responder(botao:Phaser.GameObjects.Container,valor:number):void {
         if(this.concluido)return;this.tentativas++;if(valor===this.quantidade){this.concluido=true;audioJogo.efeito('letra');servicoVoz.falar(`Muito bem. São ${this.quantidade}.`);this.botoesResposta.forEach(b=>b.disableInteractive().setAlpha((b.getData('valor') as number)===valor?1:.5));this.tweens.add({targets:botao,scale:1.14,yoyo:true,duration:170});const representacao=this.tentativas===1?`★  DE PRIMEIRA!  ${this.quantidade}`:this.quantidade<=10?`${'● '.repeat(this.quantidade)}= ${this.quantidade}`:`${this.quantidade} OBJETOS = ${this.quantidade}`;this.mostrarFeedback(representacao,0x3b9560,true);}else{audioJogo.efeito('erro');this.tweens.add({targets:botao,x:botao.x-6,yoyo:true,repeat:3,duration:45});this.mostrarFeedback('TENTE OUTRA VEZ',0xc5784d,false);}
     }
-    private desenharPote():void {if(!this.pote)return;this.pote.clear().lineStyle(3,0x6f8e7a,.65).strokeRoundedRect(835,455,60,39,10);const limite=Math.min(this.contados.length,12);for(let i=0;i<limite;i++)this.pote.fillStyle(i%2?0xf0ad55:0x69b881,1).fillCircle(845+(i%6)*8,484-Math.floor(i/6)*10,4);}
-    private mostrarFeedback(texto:string,cor:number,proximo:boolean):void {this.feedback.removeAll(true);const largura=proximo?500:260;this.feedback.add([this.add.graphics().fillStyle(0xffffff,.98).fillRoundedRect(-largura/2,-25,largura,50,18).lineStyle(2,cor,.55).strokeRoundedRect(-largura/2,-25,largura,50,18),this.add.text(proximo?-55:0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:proximo?'18px':'14px',fontStyle:'bold',color:`#${cor.toString(16).padStart(6,'0')}`}).setOrigin(.5)]);if(proximo){const config=NIVEIS_CONTA_COMIGO[this.nivel],ultimo=this.indice+1>=config.quantidadeDesafios,b=this.botao(165,0,140,38,ultimo?'CONCLUIR  ✓':'PRÓXIMO  ›',cor,13);this.feedback.add(b);b.on('pointerdown',()=>{if(ultimo){const niveis=Object.keys(NIVEIS_CONTA_COMIGO) as NivelContaComigo[],outro=niveis[(niveis.indexOf(this.nivel)+1)%niveis.length];mostrarModalConclusao(this,{titulo:'CONTAGEM CONCLUÍDA!',mensagem:`Você completou os ${config.quantidadeDesafios} desafios deste nível.`,cor:0x6ea34f,aoJogarNovamente:()=>this.scene.restart({nivel:this.nivel,indice:0}),aoOutroNivel:()=>this.scene.restart({nivel:outro,indice:0})});}else this.scene.restart({nivel:this.nivel,indice:this.indice+1});});}this.feedback.setAlpha(0).setScale(.9);this.tweens.add({targets:this.feedback,alpha:1,scale:1,duration:170,ease:'Back.Out'});if(!proximo)this.time.delayedCall(1000,()=>this.feedback.setAlpha(0));}
-    private botao(x:number,y:number,w:number,h:number,texto:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true});c.add([this.add.graphics().fillStyle(0x40572f,.16).fillRoundedRect(-w/2,-h/2+4,w,h,h/2).fillStyle(cor,1).fillRoundedRect(-w/2,-h/2,w,h,h/2),this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5)]);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
+    private desenharPote():void {if(!this.pote)return;this.pote.removeAll(true);this.pote.add(painelRaster(this,0,0,60,39,0x6f8e7a,.65));const limite=Math.min(this.contados.length,12);for(let i=0;i<limite;i++)this.pote.add(circuloRaster(this,-20+(i%6)*8,10-Math.floor(i/6)*10,8,i%2?0xf0ad55:0x69b881));}
+    private mostrarFeedback(texto:string,cor:number,proximo:boolean):void {this.feedback.removeAll(true);const largura=proximo?500:260;this.feedback.add([painelRaster(this,0,0,largura+4,54,cor,.55),painelRaster(this,0,0,largura,50,0xffffff,.98),this.add.text(proximo?-55:0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:proximo?'18px':'14px',fontStyle:'bold',color:`#${cor.toString(16).padStart(6,'0')}`}).setOrigin(.5)]);if(proximo){const config=NIVEIS_CONTA_COMIGO[this.nivel],ultimo=this.indice+1>=config.quantidadeDesafios,b=this.botao(165,0,140,38,ultimo?'CONCLUIR  ✓':'PRÓXIMO  ›',cor,13);this.feedback.add(b);b.on('pointerdown',()=>{if(ultimo){const niveis=Object.keys(NIVEIS_CONTA_COMIGO) as NivelContaComigo[],outro=niveis[(niveis.indexOf(this.nivel)+1)%niveis.length];mostrarModalConclusao(this,{titulo:'CONTAGEM CONCLUÍDA!',mensagem:`Você completou os ${config.quantidadeDesafios} desafios deste nível.`,cor:0x6ea34f,aoJogarNovamente:()=>this.scene.restart({nivel:this.nivel,indice:0}),aoOutroNivel:()=>this.scene.restart({nivel:outro,indice:0})});}else this.scene.restart({nivel:this.nivel,indice:this.indice+1});});}this.feedback.setAlpha(0).setScale(.9);this.tweens.add({targets:this.feedback,alpha:1,scale:1,duration:170,ease:'Back.Out'});if(!proximo)this.time.delayedCall(1000,()=>this.feedback.setAlpha(0));}
+    private botao(x:number,y:number,w:number,h:number,texto:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true});c.add([botaoRaster(this,0,4,w,h,0x40572f,.16),botaoRaster(this,0,0,w,h,cor),this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5)]);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
 }

@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { DadosFimFase } from '../tipos/jogo';
 import { servicoVoz } from '../../services/ServicoVoz';
 import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
+import { botaoRaster, circuloRaster, painelRaster } from '../sistemas/ArteRaster';
 
 export class FimDaFase extends Phaser.Scene {
     constructor(){super('FimDaFase');}
@@ -11,14 +12,12 @@ export class FimDaFase extends Phaser.Scene {
         const cores=[0x4baa68,0x20abc1,0xd7743e,0x596ba9,0x55a9cc];
         const corTema=cores[dados.fase%cores.length],proximo=temas[(dados.fase+1)%temas.length];
         this.add.image(480,320,'menu-jardim').setDisplaySize(960,640);
-        this.add.rectangle(480,320,960,640,0x173b46,.42);
+        painelRaster(this,480,320,960,640,0x173b46,.42);
         this.criarConfetes();
-        const voltar=this.add.text(24,22,'‹  EDUCAPP',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#ffffff',backgroundColor:'#397466',padding:{x:13,y:8}}).setDepth(50).setInteractive({useHandCursor:true});voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
+        const voltar=this.add.container(75,39,[botaoRaster(this,0,0,102,34,0x397466),this.add.text(0,0,'‹  EDUCAPP',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#ffffff'}).setOrigin(.5)]).setSize(102,34).setDepth(50).setInteractive({useHandCursor:true});voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
 
         const painel=this.add.container(480,322).setScale(.82).setAlpha(0);
-        const desenhar=(x:number,y:number,w:number,h:number,raio:number,cor:number,alpha=1):Phaser.GameObjects.Graphics=>{
-            const g=this.add.graphics(); g.fillStyle(cor,alpha).fillRoundedRect(x-w/2,y-h/2,w,h,raio); return g;
-        };
+        const desenhar=(x:number,y:number,w:number,h:number,_raio:number,cor:number,alpha=1):Phaser.GameObjects.NineSlice=>painelRaster(this,x,y,w,h,cor,alpha);
 
         // Sombra, moldura colorida e interior cremoso em camadas.
         painel.add(desenhar(0,18,650,492,44,0x102f3b,.35));
@@ -29,12 +28,13 @@ export class FimDaFase extends Phaser.Scene {
         painel.add(desenhar(0,-158,572,74,22,0xff8b69));
 
         // Medalhão e estrelas dão um foco visual claro ao resultado.
-        painel.add(this.add.circle(0,-229,61,0xfff4a6).setStrokeStyle(8,0xffc83d));
-        painel.add(this.add.circle(0,-229,47,0x7a45bd));
-        const estrelaCentral=this.add.star(0,-233,5,18,38,0xffdf4f).setStrokeStyle(4,0xffffff);
+        painel.add(circuloRaster(this,0,-229,130,0xffc83d));
+        painel.add(circuloRaster(this,0,-229,122,0xfff4a6));
+        painel.add(circuloRaster(this,0,-229,94,0x7a45bd));
+        const estrelaCentral=this.add.image(0,-233,'estrela-0').setDisplaySize(76,76);
         painel.add(estrelaCentral);
-        painel.add(this.add.star(-83,-199,5,8,18,0xffd94b).setAngle(-18));
-        painel.add(this.add.star(83,-199,5,8,18,0xffd94b).setAngle(18));
+        painel.add(this.add.image(-83,-199,'estrela-0').setDisplaySize(36,36).setAngle(-18));
+        painel.add(this.add.image(83,-199,'estrela-0').setDisplaySize(36,36).setAngle(18));
 
         painel.add(this.add.text(0,-145,'MUITO BEM!',{
             fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'39px',color:'#ffffff',
@@ -54,7 +54,7 @@ export class FimDaFase extends Phaser.Scene {
 
         const placar=desenhar(0,63,430,72,21,0xdff6ee);
         painel.add(placar);
-        painel.add(this.add.circle(-176,63,22,0x58c994));
+        painel.add(circuloRaster(this,-176,63,44,0x58c994));
         painel.add(this.add.text(-176,62,'★',{fontFamily:'Arial',fontSize:'27px',color:'#ffffff'}).setOrigin(.5));
         painel.add(this.add.text(-140,48,'NESTA PARTIDA',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#38745d'}).setOrigin(0,.5));
         painel.add(this.add.text(176,48,`+${dados.pontuacao.toLocaleString('pt-BR')}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'19px',color:'#2e6552'}).setOrigin(1,.5));
@@ -92,6 +92,7 @@ export class FimDaFase extends Phaser.Scene {
         const cores=[0xff6f61,0xffd84f,0x7a45bd,0x4ecb91,0x55b8e8];
         for(let i=0;i<42;i++){
             const x=i%2===0?Phaser.Math.Between(15,145):Phaser.Math.Between(815,945);
+            // raster-exception: confete efêmero de celebração.
             const p=this.add.rectangle(x,Phaser.Math.Between(-100,30),Phaser.Math.Between(6,10),Phaser.Math.Between(10,18),Phaser.Utils.Array.GetRandom(cores));
             this.tweens.add({targets:p,y:680,angle:Phaser.Math.Between(-360,360),duration:Phaser.Math.Between(2200,3800),delay:Phaser.Math.Between(0,900),repeat:-1});
         }

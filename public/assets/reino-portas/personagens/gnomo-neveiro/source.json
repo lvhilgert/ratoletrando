@@ -1,0 +1,12 @@
+{
+  "nome": "Gnomo Neveiro",
+  "origem": "criação original para o EducApp",
+  "autor": "OpenAI ImageGen sob direção do Codex",
+  "licenca": "licenca_autor",
+  "uso": "asset_base",
+  "movimentos": ["espera", "mira", "lancamento", "recuperacao"],
+  "criado_em": "2026-09-09",
+  "incorporado_ao_jogo": true,
+  "creditos_obrigatorios": "",
+  "observacoes": "Seis poses originais geradas em conjunto; o Gnomo da Noz local definiu apenas a família visual."
+}

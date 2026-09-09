@@ -8,16 +8,16 @@ name: "EducApp & RatoLetrando Development Guidelines"
 
 ## Project Context
 
-**RatoLetrando** is transitioning from a standalone educational game to **EducApp**, a mobile game platform for tablets aimed at elementary school children. RatoLetrando remains one of several games on this platform, not the entire product.
+**EducApp** é uma plataforma local com oito jogos 2D para crianças de 6 a 8 anos. RatoLetrando é um desses jogos. `AGENTS.md`, `ARQUITETURA.md`, `PROCESSO_DESENVOLVIMENTO.md` e `ERROS_COMUNS.md` são as fontes de verdade.
 
 ### Current Scope
-- Focus remains on RatoLetrando functionality
-- Evolve architecture gradually, **preserving current working state**
-- Avoid transforming every task into EducApp refactoring
-- Design decisions should not require overhaul when additional games are added
+- Os oito jogos atuais estão em escopo.
+- Evolua a arquitetura gradualmente, **preservando comportamento, saves e estado funcional**.
+- Planeje em spec antes de implementar e valide antes de concluir.
+- Internet, eliminação material e mudança colateral de comportamento exigem autorização explícita.
 
 ### Future Direction
-- Multiple games (language + math/logic) with shared engine
+- Jogos de linguagem, matemática e exploração com Phaser compartilhado
 - Default content + per-classroom customization
 - Reusable game mechanics and data structures
 
@@ -44,10 +44,12 @@ name: "EducApp & RatoLetrando Development Guidelines"
 - Test assumptions with real tablet interaction patterns
 
 ### 4. Asset Management
-- **Use existing assets only** during programming tasks
-- **Clearly flag when new assets are needed** instead of creating placeholder code
-- Never generate image assets during feature development
-- Coordinate asset creation separately
+- **Reuse existing assets first** and never create placeholder code for missing art
+- Toda arte permanente usa PNG/spritesheet local; HTML/CSS e primitivas Phaser não desenham objetos do jogo
+- Spritesheets mantêm células uniformes e margem transparente entre frames
+- For a new or expanded 2D character, follow `.agents/skills/personagem-generator/SKILL.md` before producing art
+- Keep character design separate from movement references and document source/license
+- Research or download external assets only after the authorization required by `AGENTS.md`
 
 ### 5. Architecture Simplicity
 - Avoid premature architecture complexity
@@ -58,10 +60,9 @@ name: "EducApp & RatoLetrando Development Guidelines"
 - Keep things simple enough for academic scope
 
 ### 6. Scope Boundaries
-- **RatoLetrando enhancements** = in scope now
-- **Cross-game platform infrastructure** = discuss scope first
-- **Refactoring for EducApp** = only if it unblocks current feature
-- If a task edges toward multi-game platform work → clarify first
+- Tome decisões técnicas e de produto de qualquer nível dentro do objetivo pedido.
+- Novos assets, arquitetura e comportamentos necessários à solução são autônomos.
+- Pare somente nos limites explícitos de autorização descritos em `AGENTS.md`.
 
 ---
 
@@ -103,7 +104,7 @@ name: "EducApp & RatoLetrando Development Guidelines"
 ### Naming
 - **Entities**: `Rato`, `Gato`, `ItemColetavel` (clear, Portuguese OK for domain terms)
 - **Systems**: `SistemaAudio`, `SistemaCaminho`, `SistemaPontuacao` (service-like)
-- **Scenes**: `Menu`, `Game`, `GameOver`, `Preloader` (Phaser convention)
+- **Scenes**: nomes de domínio em português, conforme as cenas registradas em `src/game/main.ts`
 
 ### Classroom/Configuration
 - Store per-classroom settings in a simple `ClassroomConfig` object
@@ -121,9 +122,9 @@ name: "EducApp & RatoLetrando Development Guidelines"
 - [ ] Data/content format—generalize? (e.g., generic "phrase" vs. "ratoletrando phrase")
 
 ### Assets
-- [ ] Required assets sourced/listed → create task in separate asset management
-- [ ] Existing assets flagged and confirmed available
-- [ ] **No placeholder code for missing assets**—flag and stop
+- [ ] Existing assets and local movement references checked first
+- [ ] New/expanded characters followed `personagem-generator`, with source/license recorded
+- [ ] **No placeholder code for missing assets**—produce or coordinate the real asset before final UI integration
 
 ### Classroom Integration
 - [ ] New game respects classroom configuration
@@ -137,7 +138,7 @@ name: "EducApp & RatoLetrando Development Guidelines"
 ### ❌ Don't
 - Use this task as reason to refactor entire codebase for EducApp
 - Build complex inheritance or configuration layers "for future games"
-- Generate or create asset code; flag and coordinate separately
+- Generate character frames independently without preserving the official design and continuity
 - Add unnecessary abstraction layers before a second game exists
 - Create sub-group or nested configuration structures
 
@@ -178,8 +179,8 @@ When reviewing pull requests or tasks:
 | **Config** | Per-classroom, flat structure, no sub-layers. |
 | **UX** | Visual, large buttons, touch-friendly, minimal text. |
 | **Reuse** | Always check existing structure before adding new. |
-| **Assets** | Use existing; flag gaps; no code placeholders. |
-| **Scope** | RatoLetrando now; coordinate multi-game work first. |
+| **Assets** | Reuse first; characters use `personagem-generator`; no placeholders. |
+| **Scope** | Oito jogos atuais; seguir a spec e os limites de `AGENTS.md`. |
 
 ---
 

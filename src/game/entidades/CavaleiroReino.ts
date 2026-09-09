@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import type { EquipadoReino } from '../sistemas/ProgressoReino';
 import { alinharCorpoTerrestre, assentarTerrestre, configurarAtorTerrestre } from '../sistemas/TerrestreReino';
+import { circuloRaster } from '../sistemas/ArteRaster';
 
 export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
     private static readonly ESCALA_NORMAL=.34;
@@ -23,11 +24,12 @@ export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
     private corPoeira=0xc9b58b;
     private multiplicadorVelocidade=1;
     private multiplicadorPulo=1;
-    private sombra:Phaser.GameObjects.Ellipse;
+    private noGelo=false;
+    private sombra:Phaser.GameObjects.Image;
     private arma?:Phaser.GameObjects.Container;private visualArma?:Phaser.GameObjects.Sprite;private visualEscudo?:Phaser.GameObjects.Sprite;private companheiro?:Phaser.GameObjects.Sprite;private tipoCompanheiro?:string;
     private tipoArma='espada';private movimentoArma?:Phaser.Tweens.Tween;private movimentoCompanheiro?:Phaser.Tweens.Tween;private proximaPoeira=0;
     constructor(cena:Phaser.Scene,x:number,y:number){
-        super(cena,x,y,'reino-cavaleiro',0);this.sombraYChao=y+80;this.sombra=cena.add.ellipse(x,this.sombraYChao,48,13,0x17382f,.24).setDepth(7);cena.add.existing(this);cena.physics.add.existing(this);
+        super(cena,x,y,'reino-cavaleiro',0);this.sombraYChao=y+80;this.sombra=circuloRaster(cena,x,this.sombraYChao,48,0x17382f,.24).setDisplaySize(48,13).setDepth(7);cena.add.existing(this);cena.physics.add.existing(this);
         this.setScale(CavaleiroReino.ESCALA_NORMAL).setDepth(8);
         configurarAtorTerrestre(this,{largura:120,altura:230,offsetX:68,velocidadeMaxima:[250,760],colideComLimitesDoMundo:true});
     }
@@ -38,8 +40,8 @@ export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
         this.estavaNoChao=noChao;this.velocidadeQuedaAnterior=corpo.velocity.y;
         if(bloqueado){this.setVelocityX(0);this.pararRespiracao();return;}
         const velocidade=(this.agachado?95:230)*this.multiplicadorVelocidade;
-        if(direcao){this.pararRespiracao();this.olhando=direcao;this.setFlipX(direcao<0);this.setVelocityX(direcao*velocidade);if(!this.atacando&&noChao){this.anims.play('reino-correr',true);this.animarVisualArma('correr');this.criarPoeira(false);}}
-        else {this.setVelocityX(0);if(!this.atacando&&noChao){this.anims.play('reino-idle',true);this.animarVisualArma('idle');if(!this.agachado)this.iniciarRespiracao();}}
+        if(direcao){this.pararRespiracao();this.olhando=direcao;this.setFlipX(direcao<0);this.setVelocityX(this.noGelo?Phaser.Math.Linear(corpo.velocity.x,direcao*velocidade,.075):direcao*velocidade);if(!this.atacando&&noChao){this.anims.play('reino-correr',true);this.animarVisualArma('correr');this.criarPoeira(false);}}
+        else {this.setVelocityX(this.noGelo?corpo.velocity.x*.94:0);if(!this.atacando&&noChao){this.anims.play('reino-idle',true);this.animarVisualArma('idle');if(!this.agachado)this.iniciarRespiracao();}}
         if(!noChao&&!this.atacando){this.pararRespiracao();this.setFrame(corpo.velocity.y<0?5:6);this.visualArma?.setFrame(corpo.velocity.y<0?5:6);}this.atualizarEquipamentos();
     }
     pular():boolean {
@@ -63,6 +65,7 @@ export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
     aplicarRoupa(_cor:number):void {this.clearTint();this.visualArma?.clearTint();}
     definirEfeitoPocao(multiplicadorVelocidade=1,multiplicadorPulo=1):void {this.multiplicadorVelocidade=multiplicadorVelocidade;this.multiplicadorPulo=multiplicadorPulo;(this.body as Phaser.Physics.Arcade.Body).setMaxVelocity(multiplicadorVelocidade>1?380:250,760);}
     definirCorPoeira(cor:number):void {this.corPoeira=cor;}
+    definirGelo(ativo:boolean):void {this.noGelo=ativo;}
     aplicarEquipamento(equipado:EquipadoReino):void {this.tipoArma=equipado.arma;this.movimentoCompanheiro?.stop();this.movimentoCompanheiro=undefined;this.arma?.destroy(true);this.arma=undefined;this.visualArma?.destroy();this.visualArma=undefined;this.companheiro?.destroy();this.companheiro=undefined;this.tipoCompanheiro=equipado.companheiro;const armaIntegrada=['espada-rapida','lanca','martelo','arco'].includes(equipado.arma);this.setVisible(!armaIntegrada);if(armaIntegrada)this.visualArma=this.scene.add.sprite(0,0,`reino-cavaleiro-${equipado.arma}`,0).setScale(350/667).setOrigin(.5,1).setDepth(8).play(`reino-cavaleiro-${equipado.arma}-idle`);else if(equipado.arma!=='espada')this.arma=this.criarArma(equipado.arma).setDepth(9);if(equipado.companheiro){this.companheiro=this.criarCompanheiro(equipado.companheiro).setDepth(9).play(`reino-companheiro-${equipado.companheiro}-mover`);if(equipado.companheiro==='coruja'||equipado.companheiro==='dragao')this.movimentoCompanheiro=this.scene.tweens.add({targets:this.companheiro,angle:5,duration:700,yoyo:true,repeat:-1,ease:'Sine.InOut'});}this.atualizarEquipamentos();}
     defender(ativo:boolean):void {if(ativo===this.defendendo)return;this.defendendo=ativo;if(ativo&&!this.atacando){this.setVelocityX(0);this.setVisible(false);this.visualArma?.setVisible(false);this.visualEscudo?.destroy();this.visualEscudo=this.scene.add.sprite(this.x,this.y,'reino-cavaleiro-escudo',0).setDisplaySize(74,148).setOrigin(.5,1).setDepth(9).setFlipX(this.olhando<0);this.scene.time.delayedCall(100,()=>{if(this.defendendo&&this.visualEscudo?.active)this.visualEscudo.setFrame(1);});}else if(this.visualEscudo){this.visualEscudo.setFrame(2);this.scene.time.delayedCall(130,()=>{if(this.defendendo)return;this.visualEscudo?.destroy();this.visualEscudo=undefined;this.setVisible(!this.visualArma);this.visualArma?.setVisible(true);});}}
     dash():boolean {if(this.scene.time.now<this.proximoDash||this.defendendo)return false;this.proximoDash=this.scene.time.now+850;this.invulneravel=true;this.setVelocity(this.olhando*520,0);this.setAlpha(.72);this.visualArma?.setAlpha(.72);this.scene.time.delayedCall(170,()=>{this.setVelocityX(this.olhando*190);this.setAlpha(1);this.visualArma?.setAlpha(1);this.invulneravel=false;});return true;}
@@ -74,11 +77,12 @@ export class CavaleiroReino extends Phaser.Physics.Arcade.Sprite {
     private impactarPouso():void {if(this.agachado||this.atacando)return;this.pararRespiracao();this.criarPoeira(true);this.setScale(.35,.32);this.scene.tweens.add({targets:this,scaleX:CavaleiroReino.ESCALA_NORMAL,scaleY:CavaleiroReino.ESCALA_NORMAL,duration:45,ease:'Sine.Out'});}
     private iniciarRespiracao():void {if(this.respiracao?.isPlaying())return;this.respiracao=this.scene.tweens.add({targets:this,scaleX:.345,scaleY:.333,duration:850,yoyo:true,repeat:-1,ease:'Sine.InOut'});}
     private pararRespiracao():void {if(!this.respiracao)return;this.respiracao.stop();this.respiracao=undefined;if(!this.agachado&&!this.atacando)this.setScale(CavaleiroReino.ESCALA_NORMAL);}
-    private atualizarSombra(corpo:Phaser.Physics.Arcade.Body):void {if(corpo.blocked.down)this.sombraYChao=corpo.bottom;const distancia=Math.max(0,this.sombraYChao-corpo.bottom),escala=Phaser.Math.Clamp(1-distancia/360,.52,1);this.sombra.setPosition(this.x,this.sombraYChao).setScale(escala).setAlpha(.12+.12*escala);}
+    private atualizarSombra(corpo:Phaser.Physics.Arcade.Body):void {if(corpo.blocked.down)this.sombraYChao=corpo.bottom;const distancia=Math.max(0,this.sombraYChao-corpo.bottom),escala=Phaser.Math.Clamp(1-distancia/360,.52,1);this.sombra.setPosition(this.x,this.sombraYChao).setDisplaySize(48*escala,13*escala).setAlpha(.12+.12*escala);}
     private animarVisualArma(acao:'idle'|'correr'|'atacar'):void {this.visualArma?.play(`reino-cavaleiro-${this.tipoArma}-${acao}`,true);}
     private atualizarEquipamentos():void {const pe=(this.body as Phaser.Physics.Arcade.Body).bottom;if(this.arma)this.arma.setPosition(this.x+this.olhando*24,this.y+5).setScale(this.olhando,1);if(this.visualArma)assentarTerrestre(this.visualArma,pe).setX(this.x).setFlipX(this.olhando<0);if(this.visualEscudo)assentarTerrestre(this.visualEscudo,pe).setX(this.x).setFlipX(this.olhando<0);if(this.companheiro){const terrestre=this.tipoCompanheiro==='raposa'||this.tipoCompanheiro==='tartaruga';this.companheiro.x=Phaser.Math.Linear(this.companheiro.x,this.x-this.olhando*(terrestre?62:52),.12);if(terrestre)assentarTerrestre(this.companheiro,pe).setX(this.companheiro.x);else this.companheiro.y=Phaser.Math.Linear(this.companheiro.y,this.y-52,.12);this.companheiro.setFlipX(this.olhando<0);}}
-    private criarArma(tipo:string):Phaser.GameObjects.Container {const g=this.scene.add.graphics();if(tipo==='espada-cristal')g.lineStyle(6,0x7a542e).lineBetween(-2,13,9,2).lineStyle(5,0xffd85a).lineBetween(-5,-1,10,14).fillStyle(0x68def2).fillTriangle(8,3,43,-33,31,-2).fillStyle(0xd5fbff,.9).fillTriangle(11,0,43,-33,24,-6).lineStyle(2,0xffdf72).strokeTriangle(8,3,43,-33,31,-2);else if(tipo==='martelo')g.lineStyle(5,0x70452f).lineBetween(0,8,26,-13).fillStyle(0x71818c).fillRoundedRect(18,-23,25,18,4).lineStyle(2,0xe2eef2).strokeRoundedRect(18,-23,25,18,4);else if(tipo==='lanca')g.lineStyle(4,0x8b5b35).lineBetween(-8,13,48,-21).fillStyle(0xe8edf0).fillTriangle(46,-27,61,-29,50,-15);else if(tipo==='arco')g.lineStyle(4,0x9b6538).beginPath().arc(15,0,25,-1.15,1.15).strokePath().lineStyle(2,0xf3e0b8).lineBetween(25,-23,25,23).fillStyle(0xffdc67).fillTriangle(28,-2,38,0,28,3);else {const rapida=tipo==='espada-rapida';g.lineStyle(rapida?3:5,rapida?0xb8f5ff:0xdce8ed).lineBetween(2,8,35,-25).lineStyle(4,0x8a613c).lineBetween(-5,15,7,3).lineStyle(5,rapida?0x62d9ed:0xd5a642).lineBetween(-2,2,11,15);if(rapida)g.lineStyle(2,0x7eeeff,.65).lineBetween(12,-4,43,-31);}return this.scene.add.container(0,0,[g]).setSize(70,60);}
+    private criarArma(_tipo:string):Phaser.GameObjects.Container {return this.scene.add.container(0,0,[this.scene.add.image(18,-8,'reino-espada-cristal').setDisplaySize(72,72)]).setSize(70,60);}
     private criarCompanheiro(tipo:string):Phaser.GameObjects.Sprite {const terrestre=tipo==='raposa'||tipo==='tartaruga',dragao=tipo==='dragao';return this.scene.add.sprite(0,0,`reino-companheiro-${tipo}-mover`,0).setDisplaySize(terrestre?64:dragao?72:54,terrestre?46:dragao?72:54).setOrigin(.5,terrestre?1:.5);}
     private animarArma(duracao:number):void {if(!this.arma)return;this.movimentoArma?.stop();this.arma.setRotation(this.tipoArma==='arco'?-.08:-.65);this.movimentoArma=this.scene.tweens.add({targets:this.arma,rotation:this.tipoArma==='arco'?.08:1.05,duration:this.tipoArma==='arco'?70:Math.max(90,duracao*.58),yoyo:this.tipoArma==='arco',repeat:this.tipoArma==='arco'?1:0,ease:'Sine.InOut',onComplete:()=>this.arma?.setRotation(0)});}
+    // raster-exception: poeira efêmera gerada pelo contato do personagem com o chão.
     private criarPoeira(pouso:boolean):void {const agora=this.scene.time.now;if(!pouso&&agora<this.proximaPoeira)return;this.proximaPoeira=agora+150;const pe=(this.body as Phaser.Physics.Arcade.Body).bottom;for(let i=0;i<(pouso?7:2);i++){const p=this.scene.add.ellipse(this.x+Phaser.Math.Between(-18,18),pe,Phaser.Math.Between(5,11),Phaser.Math.Between(3,7),this.corPoeira,.55).setDepth(7);this.scene.tweens.add({targets:p,x:p.x+Phaser.Math.Between(-25,25),y:p.y-Phaser.Math.Between(5,18),alpha:0,scale:1.6,duration:Phaser.Math.Between(240,420),onComplete:()=>p.destroy()});}}
 }

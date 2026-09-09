@@ -7,7 +7,9 @@ export interface InimigoReino {
     derrotado:boolean;
     readonly corpoColisao:Phaser.Physics.Arcade.Sprite;
     readonly colideComPlataformas:boolean;
+    readonly guardiao?:boolean;
+    readonly resisteMartelo?:boolean;
     atualizar():void;
-    atingir():boolean;
+    atingir(impactoForte?:boolean):boolean;
     derrotar():void;
 }

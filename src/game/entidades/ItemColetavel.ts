@@ -7,6 +7,8 @@ export class ItemColetavel extends Phaser.Physics.Arcade.Sprite {
         super(cena,x,y,textura);
         cena.add.existing(this); cena.physics.add.existing(this);
         this.setImmovable(true);
+        if (tipo === 'queijo') this.setDisplaySize(38,32).setDepth(3);
+        if (tipo === 'bolinha') this.setDisplaySize(28,28).setDepth(3);
         if (tipo === 'fruta') this.setDisplaySize(38,38).setDepth(3);
         if (tipo === 'estrela') {
             this.setDisplaySize(44,44).setDepth(6);

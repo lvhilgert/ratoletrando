@@ -4,9 +4,10 @@ import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 import { DificuldadeMontaPalavra, PALAVRAS_MONTA_PALAVRA, PalavraMontaPalavra, QUANTIDADE_DISTRATORES } from '../dados/palavrasMontaPalavra';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { mostrarModalConclusao } from '../sistemas/ModalConclusao';
+import { botaoRaster, circuloRaster, painelRaster } from '../sistemas/ArteRaster';
 
 interface PecaSilaba extends Phaser.GameObjects.Container {silaba:string;inicioX:number;inicioY:number;slot?:number}
-interface SlotSilaba {container:Phaser.GameObjects.Container;fundo:Phaser.GameObjects.Graphics;peca?:PecaSilaba}
+interface SlotSilaba {container:Phaser.GameObjects.Container;fundo:Phaser.GameObjects.NineSlice;borda:Phaser.GameObjects.NineSlice;peca?:PecaSilaba}
 
 export class MontaPalavra extends Phaser.Scene {
     private indice=0;
@@ -23,8 +24,8 @@ export class MontaPalavra extends Phaser.Scene {
 
     create():void {
         this.desafio=PALAVRAS_MONTA_PALAVRA[this.indice%PALAVRAS_MONTA_PALAVRA.length];this.slots=[];this.pecas=[];this.concluido=false;
-        this.add.graphics().fillGradientStyle(0xfbf9f2,0xfbf9f2,0xeee6cf,0xeee6cf,1).fillRect(0,0,960,640);
-        const decoracao=this.add.graphics().setAlpha(.28);decoracao.fillStyle(0xe3b65e,.35).fillCircle(45,65,55).fillCircle(920,570,78).fillStyle(0xffffff,.85).fillCircle(900,65,58).fillCircle(60,575,72);
+        this.add.image(480,320,'minijogos-fundo').setDisplaySize(960,640);
+        [[45,65,110,0xe3b65e,.1],[920,570,156,0xe3b65e,.1],[900,65,116,0xffffff,.24],[60,575,144,0xffffff,.24]].forEach(([x,y,d,cor,a])=>circuloRaster(this,x,y,d,cor,a));
         const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x96713b,12);voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
         this.add.text(480,34,'MontaPalavra',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'32px',fontStyle:'bold',color:'#6e522d'}).setOrigin(.5);
         this.add.text(884,34,`${this.indice+1} / ${PALAVRAS_MONTA_PALAVRA.length}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#816f54'}).setOrigin(1,.5);
@@ -37,7 +38,7 @@ export class MontaPalavra extends Phaser.Scene {
         if(this.dificuldade==='dificil'){const dica=this.botao(690,166,120,37,'DICA',0xb58b4f,11);dica.on('pointerdown',()=>{this.textoAlvo.setText(this.desafio.palavra).setFontSize(30);this.time.delayedCall(1400,()=>this.textoAlvo.setText('OUÇA E DESCUBRA').setFontSize(17));});}
         this.add.text(480,207,'ARRASTE AS SÍLABAS PARA OS ESPAÇOS',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#89775d',letterSpacing:1}).setOrigin(.5);
         this.criarSlots();this.criarPecas();
-        for(let i=0;i<PALAVRAS_MONTA_PALAVRA.length;i++)this.add.circle(480+(i-(PALAVRAS_MONTA_PALAVRA.length-1)/2)*16,527,5,i===this.indice?0xc58b3c:0xd8c9aa);
+        for(let i=0;i<PALAVRAS_MONTA_PALAVRA.length;i++)circuloRaster(this,480+(i-(PALAVRAS_MONTA_PALAVRA.length-1)/2)*16,527,10,i===this.indice?0xc58b3c:0xd8c9aa);
         this.feedback=this.add.container(480,557).setAlpha(0);
         this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>servicoVoz.parar());
         this.time.delayedCall(420,()=>this.ouvir());
@@ -51,7 +52,7 @@ export class MontaPalavra extends Phaser.Scene {
 
     private criarSlots():void {
         const quantidade=this.desafio.silabas.length,largura=quantidade===2?150:130,espaco=18,total=quantidade*largura+(quantidade-1)*espaco;
-        this.desafio.silabas.forEach((_silaba,i)=>{const x=480-total/2+largura/2+i*(largura+espaco),container=this.add.container(x,274).setSize(largura,74),fundo=this.add.graphics();container.add(fundo);this.slots.push({container,fundo});this.desenharSlot(i,'vazio');});
+        this.desafio.silabas.forEach((_silaba,i)=>{const x=480-total/2+largura/2+i*(largura+espaco),container=this.add.container(x,274).setSize(largura,74),borda=painelRaster(this,0,0,largura,74,0xc9b98f,.55),fundo=painelRaster(this,0,0,largura-6,68,0xf7f2e5);container.add([borda,fundo]);this.slots.push({container,fundo,borda});this.desenharSlot(i,'vazio');});
     }
 
     private criarPecas():void {
@@ -62,7 +63,7 @@ export class MontaPalavra extends Phaser.Scene {
 
     private criarPeca(x:number,y:number,silaba:string):PecaSilaba {
         const p=this.add.container(x,y).setSize(112,62).setInteractive({useHandCursor:true}) as PecaSilaba;p.silaba=silaba;p.inicioX=x;p.inicioY=y;
-        p.add([this.add.graphics().fillStyle(0x68491f,.18).fillRoundedRect(-56,-26,112,62,18).fillStyle(0xffd978,1).fillRoundedRect(-56,-31,112,62,18).lineStyle(3,0xd69b36,.8).strokeRoundedRect(-56,-31,112,62,18),this.add.text(0,-1,silaba,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'27px',fontStyle:'bold',color:'#69491f'}).setOrigin(.5)]);
+        p.add([painelRaster(this,0,5,112,62,0x68491f,.18),painelRaster(this,0,0,116,66,0xd69b36,.8),painelRaster(this,0,0,110,60,0xffd978),this.add.text(0,-1,silaba,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'27px',fontStyle:'bold',color:'#69491f'}).setOrigin(.5)]);
         this.input.setDraggable(p);p.on('pointerdown',()=>servicoVoz.falar(silaba));p.on('dragstart',()=>this.iniciarArraste(p));p.on('drag',(_pointer:Phaser.Input.Pointer,dx:number,dy:number)=>this.arrastarPeca(p,dx,dy));p.on('dragend',()=>this.soltarPeca(p));return p;
     }
 
@@ -74,9 +75,9 @@ export class MontaPalavra extends Phaser.Scene {
 
     private verificarPreenchimento():void {if(this.slots.some(slot=>!slot.peca))return;const correto=this.slots.every((slot,i)=>slot.peca?.silaba===this.desafio.silabas[i]);if(correto)this.acertou();else{this.slots.forEach((slot,i)=>this.desenharSlot(i,slot.peca?.silaba===this.desafio.silabas[i]?'correto':'incorreto'));this.mostrarFeedback('QUASE! MUDE AS PEÇAS VERMELHAS',0xc36a55,false);}}
     private acertou():void {this.concluido=true;this.pecas.forEach(peca=>this.input.setDraggable(peca,false));this.slots.forEach((_slot,i)=>this.desenharSlot(i,'correto'));audioJogo.efeito('vitoria');this.tweens.add({targets:this.slots.map(s=>s.container),scale:1.1,yoyo:true,duration:220,ease:'Back.Out'});servicoVoz.falar(this.desafio.palavra);this.mostrarFeedback(`${this.desafio.silabas.join(' + ')}  =  ${this.desafio.palavra}`,0x39966b,true);}
-    private mostrarFeedback(texto:string,cor:number,proximo:boolean):void {this.feedback.removeAll(true);const largura=proximo?550:430;this.feedback.add([this.add.graphics().fillStyle(0xffffff,.98).fillRoundedRect(-largura/2,-30,largura,60,20).lineStyle(3,cor,.55).strokeRoundedRect(-largura/2,-30,largura,60,20),this.add.text(proximo?-70:0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:proximo?'19px':'13px',fontStyle:'bold',color:`#${cor.toString(16).padStart(6,'0')}`}).setOrigin(.5)]);if(proximo){const ultimo=this.indice+1>=PALAVRAS_MONTA_PALAVRA.length,botao=this.botao(185,0,150,42,ultimo?'CONCLUIR  ✓':'PRÓXIMO  ›',cor,14);this.feedback.add(botao);botao.on('pointerdown',()=>{if(ultimo){const dificuldades:DificuldadeMontaPalavra[]=['facil','medio','dificil'],outra=dificuldades[(dificuldades.indexOf(this.dificuldade)+1)%dificuldades.length];mostrarModalConclusao(this,{titulo:'PALAVRAS CONCLUÍDAS!',mensagem:`Você montou as ${PALAVRAS_MONTA_PALAVRA.length} palavras deste desafio.`,cor:0xc58b3c,aoJogarNovamente:()=>this.scene.restart({indice:0,dificuldade:this.dificuldade}),aoOutroNivel:()=>this.scene.restart({indice:0,dificuldade:outra})});}else this.scene.restart({indice:this.indice+1,dificuldade:this.dificuldade});});}this.feedback.setAlpha(0).setScale(.9);this.tweens.add({targets:this.feedback,alpha:1,scale:1,duration:180,ease:'Back.Out'});}
+    private mostrarFeedback(texto:string,cor:number,proximo:boolean):void {this.feedback.removeAll(true);const largura=proximo?550:430;this.feedback.add([painelRaster(this,0,0,largura+6,66,cor,.55),painelRaster(this,0,0,largura,60,0xffffff,.98),this.add.text(proximo?-70:0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:proximo?'19px':'13px',fontStyle:'bold',color:`#${cor.toString(16).padStart(6,'0')}`}).setOrigin(.5)]);if(proximo){const ultimo=this.indice+1>=PALAVRAS_MONTA_PALAVRA.length,botao=this.botao(185,0,150,42,ultimo?'CONCLUIR  ✓':'PRÓXIMO  ›',cor,14);this.feedback.add(botao);botao.on('pointerdown',()=>{if(ultimo){const dificuldades:DificuldadeMontaPalavra[]=['facil','medio','dificil'],outra=dificuldades[(dificuldades.indexOf(this.dificuldade)+1)%dificuldades.length];mostrarModalConclusao(this,{titulo:'PALAVRAS CONCLUÍDAS!',mensagem:`Você montou as ${PALAVRAS_MONTA_PALAVRA.length} palavras deste desafio.`,cor:0xc58b3c,aoJogarNovamente:()=>this.scene.restart({indice:0,dificuldade:this.dificuldade}),aoOutroNivel:()=>this.scene.restart({indice:0,dificuldade:outra})});}else this.scene.restart({indice:this.indice+1,dificuldade:this.dificuldade});});}this.feedback.setAlpha(0).setScale(.9);this.tweens.add({targets:this.feedback,alpha:1,scale:1,duration:180,ease:'Back.Out'});}
     private ocultarFeedback():void {if(this.feedback)this.feedback.setAlpha(0);this.slots.forEach((_slot,i)=>this.desenharSlot(i,this.slots[i].peca?'ocupado':'vazio'));}
-    private desenharSlot(indice:number,estado:'vazio'|'ocupado'|'correto'|'incorreto'):void {const slot=this.slots[indice],w=slot.container.width,h=slot.container.height,cores={vazio:[0xf7f2e5,0xc9b98f],ocupado:[0xfff4ca,0xd6a94f],correto:[0xd9f2e4,0x4ca777],incorreto:[0xf8ddd7,0xd06a5b]}[estado];slot.fundo.clear().fillStyle(cores[0],1).fillRoundedRect(-w/2,-h/2,w,h,20).lineStyle(3,cores[1],estado==='vazio'?.55:.9).strokeRoundedRect(-w/2,-h/2,w,h,20);if(estado==='vazio'){slot.fundo.lineStyle(3,cores[1],.35);for(let x=-w/2+20;x<w/2-10;x+=16)slot.fundo.lineBetween(x,h/2-12,x+8,h/2-12);}}
+    private desenharSlot(indice:number,estado:'vazio'|'ocupado'|'correto'|'incorreto'):void {const slot=this.slots[indice],cores={vazio:[0xf7f2e5,0xc9b98f],ocupado:[0xfff4ca,0xd6a94f],correto:[0xd9f2e4,0x4ca777],incorreto:[0xf8ddd7,0xd06a5b]}[estado];slot.fundo.setTint(cores[0]);slot.borda.setTint(cores[1]).setAlpha(estado==='vazio'?.55:.9);}
     private ouvir():void {servicoVoz.falar(this.desafio.palavra);}
-    private botao(x:number,y:number,w:number,h:number,texto:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true});c.add([this.add.graphics().fillStyle(0x594321,.16).fillRoundedRect(-w/2,-h/2+4,w,h,h/2).fillStyle(cor,1).fillRoundedRect(-w/2,-h/2,w,h,h/2),this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5)]);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
+    private botao(x:number,y:number,w:number,h:number,texto:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true});c.add([botaoRaster(this,0,4,w,h,0x594321,.16),botaoRaster(this,0,0,w,h,cor),this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5)]);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
 }

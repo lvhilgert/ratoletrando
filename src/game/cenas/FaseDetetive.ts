@@ -6,6 +6,7 @@ import { DetetiveJogador } from '../entidades/DetetiveJogador';
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 import { progressoDetetive } from '../sistemas/ProgressoDetetive';
+import { botaoRaster, circuloRaster, painelRaster } from '../sistemas/ArteRaster';
 
 interface Interacao {x:number;y:number;rotulo:string;executar:()=>void}
 type Marcacao='neutro'|'descartado'|'suspeito';
@@ -49,14 +50,14 @@ export class FaseDetetive extends Phaser.Scene {
         const area=this.area();
         if(area.textura==='procedural'){area.decoracao?.(this,this.conteudo);}
         else {this.conteudo.add(this.add.image(480,320,area.textura,area.frame).setDisplaySize(960,640).setDepth(0));area.decoracao?.(this,this.conteudo);}
-        this.conteudo.add(this.add.rectangle(480,91,320,39,0x234f49,.82).setStrokeStyle(2,0xffffff,.55).setDepth(2));
+        this.conteudo.add(painelRaster(this,480,91,324,43,0xffffff,.55).setDepth(2));this.conteudo.add(painelRaster(this,480,91,320,39,0x234f49,.82).setDepth(2));
         this.conteudo.add(this.add.text(480,91,area.nome,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'16px',fontStyle:'bold',color:'#ffffff'}).setOrigin(.5).setDepth(3));
         this.criarSetasSaida(area.saidas);
         this.caso.personagens.filter(p=>p.area===this.areaAtual).forEach(p=>this.criarNPC(p));
         this.caso.pistas.filter(p=>p.area===this.areaAtual&&!(p.posicao[0]===0&&p.posicao[1]===0)).forEach(p=>this.criarObjetoPista(p));
     }
     private criarSetasSaida(saidas:Partial<Record<'esquerda'|'direita'|'cima'|'baixo',string>>):void {
-        (Object.keys(saidas) as Array<keyof typeof saidas>).forEach(dir=>{const pos={esquerda:[22,340,'◀'],direita:[938,340,'▶'],cima:[480,110,'▲'],baixo:[480,612,'▼']}[dir] as [number,number,string];this.conteudo.add(this.add.text(pos[0],pos[1],pos[2],{fontFamily:'Arial',fontSize:'25px',color:'#ffffff',backgroundColor:'#347568',padding:{x:7,y:4}}).setOrigin(.5).setDepth(5).setAlpha(.78));});
+        (Object.keys(saidas) as Array<keyof typeof saidas>).forEach(dir=>{const pos={esquerda:[22,340,'◀'],direita:[938,340,'▶'],cima:[480,110,'▲'],baixo:[480,612,'▼']}[dir] as [number,number,string],seta=this.add.container(pos[0],pos[1],[botaoRaster(this,0,0,40,40,0x347568,.78),this.add.text(0,0,pos[2],{fontFamily:'Arial',fontSize:'25px',color:'#ffffff'}).setOrigin(.5)]).setDepth(5);this.conteudo.add(seta);});
     }
     private criarNPC(p:PersonagemConfig):void {
         const [x,y]=p.posicao;
@@ -64,14 +65,11 @@ export class FaseDetetive extends Phaser.Scene {
         this.conteudo.add(npc);const fala=this.add.image(x+45,y-78,'detetive-objetos',5).setDisplaySize(37,37).setDepth(8);this.conteudo.add(fala);this.tweens.add({targets:fala,y:y-84,yoyo:true,repeat:-1,duration:700});
         this.interacoes.push({x,y,rotulo:'💬 CONVERSAR',executar:()=>this.dialogar(p)});
     }
-    private desenharAvatar(x:number,y:number,cor:number):Phaser.GameObjects.Container {
-        const g=this.add.graphics();g.fillStyle(cor,1).fillCircle(0,0,44).fillStyle(0xffffff,1).fillCircle(-14,-6,9).fillCircle(14,-6,9).fillStyle(0x2a2a2a,1).fillCircle(-14,-4,4).fillCircle(14,-4,4);g.lineStyle(4,0x2a2a2a,1).beginPath().arc(0,10,16,0.15,Math.PI-0.15,false).strokePath();
-        return this.add.container(x,y,[g]).setDepth(7);
-    }
+    private desenharAvatar(x:number,y:number,cor:number):Phaser.GameObjects.Container {return this.add.container(x,y,[this.add.image(0,0,'detetive-suspeitos',0).setDisplaySize(122,162).setTint(cor)]).setDepth(7);}
     private criarObjetoPista(p:PistaConfig):void {
-        const [x,y]=p.posicao;const obj=p.frame!==undefined?this.add.image(x,y,'detetive-objetos',p.frame).setDisplaySize(60,74).setDepth(6):this.add.circle(x,y,24,p.cor??0xf0d955).setStrokeStyle(3,0xffffff,.7).setDepth(6);
+        const [x,y]=p.posicao,obj=this.add.image(x,y,'detetive-objetos',p.frame??6).setDisplaySize(60,74).setTint(p.cor??0xffffff).setDepth(6);
         this.conteudo.add(obj);
-        if(!this.pistas.has(p.id)){const brilho=this.add.star(x+28,y-28,4,6,13,0xfff2a0,.95).setDepth(8);this.conteudo.add(brilho);this.tweens.add({targets:brilho,scale:1.3,alpha:.4,angle:60,yoyo:true,repeat:-1,duration:650});}
+        if(!this.pistas.has(p.id)){const brilho=this.add.image(x+28,y-28,'estrela-0').setDisplaySize(26,26).setDepth(8);this.conteudo.add(brilho);this.tweens.add({targets:brilho,scale:1.3,alpha:.4,angle:60,yoyo:true,repeat:-1,duration:650});}
         this.interacoes.push({x,y,rotulo:'🔍 INVESTIGAR',executar:()=>this.investigar(p)});
     }
     private verificarTransicao(dx:number,dy:number):void {
@@ -107,14 +105,14 @@ export class FaseDetetive extends Phaser.Scene {
         });
     }
     private criarHUD():void {
-        const hud=this.add.container(0,0).setDepth(40);hud.add(this.add.rectangle(480,34,930,56,0x173e38,.82).setStrokeStyle(2,0xffffff,.3));
+        const hud=this.add.container(0,0).setDepth(40);hud.add([painelRaster(this,480,34,934,60,0xffffff,.3),painelRaster(this,480,34,930,56,0x173e38,.82)]);
         this.textoPistas=this.add.text(45,34,`🔍  PISTAS: 0/${this.caso.pistas.length}`,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'16px',fontStyle:'bold',color:'#ffffff'}).setOrigin(0,.5);hud.add(this.textoPistas);
         const dica=this.botao(560,34,110,42,'💡 DICA',0xc48a3d),caderno=this.botao(700,34,150,42,'📒 CADERNO',0x4f836e),sair=this.botao(870,34,130,42,'‹ EDUCAPP',0x55778a);
         hud.add([dica,caderno,sair]);dica.on('pointerdown',()=>this.mostrarDica());caderno.on('pointerdown',()=>this.abrirCaderno());sair.on('pointerdown',()=>confirmarSaidaParaEducApp(this,{aoAbrir:()=>this.bloqueado=true,aoCancelar:()=>this.bloqueado=false}));
     }
     private mostrarDica():void {if(this.modal)return;const texto=this.caso.dicas[Math.min(this.contadorDicas,this.caso.dicas.length-1)];this.contadorDicas++;this.abrirDialogo('💡 DICA',[texto]);}
     private criarControles():void {
-        const press=(x:number,y:number,label:string,chave:keyof typeof this.touch)=>{const c=this.add.container(x,y).setDepth(45).setSize(64,64).setInteractive({useHandCursor:true});c.add([this.add.circle(0,3,30,0x173e38,.25),this.add.circle(0,0,30,0x36796b,.7).setStrokeStyle(2,0xffffff,.6),this.add.text(0,0,label,{fontFamily:'Arial',fontSize:'22px',color:'#ffffff'}).setOrigin(.5)]);const on=()=>{this.touch[chave]=true;c.setScale(.92);},off=()=>{this.touch[chave]=false;c.setScale(1);};c.on('pointerdown',on).on('pointerup',off).on('pointerout',off);};
+        const press=(x:number,y:number,label:string,chave:keyof typeof this.touch)=>{const c=this.add.container(x,y).setDepth(45).setSize(64,64).setInteractive({useHandCursor:true});c.add([circuloRaster(this,0,3,60,0x173e38,.25),circuloRaster(this,0,0,64,0xffffff,.6),circuloRaster(this,0,0,60,0x36796b,.7),this.add.text(0,0,label,{fontFamily:'Arial',fontSize:'22px',color:'#ffffff'}).setOrigin(.5)]);const on=()=>{this.touch[chave]=true;c.setScale(.92);},off=()=>{this.touch[chave]=false;c.setScale(1);};c.on('pointerdown',on).on('pointerup',off).on('pointerout',off);};
         press(75,545,'◀','esquerda');press(145,545,'▶','direita');press(110,475,'▲','cima');press(110,605,'▼','baixo');
         this.botaoInteragir=this.botao(800,555,230,58,'💬 INTERAGIR',0xbd7b3f).setDepth(45).setVisible(false);this.textoInteragir=this.botaoInteragir.getData('texto') as Phaser.GameObjects.Text;this.botaoInteragir.on('pointerdown',()=>this.interagir());
     }
@@ -132,10 +130,10 @@ export class FaseDetetive extends Phaser.Scene {
         c.add([pistas,suspeitos,fechar]);pistas.on('pointerdown',mostrarPistas);suspeitos.on('pointerdown',mostrarSuspeitos);fechar.on('pointerdown',()=>{c.destroy(true);this.modal=undefined;this.bloqueado=false;});mostrarPistas();
     }
     private criarCardSuspeito(area:Phaser.GameObjects.Container,p:PersonagemConfig,x:number,y:number):void {
-        const card=this.add.container(x,y),bg=this.add.graphics().fillStyle(0xf4f0df,1).fillRoundedRect(-78,-125,156,250,19).lineStyle(3,0x78968a,.5).strokeRoundedRect(-78,-125,156,250,19);
+        const card=this.add.container(x,y),borda=painelRaster(this,0,0,162,256,0x78968a,.5),bg=painelRaster(this,0,0,156,250,0xf4f0df);
         const img=p.frame!==undefined?this.add.image(0,-62,'detetive-suspeitos',p.frame).setDisplaySize(86,105):this.desenharAvatar(0,-62,p.cor??0x8899aa);
         const info=this.add.text(0,20,p.nome,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#40584f',align:'center',lineSpacing:4}).setOrigin(.5);
-        const marcar=this.botao(0,90,132,36,'SEM MARCA',0x75827d);card.add([bg,img,info,marcar]);area.add(card);
+        const marcar=this.botao(0,90,132,36,'SEM MARCA',0x75827d);card.add([borda,bg,img,info,marcar]);area.add(card);
         const atualizar=()=>{const estado=this.marcacoes[p.id];(marcar.getData('texto') as Phaser.GameObjects.Text).setText(estado==='neutro'?'SEM MARCA':estado==='descartado'?'❌ DESCARTADO':'⭐ SUSPEITO');};
         marcar.on('pointerdown',()=>{this.marcacoes[p.id]=this.marcacoes[p.id]==='neutro'?'descartado':this.marcacoes[p.id]==='descartado'?'suspeito':'neutro';atualizar();});atualizar();
     }
@@ -144,14 +142,14 @@ export class FaseDetetive extends Phaser.Scene {
         if(this.modal)return;this.bloqueado=true;const c=this.criarBaseModal(480,330,850,520);this.modal=c;
         c.add(this.add.text(0,-205,this.caso.perguntaFinal,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:this.caso.perguntaFinal.length>26?'21px':'26px',fontStyle:'bold',color:'#315f56',align:'center',wordWrap:{width:760}}).setOrigin(.5));
         if(this.caso.tipoResposta==='personagem'){
-            this.caso.opcoesResposta.forEach((op,i)=>{const x=-285+i*190,b=this.add.container(x,25).setSize(160,250).setInteractive({useHandCursor:true}),g=this.add.graphics().fillStyle(0xf7f2df,1).fillRoundedRect(-76,-120,152,240,20).lineStyle(3,0xd1ad61,.65).strokeRoundedRect(-76,-120,152,240,20),img=op.frame!==undefined?this.add.image(0,-38,'detetive-suspeitos',op.frame).setDisplaySize(120,150):this.desenharAvatar(0,-38,0x8899aa),nome=this.add.text(0,82,op.rotulo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'16px',fontStyle:'bold',color:'#40584f'}).setOrigin(.5);b.add([g,img,nome]);c.add(b);b.on('pointerdown',()=>this.escolherResposta(op.id,c));});
+            this.caso.opcoesResposta.forEach((op,i)=>{const x=-285+i*190,b=this.add.container(x,25).setSize(160,250).setInteractive({useHandCursor:true}),borda=painelRaster(this,0,0,158,246,0xd1ad61,.65),fundo=painelRaster(this,0,0,152,240,0xf7f2df),img=op.frame!==undefined?this.add.image(0,-38,'detetive-suspeitos',op.frame).setDisplaySize(120,150):this.desenharAvatar(0,-38,0x8899aa),nome=this.add.text(0,82,op.rotulo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'16px',fontStyle:'bold',color:'#40584f'}).setOrigin(.5);b.add([borda,fundo,img,nome]);c.add(b);b.on('pointerdown',()=>this.escolherResposta(op.id,c));});
         } else {
             this.caso.opcoesResposta.forEach((op,i)=>{const b=this.botao(0,-90+i*80,650,64,op.rotulo,0x4c8d72);c.add(b);b.on('pointerdown',()=>this.escolherResposta(op.id,c));});
         }
         const voltar=this.botao(0,205,180,40,'VOLTAR',0x71807a);c.add(voltar);voltar.on('pointerdown',()=>{c.destroy(true);this.modal=undefined;this.bloqueado=false;});
     }
     private escolherResposta(id:string,c:Phaser.GameObjects.Container):void {
-        if(id!==this.caso.respostaCorreta){audioJogo.efeito('erro');const aviso=this.add.text(0,168,'Essa pista ainda não combina. Vamos pensar outra vez?',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'14px',color:'#a05248',backgroundColor:'#fff1e9',padding:{x:15,y:8}}).setOrigin(.5);c.add(aviso);this.time.delayedCall(1800,()=>aviso.destroy());return;}
+        if(id!==this.caso.respostaCorreta){audioJogo.efeito('erro');const aviso=this.add.container(0,168,[botaoRaster(this,0,0,430,38,0xfff1e9),this.add.text(0,0,'Essa pista ainda não combina. Vamos pensar outra vez?',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'14px',color:'#a05248'}).setOrigin(.5)]);c.add(aviso);this.time.delayedCall(1800,()=>aviso.destroy(true));return;}
         c.destroy(true);this.modal=undefined;this.mostrarFinal();
     }
     private mostrarFinal():void {
@@ -164,7 +162,7 @@ export class FaseDetetive extends Phaser.Scene {
         const casos=this.botao(temProximo?245:150,125,145,44,'CASOS',0x557f9c);c.add(casos);casos.on('pointerdown',()=>this.scene.start('CasosDetetive'));
         this.criarCelebracao(36);
     }
-    private criarBaseModal(x:number,y:number,w:number,h:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setDepth(100);c.add([this.add.rectangle(0,0,960,640,0x193a34,.55),this.add.graphics().fillStyle(0x183e36,.2).fillRoundedRect(-w/2,-h/2+9,w,h,28).fillStyle(0xfffdf4,1).fillRoundedRect(-w/2,-h/2,w,h,28).lineStyle(4,0xd2ae62,.9).strokeRoundedRect(-w/2,-h/2,w,h,28)]);c.setAlpha(0).setScale(.94);this.tweens.add({targets:c,alpha:1,scale:1,duration:180,ease:'Back.Out'});return c;}
+    private criarBaseModal(x:number,y:number,w:number,h:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setDepth(100);c.add([painelRaster(this,0,0,960,640,0x193a34,.55),painelRaster(this,0,9,w,h,0x183e36,.2),painelRaster(this,0,0,w+8,h+8,0xd2ae62,.9),painelRaster(this,0,0,w,h,0xfffdf4)]);c.setAlpha(0).setScale(.94);this.tweens.add({targets:c,alpha:1,scale:1,duration:180,ease:'Back.Out'});return c;}
     private criarCelebracao(q=16):void {for(let i=0;i<q;i++){const p=this.add.image(Phaser.Math.Between(220,740),Phaser.Math.Between(120,450),'detetive-objetos',6).setDisplaySize(Phaser.Math.Between(15,30),Phaser.Math.Between(15,30)).setDepth(130);this.tweens.add({targets:p,y:p.y-Phaser.Math.Between(50,130),x:p.x+Phaser.Math.Between(-55,55),alpha:0,angle:180,duration:Phaser.Math.Between(500,950),onComplete:()=>p.destroy()});}}
-    private botao(x:number,y:number,w:number,h:number,texto:string,cor:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true}),g=this.add.graphics().fillStyle(0x244b42,.18).fillRoundedRect(-w/2,-h/2+4,w,h,h/2).fillStyle(cor,1).fillRoundedRect(-w/2,-h/2,w,h,h/2),t=this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',fontStyle:'bold',color:'#ffffff'}).setOrigin(.5);c.add([g,t]);c.setData('texto',t);return c;}
+    private botao(x:number,y:number,w:number,h:number,texto:string,cor:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true}),t=this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',fontStyle:'bold',color:'#ffffff'}).setOrigin(.5);c.add([botaoRaster(this,0,4,w,h,0x244b42,.18),botaoRaster(this,0,0,w,h,cor),t]);c.setData('texto',t);return c;}
 }

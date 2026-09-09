@@ -12,7 +12,7 @@ interface PadraoAtaqueMimico {
 
 /** Guardião final de cada região: desperta, persegue e golpeia em intervalos legíveis. */
 export class MimicoPortaReino extends Phaser.Physics.Arcade.Sprite implements InimigoReino {
-    readonly colideComPlataformas=true;get corpoColisao():Phaser.Physics.Arcade.Sprite{return this;}derrotado=false;
+    readonly colideComPlataformas=true;readonly guardiao=true;get corpoColisao():Phaser.Physics.Arcade.Sprite{return this;}derrotado=false;
     private vida:number;private estado:'dormindo'|'andando'|'ataque'='dormindo';private estadoAte=0;private direcao=-1;
     private readonly padrao:PadraoAtaqueMimico;private golpesRestantes=0;private preparandoCombo=false;
     constructor(cena:Phaser.Scene,x:number,y:number,private readonly alvo:Phaser.Physics.Arcade.Sprite,bonusVida=0,regiao:TemaReino='bosque'){super(cena,x,y,'reino-mimico-porta',0);cena.add.existing(this);cena.physics.add.existing(this);this.vida=5+bonusVida;this.padrao=this.criarPadrao(regiao);this.setScale(.21).setDepth(9);configurarAtorTerrestre(this,{largura:245,altura:430,offsetX:82,velocidadeMaxima:[260,650]});}

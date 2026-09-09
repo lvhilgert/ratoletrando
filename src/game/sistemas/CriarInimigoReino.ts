@@ -1,0 +1,33 @@
+import * as Phaser from 'phaser';
+import type { TipoInimigo } from '../dados/mundoReinoPortas';
+import { ArqueiroReino } from '../entidades/ArqueiroReino';
+import { CavaleiroEspantalhoReino } from '../entidades/CavaleiroEspantalhoReino';
+import type { CavaleiroReino } from '../entidades/CavaleiroReino';
+import { CogumeloSaltadorReino } from '../entidades/CogumeloSaltadorReino';
+import { FuracaoFolhasReino } from '../entidades/FuracaoFolhasReino';
+import { GoblinReino } from '../entidades/GoblinReino';
+import { InimigoFogoReino } from '../entidades/InimigoFogoReino';
+import type { InimigoReino } from '../entidades/InimigoReino';
+import { MorcegoReino } from '../entidades/MorcegoReino';
+import { PlantaReino } from '../entidades/PlantaReino';
+import { SlimeReino } from '../entidades/SlimeReino';
+import { PinguimSentinelaReino } from '../entidades/PinguimSentinelaReino';
+import { GnomoNeveiroReino } from '../entidades/GnomoNeveiroReino';
+import { GuardiaoMamuteReino } from '../entidades/GuardiaoMamuteReino';
+
+export const criarInimigoReino=(cena:Phaser.Scene,tipo:TipoInimigo,x:number,y:number,cavaleiro:CavaleiroReino,piso:number,aoDano:(inimigo:InimigoReino)=>void,plataformas?:Phaser.Physics.Arcade.StaticGroup):InimigoReino=>{
+    let inimigo:InimigoReino;
+    if(tipo==='pinguim')inimigo=new PinguimSentinelaReino(cena,x,y,cavaleiro);
+    else if(tipo==='gnomo-neve')inimigo=new GnomoNeveiroReino(cena,x,y,cavaleiro,plataformas!,()=>aoDano(inimigo));
+    else if(tipo==='mamute')inimigo=new GuardiaoMamuteReino(cena,x,y,cavaleiro);
+    else if(tipo==='morcego')inimigo=new MorcegoReino(cena,x,y,cavaleiro);
+    else if(tipo==='cogumelo')inimigo=new CogumeloSaltadorReino(cena,x,y,cavaleiro);
+    else if(tipo==='furacao')inimigo=new FuracaoFolhasReino(cena,x,y);
+    else if(tipo==='arqueiro')inimigo=new ArqueiroReino(cena,x,y,cavaleiro,()=>aoDano(inimigo));
+    else if(tipo==='espantalho')inimigo=new CavaleiroEspantalhoReino(cena,x,y,cavaleiro);
+    else if(tipo==='goblin')inimigo=new GoblinReino(cena,x,y,cavaleiro,()=>aoDano(inimigo));
+    else if(tipo==='golem-lava'||tipo==='diabrete-fogo')inimigo=new InimigoFogoReino(cena,x,y,tipo);
+    else if(tipo==='planta')inimigo=new PlantaReino(cena,x,piso);
+    else inimigo=new SlimeReino(cena,x,y);
+    return inimigo;
+};

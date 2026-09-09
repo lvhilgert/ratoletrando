@@ -1,5 +1,5 @@
-export type TemaReino='bosque'|'vila'|'caverna'|'montanha'|'pantano'|'biblioteca'|'castelo'|'fogo';
-export type TipoInimigo='slime'|'morcego'|'cogumelo'|'furacao'|'arqueiro'|'espantalho'|'goblin'|'planta'|'golem-lava'|'diabrete-fogo';
+export type TemaReino='bosque'|'vila'|'caverna'|'montanha'|'pantano'|'biblioteca'|'castelo'|'fogo'|'neve';
+export type TipoInimigo='slime'|'morcego'|'cogumelo'|'furacao'|'arqueiro'|'espantalho'|'goblin'|'planta'|'golem-lava'|'diabrete-fogo'|'pinguim'|'gnomo-neve'|'mamute';
 
 export interface RegiaoReino {id:TemaReino;nome:string;cor:number;corDestaque:number}
 export interface EquipamentoReino {id:string;nome:string;tipo:'arma'|'roupa'|'companheiro';descricao:string;preco:number;precoGemas?:number}
@@ -13,7 +13,8 @@ export const REGIOES_REINO:RegiaoReino[]=[
     {id:'pantano',nome:'Pântano das Poções',cor:0x658752,corDestaque:0xb4cf6c},
     {id:'biblioteca',nome:'Biblioteca Encantada',cor:0x765b96,corDestaque:0xd2adf0},
     {id:'castelo',nome:'Castelo do Rei Confuso',cor:0xb98a45,corDestaque:0xffdc75},
-    {id:'fogo',nome:'Fornalha das Chamas',cor:0x9e3f2b,corDestaque:0xffa62b}
+    {id:'fogo',nome:'Fornalha das Chamas',cor:0x9e3f2b,corDestaque:0xffa62b},
+    {id:'neve',nome:'Picos das Trilhas',cor:0x397aa1,corDestaque:0xbff7ff}
 ];
 
 const pontos=(tipos:TipoInimigo[],xs:number[]):PosicaoInimigoReino[]=>xs.map((x,i)=>({x,y:tipos[i]==='morcego'?330:tipos[i]==='furacao'?420:500,tipo:tipos[i]}));
@@ -25,7 +26,8 @@ export const INIMIGOS_POR_REGIAO:Record<TemaReino,PosicaoInimigoReino[]>={
     pantano:pontos(['planta','slime','morcego','planta','cogumelo','furacao','planta','morcego','goblin','slime','planta','morcego','cogumelo'],[500,880,1260,1980,2340,2700,2980,3700,4020,4340,4620,5380,5660]),
     biblioteca:pontos(['goblin','morcego','arqueiro','planta','espantalho','furacao','morcego','goblin','arqueiro','planta','espantalho','cogumelo','morcego','goblin'],[500,820,1260,1980,2260,2540,2860,3700,3980,4260,4540,4740,5380,5660]),
     castelo:pontos(['goblin','arqueiro','espantalho','morcego','planta','furacao','goblin','arqueiro','cogumelo','espantalho','morcego','planta','furacao','goblin','arqueiro','espantalho'],[480,780,1080,1360,1940,2220,2500,2780,3020,3660,3940,4220,4500,4740,5380,5660]),
-    fogo:pontos(['diabrete-fogo','golem-lava','morcego','arqueiro','diabrete-fogo','golem-lava','morcego','diabrete-fogo','golem-lava','morcego','arqueiro','diabrete-fogo','golem-lava','morcego'],[470,760,1050,1340,1920,2200,2480,2760,3040,3640,3920,4200,4480,4760])
+    fogo:pontos(['diabrete-fogo','golem-lava','morcego','arqueiro','diabrete-fogo','golem-lava','morcego','diabrete-fogo','golem-lava','morcego','arqueiro','diabrete-fogo','golem-lava','morcego'],[470,760,1050,1340,1920,2200,2480,2760,3040,3640,3920,4200,4480,4760]),
+    neve:[{x:650,y:1100,tipo:'pinguim'},{x:1450,y:940,tipo:'pinguim'},{x:2540,y:780,tipo:'gnomo-neve'},{x:3260,y:510,tipo:'gnomo-neve'},{x:4050,y:340,tipo:'pinguim'},{x:4450,y:260,tipo:'gnomo-neve'},{x:5520,y:160,tipo:'mamute'}]
 };
 
 export const EQUIPAMENTOS_REINO:EquipamentoReino[]=[

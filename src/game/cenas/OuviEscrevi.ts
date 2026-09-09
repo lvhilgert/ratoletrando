@@ -4,6 +4,7 @@ import { EXERCICIOS_OUVI_ESCREVI, ExercicioEscrita } from '../dados/exerciciosOu
 import { audioJogo } from '../sistemas/SistemaAudio';
 import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 import { mostrarModalConclusao } from '../sistemas/ModalConclusao';
+import { barraRaster, botaoRaster, circuloRaster, painelRaster } from '../sistemas/ArteRaster';
 
 interface Ponto {x:number;y:number}
 
@@ -32,8 +33,8 @@ export class OuviEscrevi extends Phaser.Scene {
     create():void {
         this.indice=0;this.tracos=[];this.conferido=false;
         this.cameras.main.setBackgroundColor(0xeaf5f3);
-        this.add.graphics().fillGradientStyle(0xf8fcfb,0xf8fcfb,0xdcefeb,0xdcefeb,1).fillRect(0,0,960,640);
-        const decoracao=this.add.graphics().setAlpha(.35);decoracao.fillStyle(0x9ed7cf,.35).fillCircle(45,70,48).fillCircle(925,580,76).fillStyle(0xffffff,.75).fillCircle(900,75,60).fillCircle(55,575,66);
+        this.add.image(480,320,'minijogos-fundo').setDisplaySize(960,640);
+        [[45,70,96,0x9ed7cf,.12],[925,580,152,0x9ed7cf,.12],[900,75,120,0xffffff,.26],[55,575,132,0xffffff,.26]].forEach(([x,y,d,cor,a])=>circuloRaster(this,x,y,d,cor,a));
 
         const voltar=this.criarBotao(74,22,120,36,'‹  EDUCAPP',0x397b70,12);
         voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
@@ -43,13 +44,14 @@ export class OuviEscrevi extends Phaser.Scene {
         this.add.text(480,98,'Ouça e escreva na área abaixo',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'16px',color:'#607b75'}).setOrigin(.5);
 
         const ouvir=this.add.container(480,132).setSize(190,52).setInteractive({useHandCursor:true});
-        ouvir.add([this.add.graphics().fillStyle(0x397fbb,.18).fillCircle(-58,3,25).fillStyle(0x438ecb,1).fillRoundedRect(-91,-23,182,46,23),this.add.text(0,0,'▶  OUVIR',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'18px',color:'#ffffff'}).setOrigin(.5)]);
+        ouvir.add([circuloRaster(this,-58,3,50,0x397fbb,.18),botaoRaster(this,0,0,182,46,0x438ecb),this.add.text(0,0,'▶  OUVIR',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'18px',color:'#ffffff'}).setOrigin(.5)]);
         ouvir.on('pointerover',()=>this.tweens.add({targets:ouvir,scale:1.04,duration:100}));ouvir.on('pointerout',()=>this.tweens.add({targets:ouvir,scale:1,duration:100}));ouvir.on('pointerdown',()=>{this.tweens.add({targets:ouvir,scale:.95,yoyo:true,duration:70});this.ouvir();});
 
-        this.add.graphics().fillStyle(0x315e54,.13).fillRoundedRect(this.area.x+3,this.area.y+7,this.area.largura,this.area.altura,26).fillStyle(0xffffff,1).fillRoundedRect(this.area.x,this.area.y,this.area.largura,this.area.altura,26).lineStyle(3,0x8bc8be,.7).strokeRoundedRect(this.area.x,this.area.y,this.area.largura,this.area.altura,26);
-        const linhas=this.add.graphics().lineStyle(2,0xb9dcd6,.35);linhas.lineBetween(100,316,860,316);linhas.lineBetween(100,405,860,405);
+        painelRaster(this,this.area.x+this.area.largura/2+3,this.area.y+this.area.altura/2+7,this.area.largura,this.area.altura,0x315e54,.13);painelRaster(this,this.area.x+this.area.largura/2,this.area.y+this.area.altura/2,this.area.largura+6,this.area.altura+6,0x8bc8be,.7);painelRaster(this,this.area.x+this.area.largura/2,this.area.y+this.area.altura/2,this.area.largura,this.area.altura,0xffffff);
+        barraRaster(this,480,316,760,2,0xb9dcd6,.35);barraRaster(this,480,405,760,2,0xb9dcd6,.35);
         this.add.text(480,183,'ESCREVA AQUI',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'11px',color:'#a2bcb6',letterSpacing:1.5}).setOrigin(.5);
         this.modelo=this.add.text(480,322,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'150px',fontStyle:'bold',color:'#82aaa2',stroke:'#82aaa2',strokeThickness:2,align:'center'}).setOrigin(.5).setAlpha(0);
+        // raster-exception: traço livre produzido pela própria criança.
         this.desenho=this.add.graphics().setDepth(5);
         const zona=this.add.zone(this.area.x,this.area.y,this.area.largura,this.area.altura).setOrigin(0).setInteractive({useHandCursor:false});
         zona.on('pointerdown',(p:Phaser.Input.Pointer)=>this.iniciarTraco(p));this.input.on('pointermove',(p:Phaser.Input.Pointer)=>this.continuarTraco(p));this.input.on('pointerup',(p:Phaser.Input.Pointer)=>this.finalizarTraco(p));this.input.on('pointerupoutside',(p:Phaser.Input.Pointer)=>this.finalizarTraco(p));
@@ -80,12 +82,12 @@ export class OuviEscrevi extends Phaser.Scene {
     private redesenhar():void {const raio=this.espessura/2;this.desenho.clear().lineStyle(this.espessura,0x315f87,1);this.tracos.forEach(traco=>{if(!traco.length)return;this.desenho.fillStyle(0x315f87,1).fillCircle(traco[0].x,traco[0].y,raio);for(let i=1;i<traco.length;i++){const a=traco[i-1],b=traco[i];this.desenho.lineBetween(a.x,a.y,b.x,b.y).fillCircle(b.x,b.y,raio);}});}
     private apagarTudo():void {this.tracos=[];this.tracoAtual=undefined;this.ponteiroAtivo=undefined;if(this.desenho)this.desenho.clear();}
     private desfazer():void {if(this.conferido)return;this.tracos.pop();this.redesenhar();}
-    private acaoPrincipal():void {if(this.conferido){if(this.indice+1>=EXERCICIOS_OUVI_ESCREVI.length){mostrarModalConclusao(this,{titulo:'ESCRITA CONCLUÍDA!',mensagem:`Você praticou os ${EXERCICIOS_OUVI_ESCREVI.length} exercícios. Parabéns!`,cor:0x3b9070,aoJogarNovamente:()=>this.scene.restart()});return;}this.indice++;this.carregarExercicio();return;}this.conferido=true;servicoVoz.falar(this.exercicio.conteudo,{obrigatoria:true});this.modelo.setAlpha(.16);this.resposta.removeAll(true);this.resposta.add([this.add.graphics().fillStyle(0xe1f4e9,1).fillRoundedRect(-310,-27,620,54,19).lineStyle(2,0x56ae7e,.55).strokeRoundedRect(-310,-27,620,54,19),this.add.text(-280,0,'MODELO:',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#347359'}).setOrigin(0,.5),this.add.text(-115,0,this.exercicio.conteudo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'30px',fontStyle:'bold',color:'#245f48'}).setOrigin(.5)]);const tentar=this.criarBotao(190,0,190,38,'TENTAR DE NOVO',0x668b83,11);this.resposta.add(tentar);tentar.on('pointerdown',()=>{this.conferido=false;this.modelo.setAlpha(0);this.modeloVisivel=false;this.resposta.setAlpha(0);this.apagarTudo();this.textoAcao.setText('CONFERIR  ✓');this.ouvir();});this.resposta.setAlpha(0);this.tweens.add({targets:this.resposta,alpha:1,scale:{from:.9,to:1},duration:180,ease:'Back.Out'});this.textoAcao.setText(this.indice+1>=EXERCICIOS_OUVI_ESCREVI.length?'CONCLUIR  ✓':'FICOU PARECIDA?  ›');}
+    private acaoPrincipal():void {if(this.conferido){if(this.indice+1>=EXERCICIOS_OUVI_ESCREVI.length){mostrarModalConclusao(this,{titulo:'ESCRITA CONCLUÍDA!',mensagem:`Você praticou os ${EXERCICIOS_OUVI_ESCREVI.length} exercícios. Parabéns!`,cor:0x3b9070,aoJogarNovamente:()=>this.scene.restart()});return;}this.indice++;this.carregarExercicio();return;}this.conferido=true;servicoVoz.falar(this.exercicio.conteudo,{obrigatoria:true});this.modelo.setAlpha(.16);this.resposta.removeAll(true);this.resposta.add([painelRaster(this,0,0,624,58,0x56ae7e,.55),painelRaster(this,0,0,620,54,0xe1f4e9),this.add.text(-280,0,'MODELO:',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',color:'#347359'}).setOrigin(0,.5),this.add.text(-115,0,this.exercicio.conteudo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'30px',fontStyle:'bold',color:'#245f48'}).setOrigin(.5)]);const tentar=this.criarBotao(190,0,190,38,'TENTAR DE NOVO',0x668b83,11);this.resposta.add(tentar);tentar.on('pointerdown',()=>{this.conferido=false;this.modelo.setAlpha(0);this.modeloVisivel=false;this.resposta.setAlpha(0);this.apagarTudo();this.textoAcao.setText('CONFERIR  ✓');this.ouvir();});this.resposta.setAlpha(0);this.tweens.add({targets:this.resposta,alpha:1,scale:{from:.9,to:1},duration:180,ease:'Back.Out'});this.textoAcao.setText(this.indice+1>=EXERCICIOS_OUVI_ESCREVI.length?'CONCLUIR  ✓':'FICOU PARECIDA?  ›');}
 
     private criarCursorLapis():void {
         this.input.setDefaultCursor('none');
         this.lapisCursor=this.add.image(this.input.activePointer.x,this.input.activePointer.y,'detetive-objetos',0).setDisplaySize(42,52).setOrigin(.22,.85).setDepth(1000).setScrollFactor(0);
         this.input.on('pointermove',(p:Phaser.Input.Pointer)=>this.lapisCursor.setPosition(p.x,p.y));
     }
-    private criarBotao(x:number,y:number,largura:number,altura:number,rotulo:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(largura,altura).setInteractive({useHandCursor:true}),s=this.add.graphics().fillStyle(0x294f46,.17).fillRoundedRect(-largura/2,-altura/2+4,largura,altura,altura/2),f=this.add.graphics().fillStyle(cor,1).fillRoundedRect(-largura/2,-altura/2,largura,altura,altura/2),t=this.add.text(0,0,rotulo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5);c.add([s,f,t]);c.setData('texto',t);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
+    private criarBotao(x:number,y:number,largura:number,altura:number,rotulo:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(largura,altura).setInteractive({useHandCursor:true}),t=this.add.text(0,0,rotulo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5);c.add([botaoRaster(this,0,4,largura,altura,0x294f46,.17),botaoRaster(this,0,0,largura,altura,cor),t]);c.setData('texto',t);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
 }

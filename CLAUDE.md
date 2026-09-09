@@ -1,11 +1,16 @@
-## Trabalho com Codex
+## Instruções do projeto
 
-Quando eu solicitar "trabalhe com o Codex", "delegue ao Codex",
-"faça com o Codex" ou instrução equivalente:
+Leia e siga `AGENTS.md`, `ARQUITETURA.md`, `PROCESSO_DESENVOLVIMENTO.md` e `ERROS_COMUNS.md` antes de alterar código, gameplay, UX ou assets. As skills reutilizáveis ficam em `.agents/skills/`.
 
-Você assume o papel de líder técnico e revisor. Seu objetivo deve ser melhorar usabilidade, qualidade, visual e expansão do jogo (novas fases, level, etc).
+Quando uma tarefa criar ou ampliar personagem jogável, NPC, inimigo, chefe, animal, criatura, monstro, companheiro ou montaria — inclusive sprites, spritesheet, frames ou animação nova de personagem existente — leia e siga `.agents/skills/personagem-generator/SKILL.md` e sua referência indicada antes de produzir arte. A skill é semântica: não depende dessas palavras exatas. Pesquisa e download continuam exigindo a autorização definida em `AGENTS.md`.
 
-O jogo ára para uma criança de 7 a 9 anos.
+## Ciclo de trabalho da IA
+
+Para toda mudança relevante:
+
+Você assume o papel de líder técnico, planejador, implementador e revisor. Seu objetivo é melhorar usabilidade, qualidade, visual e expansão dos jogos dentro do pedido.
+
+O produto é para crianças de 6 a 8 anos.
 
 Instrução para construção de fases: 
     a) Devem ter um tempo de duração de pelo menos 3 a 5 min. 
@@ -14,11 +19,9 @@ Instrução para construção de fases:
 
 1. Analise o objetivo solicitado e o estado atual do projeto.
 
-2. Não implemente imediatamente por conta própria.
-   Sempre que a tarefa envolver alteração relevante de código,
-   delegue a implementação ao Codex CLI usando `codex exec`.
+2. Produza ou atualize a spec viva em `specs/` e planeje proporcionalmente ao risco.
 
-3. Escreva para o Codex uma instrução completa contendo:
+3. Registre:
    - objetivo;
    - contexto;
    - arquivos relevantes;
@@ -26,7 +29,7 @@ Instrução para construção de fases:
    - critérios de aceite;
    - testes necessários.
 
-4. Aguarde o Codex concluir.
+4. Implemente autonomamente dentro dos limites de `AGENTS.md`.
 
 5. Revise você mesmo:
    - git diff;
@@ -37,23 +40,16 @@ Instrução para construção de fases:
    - regressões;
    - build e testes.
 
-6. Se encontrar problemas ou melhorias necessárias,
-   delegue uma nova tarefa ao Codex.
+6. Se encontrar problemas, corrija-os e repita a validação.
 
-7. Repita automaticamente o processo.
+7. Repita automaticamente até todos os critérios da spec passarem.
 
-8. Limite máximo: 10 ciclos de Codex por solicitação.
-
-9. Pare antes se considerar que o objetivo foi satisfatoriamente atingido.
-
-10. Ao final, apresente ao usuário:
+8. Ao final, apresente ao usuário:
     - o que foi feito;
     - quantos ciclos ocorreram;
     - problemas encontrados nas revisões;
     - estado final do projeto.
 
-Não fique pedindo confirmação entre os ciclos,
-exceto diante de uma decisão realmente destrutiva,
-ambígua ou que altere substancialmente o escopo.
+Não peça confirmação intermediária, exceto antes de internet, eliminação material ou mudança colateral de comportamento existente.
 
-Se tiver alguma question para mim, se eu não responder em 2 min, use a opção recomandada como default. 
+Se tiver alguma question para mim, se eu não responder em 2 min, use a opção recomandada como default.

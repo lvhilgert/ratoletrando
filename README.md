@@ -1,13 +1,13 @@
-# Ratoletrando
+# EducApp / RatoLetrando
 
-Jogo infantil 2D de exploração e alfabetização. Controle um ratinho, explore os corredores, colete alimentos e encontre na ordem as letras que formam a palavra de cada fase. O gato pode alcançar o rato, mas não há morte, vidas ou perda de progresso.
+Plataforma de jogos educativos 2D para crianças de 6 a 8 anos. Reúne oito experiências de linguagem, matemática e exploração, incluindo RatoLetrando, Reino das Portas e Detetive Mirim.
 
 ## Stack
 
 - Phaser 4 e Arcade Physics
 - TypeScript
 - Vite
-- Sem React e sem assets externos
+- Arte raster local; HTML/CSS não desenha elementos dos jogos
 
 ## Executar
 
@@ -28,16 +28,24 @@ Use as setas do teclado ou WASD. O mapa contém somente as letras da palavra; co
 
 ## Estrutura
 
-- `src/game/cenas`: carregamento, menu, jogo e fim de fase.
-- `src/game/entidades`: rato, gato e itens coletáveis.
-- `src/game/sistemas`: palavra, pontuação e busca de caminho BFS.
-- `src/game/dados/fases.ts`: configuração das cinco fases.
-- `src/game/tipos`: contratos TypeScript do jogo.
+- `src/game/cenas`: ciclo de vida, composição e transição das cenas.
+- `src/game/entidades`: personagens e atores com movimento próprio.
+- `src/game/sistemas`: regras, carregamento por domínio, física e UI raster compartilhada.
+- `src/game/dados`: fases, exercícios e conteúdo declarativo.
+- `public/assets`: imagens e spritesheets locais, separados por jogo.
+
+O mapa completo está em [`ARQUITETURA.md`](ARQUITETURA.md). Toda mudança relevante segue [`PROCESSO_DESENVOLVIMENTO.md`](PROCESSO_DESENVOLVIMENTO.md): Especificação → Implementação → Validação.
 
 ## Criar ou ajustar fases
 
 Edite `src/game/dados/fases.ts`. Cada fase define palavra, matriz do mapa, letras incorretas, quantidades, pontos e posições iniciais. `0` representa corredor e `1` representa parede. As velocidades são configuradas em `velocidadeRato` e `velocidadeGato`; não há valores de dificuldade presos à cena.
 
-## Limitações atuais
+## Verificar
 
-O MVP usa formas geradas, oferece apenas o gato normal, teclado no desktop e não persiste progresso. A arquitetura permite adicionar sprites, áudio, controles touch e novos comportamentos de gato posteriormente.
+```bash
+npx tsc --noEmit
+npm run build
+npm run test:arte
+```
+
+Os demais testes automatizados estão listados em `package.json`.

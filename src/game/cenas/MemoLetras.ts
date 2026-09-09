@@ -4,6 +4,7 @@ import { ASSOCIACOES_MEMO_LETRAS, DificuldadeMemoLetras, ItemAssociacao, PARES_P
 import { servicoVoz } from '../../services/ServicoVoz';
 import { confirmarSaidaParaEducApp } from '../sistemas/ConfirmacaoSaida';
 import { mostrarModalConclusao } from '../sistemas/ModalConclusao';
+import { botaoRaster, circuloRaster, painelRaster } from '../sistemas/ArteRaster';
 
 interface Carta extends Phaser.GameObjects.Container {grupo:string;item:ItemAssociacao;aberta:boolean;encontrada:boolean;frente:Phaser.GameObjects.Container;verso:Phaser.GameObjects.Container}
 
@@ -25,8 +26,8 @@ export class MemoLetras extends Phaser.Scene {
 
     create():void {
         this.cartas=[];this.primeira=undefined;this.bloqueado=false;this.encontrados=0;this.paresEncontrados=[];this.sequencia=0;this.timerPrimeira=undefined;this.timerFeedback=undefined;
-        this.add.graphics().fillGradientStyle(0xf6f2fb,0xf6f2fb,0xe1e8f2,0xe1e8f2,1).fillRect(0,0,960,640);
-        const decor=this.add.graphics().setAlpha(.25);decor.fillStyle(0xa58ac8,.35).fillCircle(45,65,55).fillCircle(925,575,80).fillStyle(0xffffff,.85).fillCircle(900,65,58).fillCircle(55,575,70);
+        this.add.image(480,320,'minijogos-fundo').setDisplaySize(960,640);
+        [[45,65,110,0xa58ac8,.09],[925,575,160,0xa58ac8,.09],[900,65,116,0xffffff,.22],[55,575,140,0xffffff,.22]].forEach(([x,y,d,cor,a])=>circuloRaster(this,x,y,d,cor,a));
         const voltar=this.botao(76,26,124,36,'‹  EDUCAPP',0x74649d,12);voltar.on('pointerdown',()=>confirmarSaidaParaEducApp(this));
         this.add.text(480,31,'MemóLetras',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'32px',fontStyle:'bold',color:'#554878'}).setOrigin(.5);
         this.progresso=this.add.text(884,31,'',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#706887'}).setOrigin(1,.5);
@@ -55,8 +56,8 @@ export class MemoLetras extends Phaser.Scene {
 
     private criarCarta(x:number,y:number,w:number,h:number,grupo:string,item:ItemAssociacao):Carta {
         const carta=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true}) as Carta;carta.grupo=grupo;carta.item=item;carta.aberta=false;carta.encontrada=false;
-        carta.verso=this.add.container(0,0);carta.verso.add([this.add.graphics().fillStyle(0x493c68,.18).fillRoundedRect(-w/2,-h/2+6,w,h,20).fillStyle(0x8069ad,1).fillRoundedRect(-w/2,-h/2,w,h,20).lineStyle(4,0xffffff,.65).strokeRoundedRect(-w/2+4,-h/2+4,w-8,h-8,17),this.add.circle(0,0,27,0xffffff,.14).setStrokeStyle(3,0xffffff,.45),this.add.text(0,0,'A',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'30px',fontStyle:'bold',color:'#ffffff'}).setOrigin(.5)]);
-        carta.frente=this.add.container(0,0).setVisible(false);const tamanhoFonte=item.texto.length>6?18:23;const fundoFrente=this.add.graphics().fillStyle(0x51446a,.14).fillRoundedRect(-w/2,-h/2+6,w,h,20).fillStyle(0xffffff,1).fillRoundedRect(-w/2,-h/2,w,h,20).lineStyle(3,0xa891c7,.65).strokeRoundedRect(-w/2,-h/2,w,h,20);const[letraInicial,restoPalavra]=this.criarTextoPalavra(item.texto,tamanhoFonte);carta.frente.add([fundoFrente,letraInicial,restoPalavra]);
+        carta.verso=this.add.container(0,0);carta.verso.add([painelRaster(this,0,6,w,h,0x493c68,.18),painelRaster(this,0,0,w,h,0x8069ad),painelRaster(this,0,0,w-8,h-8,0xffffff,.65),painelRaster(this,0,0,w-14,h-14,0x8069ad),circuloRaster(this,0,0,54,0xffffff,.14),this.add.text(0,0,'A',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'30px',fontStyle:'bold',color:'#ffffff'}).setOrigin(.5)]);
+        carta.frente=this.add.container(0,0).setVisible(false);const tamanhoFonte=item.texto.length>6?18:23;const[letraInicial,restoPalavra]=this.criarTextoPalavra(item.texto,tamanhoFonte);carta.frente.add([painelRaster(this,0,6,w,h,0x51446a,.14),painelRaster(this,0,0,w+6,h+6,0xa891c7,.65),painelRaster(this,0,0,w,h,0xffffff),letraInicial,restoPalavra]);
         carta.add([carta.verso,carta.frente]);carta.on('pointerover',()=>{if(!carta.aberta)this.tweens.add({targets:carta,y:y-4,scale:1.025,duration:90});});carta.on('pointerout',()=>this.tweens.add({targets:carta,y,scale:1,duration:90}));carta.on('pointerdown',()=>this.selecionar(carta));return carta;
     }
 
@@ -72,9 +73,9 @@ export class MemoLetras extends Phaser.Scene {
         if(this.bloqueado||carta.aberta||carta.encontrada)return;this.bloqueado=true;this.virar(carta,true,()=>{audioJogo.efeito('bolinha');servicoVoz.falar(carta.item.texto);if(!this.primeira){this.primeira=carta;this.bloqueado=false;this.timerPrimeira=this.time.delayedCall(3000,()=>{if(this.primeira===carta&&!carta.encontrada){this.primeira=undefined;this.bloqueado=true;this.virar(carta,false,()=>{this.bloqueado=false;});}});return;}this.timerPrimeira?.remove(false);const primeira=this.primeira;this.primeira=undefined;if(this.combinam(primeira,carta,ASSOCIACOES_MEMO_LETRAS.regra)){primeira.encontrada=true;carta.encontrada=true;this.encontrados++;this.sequencia++;this.paresEncontrados.push(`${primeira.item.texto} e ${carta.item.texto} começam com ${carta.grupo}`);audioJogo.efeito('letra');this.destacarPar(primeira,carta);this.mostrarFeedback(this.sequencia>=3?`COMBO ${this.sequencia}!  ${primeira.item.texto} + ${carta.item.texto}`:`${primeira.item.texto} + ${carta.item.texto}`,0x4b996b);this.bloqueado=false;this.atualizarProgresso();if(this.encontrados===PARES_POR_DIFICULDADE[this.dificuldade])this.time.delayedCall(550,()=>this.concluir());}else{this.sequencia=0;audioJogo.efeito('erro');this.mostrarFeedback('OBSERVE E TENTE NOVAMENTE',0xa76c72);this.time.delayedCall(1350,()=>this.virar(primeira,false,()=>this.virar(carta,false,()=>{this.bloqueado=false;})));}});}
     private combinam(a:Carta,b:Carta,_regra:RegraAssociacao):boolean {return a.grupo===b.grupo;}
     private virar(carta:Carta,abrir:boolean,aoConcluir:()=>void):void {this.tweens.add({targets:carta,scaleX:0,duration:135,ease:'Sine.In',onComplete:()=>{carta.aberta=abrir;carta.verso.setVisible(!abrir);carta.frente.setVisible(abrir);this.tweens.add({targets:carta,scaleX:1,duration:150,ease:'Sine.Out',onComplete:aoConcluir});}});}
-    private destacarPar(a:Carta,b:Carta):void {[a,b].forEach((carta,i)=>{carta.add(this.add.container(carta.width/2-20,-carta.height/2+20,[this.add.circle(0,0,15,0x5a9d70).setStrokeStyle(2,0xffffff),this.add.text(0,0,carta.grupo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#ffffff'}).setOrigin(.5)]));this.tweens.add({targets:carta,scale:1.08,yoyo:true,duration:180,delay:i*60});carta.setAlpha(.9);carta.disableInteractive();});}
+    private destacarPar(a:Carta,b:Carta):void {[a,b].forEach((carta,i)=>{carta.add(this.add.container(carta.width/2-20,-carta.height/2+20,[circuloRaster(this,0,0,34,0xffffff),circuloRaster(this,0,0,30,0x5a9d70),this.add.text(0,0,carta.grupo,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'12px',color:'#ffffff'}).setOrigin(.5)]));this.tweens.add({targets:carta,scale:1.08,yoyo:true,duration:180,delay:i*60});carta.setAlpha(.9);carta.disableInteractive();});}
     private atualizarProgresso():void {this.progresso.setText(`${this.encontrados} / ${PARES_POR_DIFICULDADE[this.dificuldade]} PARES`);}
-    private mostrarFeedback(texto:string,cor:number):void {this.timerFeedback?.remove(false);this.feedback.removeAll(true);this.feedback.add([this.add.graphics().fillStyle(0xffffff,.97).fillRoundedRect(-165,-23,330,46,17).lineStyle(2,cor,.5).strokeRoundedRect(-165,-23,330,46,17),this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',fontStyle:'bold',color:`#${cor.toString(16).padStart(6,'0')}`}).setOrigin(.5)]);this.feedback.setAlpha(1);this.timerFeedback=this.time.delayedCall(850,()=>this.feedback.setAlpha(0));}
+    private mostrarFeedback(texto:string,cor:number):void {this.timerFeedback?.remove(false);this.feedback.removeAll(true);this.feedback.add([painelRaster(this,0,0,334,50,cor,.5),painelRaster(this,0,0,330,46,0xffffff,.97),this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'13px',fontStyle:'bold',color:`#${cor.toString(16).padStart(6,'0')}`}).setOrigin(.5)]);this.feedback.setAlpha(1);this.timerFeedback=this.time.delayedCall(850,()=>this.feedback.setAlpha(0));}
     private concluir():void {
         this.timerFeedback?.remove(false);
         audioJogo.efeito('vitoria');
@@ -85,9 +86,10 @@ export class MemoLetras extends Phaser.Scene {
     private criarConfeteVitoria():void {
         const cores=[0xff6f61,0xffd84f,0x7a45bd,0x4ecb91,0x55b8e8];
         for(let i=0;i<28;i++){
+            // raster-exception: confete efêmero de celebração.
             const p=this.add.rectangle(Phaser.Math.Between(60,900),Phaser.Math.Between(-60,0),Phaser.Math.Between(6,10),Phaser.Math.Between(10,16),Phaser.Utils.Array.GetRandom(cores)).setDepth(22);
             this.tweens.add({targets:p,y:680,angle:Phaser.Math.Between(-360,360),duration:Phaser.Math.Between(1800,2800),delay:Phaser.Math.Between(0,500),onComplete:()=>p.destroy()});
         }
     }
-    private botao(x:number,y:number,w:number,h:number,texto:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true});c.add([this.add.graphics().fillStyle(0x403552,.15).fillRoundedRect(-w/2,-h/2+4,w,h,h/2).fillStyle(cor,1).fillRoundedRect(-w/2,-h/2,w,h,h/2),this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5)]);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
+    private botao(x:number,y:number,w:number,h:number,texto:string,cor:number,tamanho:number):Phaser.GameObjects.Container {const c=this.add.container(x,y).setSize(w,h).setInteractive({useHandCursor:true});c.add([botaoRaster(this,0,4,w,h,0x403552,.15),botaoRaster(this,0,0,w,h,cor),this.add.text(0,0,texto,{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:`${tamanho}px`,color:'#ffffff'}).setOrigin(.5)]);c.on('pointerover',()=>this.tweens.add({targets:c,scale:1.035,duration:90}));c.on('pointerout',()=>this.tweens.add({targets:c,scale:1,duration:90}));return c;}
 }

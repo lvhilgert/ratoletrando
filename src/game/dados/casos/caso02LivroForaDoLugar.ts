@@ -1,24 +1,12 @@
 import { FaseDetetiveConfig } from '../tiposDetetive';
 
-const decorarSalaLeitura=(cena:Phaser.Scene,c:Phaser.GameObjects.Container):void => {
-    c.add(cena.add.rectangle(480,320,960,640,0xf3e0bd).setDepth(0));
-    c.add(cena.add.rectangle(480,110,960,120,0xead9b8).setDepth(0));
-    c.add(cena.add.ellipse(480,430,560,260,0xd9a86b).setDepth(1));
-    const almofada=(x:number,y:number,cor:number)=>{c.add(cena.add.ellipse(x,y,120,80,cor).setStrokeStyle(4,0x00000022).setDepth(2));};
-    almofada(330,420,0xe8735f);almofada(620,460,0x5f9ee8);almofada(470,500,0xe8c95f);
-    const estante=cena.add.graphics().setDepth(2);estante.fillStyle(0x8a5a34,1).fillRect(760,150,150,320);for(let i=0;i<4;i++){estante.fillStyle(0x6b4023,1).fillRect(770,180+i*72,130,10);}
-    for(let i=0;i<10;i++){estante.fillStyle([0xd85c5c,0x5c9dd8,0xe8c25c,0x6bbf6b,0x9a6bd8][i%5],1).fillRect(775+i*13,150+Math.floor(i/5)*72+15,10,50);}
-    c.add(estante);
-    c.add(cena.add.text(480,60,'Cantinho macio para ler histórias',{fontFamily:'Arial Rounded MT Bold, Arial',fontSize:'15px',color:'#6b4f30'}).setOrigin(.5).setDepth(2));
-};
-
 export const CASO_LIVRO_FORA_DO_LUGAR:FaseDetetiveConfig={
     id:'livro-fora-do-lugar',numero:2,titulo:'O Livro Fora do Lugar',tema:'escola',
     introducao:'Um livro de histórias sumiu da biblioteca! Vamos conversar com todo mundo e investigar direitinho.',
     areas:[
         {id:'sala',nome:'SALA DE AULA',textura:'detetive-escola',frame:0,saidas:{direita:'biblioteca'}},
         {id:'biblioteca',nome:'BIBLIOTECA',textura:'detetive-escola',frame:1,saidas:{esquerda:'sala',direita:'sala-leitura'}},
-        {id:'sala-leitura',nome:'SALA DE LEITURA',textura:'procedural',saidas:{esquerda:'biblioteca'},decoracao:decorarSalaLeitura}
+        {id:'sala-leitura',nome:'SALA DE LEITURA',textura:'detetive-fundo-sala-leitura',saidas:{esquerda:'biblioteca'}}
     ],
     areaInicial:'sala',posicaoInicial:[480,500],
     personagens:[
